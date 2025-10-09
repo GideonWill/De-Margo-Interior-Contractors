@@ -109,17 +109,17 @@ function Home() {
         <img
           src="/assets/hero%20pic.jpg"
           alt="Luxury interior hero"
-          className="absolute inset-0 w-full h-full object-cover brightness-[0.9] transform scale-[0.98]"
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.8] transform scale-[0.98]"
           ref={videoRef}
         />
-        <div className="absolute inset-0 bg-gradient-to-tr from-demargo-blue/50 via-black/20 to-demargo-orange/50" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-demargo-blue/60 via-black/40 to-demargo-orange/60" />
         <div className="relative z-10 max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-6 items-center w-full">
           <div className="animate-fade-in">
             <div className="badge-glass mb-4"><span>★</span><span>Premium Interior Design Since 2018</span></div>
-            <h1 className="text-white text-5xl md:text-7xl font-extrabold leading-[1.05]">
-              Bright, <span className="text-demargo-orange">Elegant</span>,
-              <br />
-              <span className="text-demargo-blue">Timeless</span> Spaces
+            <h1 className="text-4xl md:text-6xl font-extrabold leading-[1.05]">
+              <span className="text-white">Create</span><br />
+              <span className="text-white">Luxury</span><br />
+              <span className="text-demargo-orange">Interiors</span>
             </h1>
             <p className="mt-4 text-white/90 text-lg md:text-xl max-w-xl">Elevate your home with custom curtains, vibrant accents and soothing palettes crafted for modern luxury.</p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
@@ -283,43 +283,129 @@ function Home() {
 }
 
 function Services() {
-  const services = [
-    { title: 'Custom Curtains & Blinds Installation', img: '/assets/c1.jpg', desc: 'Tailor‑made window solutions with precise fitting.' },
-    { title: 'Renovation, Painting & Tiling', img: '/assets/c2.jpg', desc: 'Full refresh from walls to floors with clean finishes.' },
-    { title: 'Cleaning Services', img: '/assets/c3.jpg', desc: 'Post‑project deep cleans to handover standards.' },
-    { title: 'Woodwork (Cabinets, TV Units)', img: '/assets/c4.jpg', desc: 'Built‑ins and bespoke furniture to spec.' },
-    { title: '3D Architectural Designs', img: '/assets/s8.jpg', desc: 'Visualize spaces before construction starts.' },
-    { title: 'Smart Home Systems', img: '/assets/s4.jpg', desc: 'Lighting, security and comfort at your fingertips.' },
-    { title: 'POP & Plaster Board Installations', img: '/assets/p1.jpg', desc: 'Elegant ceilings and partitions with crisp details.' }
+  const heroImg = '/assets/bedroom%20styling.jpg'
+  const allServices = [
+    {
+      title: 'Interior Design',
+      desc: 'We create custom‑designed interiors that reflect your lifestyle, personality, and space needs.',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7h18"/><path d="M6 7v13"/><path d="M18 7v13"/><path d="M6 20h12"/><path d="M9 7V4h6v3"/></svg>
+      )
+    },
+    {
+      title: 'Home Renovation',
+      desc: 'From kitchen upgrades to full remodels, we handle all aspects of home renovation.',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
+      )
+    },
+    {
+      title: '3D Rendering and Visualization',
+      desc: 'Visualize your interior project in real‑time form with high‑quality 3D renders.',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg>
+      )
+    },
+    {
+      title: 'Curtains and Blinds Installation',
+      desc: 'Fabric selection, measurement, and flawless installation for homes and offices.',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3h18"/><path d="M4 3v18"/><path d="M8 3v18"/><path d="M12 3v18"/><path d="M16 3v18"/><path d="M20 3v18"/></svg>
+      )
+    },
+    {
+      title: 'Smart Home Installation',
+      desc: 'Lighting automation, security, and remote‑controlled systems tailored to your lifestyle.',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l7 7v11H5V9l7-7z"/><path d="M9 13h6v6H9z"/></svg>
+      )
+    },
+    {
+      title: 'POP Ceiling Designs',
+      desc: 'Modern ceiling finishes that add depth, beauty, and sophistication to any room.',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7h18"/><path d="M6 10h12"/><path d="M9 13h6"/></svg>
+      )
+    },
+    {
+      title: 'Painting',
+      desc: 'Professional interior and exterior painting using high‑quality materials and techniques.',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 3h10v6H3z"/>
+          <path d="M13 5h8"/>
+          <path d="M13 8h6"/>
+          <path d="M7 9v10a2 2 0 002 2h2a2 2 0 002-2V9"/>
+        </svg>
+      )
+    },
+    {
+      title: 'Tiling',
+      desc: 'Durable, stylish floors and wall tiling for bathrooms, kitchens, offices and showrooms.',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      )
+    },
+    {
+      title: 'Cleaning Services',
+      desc: 'Post‑construction and deep cleaning to ensure your space is spotless, safe, and move‑in ready.',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18"/><path d="M6 12V6a3 3 0 013-3h6a3 3 0 013 3v6"/><path d="M6 12l2 9h8l2-9"/></svg>
+      )
+    }
   ]
+
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Services" description="Detailed list of Demargo services including curtains, renovations, woodwork and smart home systems." />
-      <h1 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-demargo-orange to-demargo-blue bg-clip-text text-transparent">Our Services</h1>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.map((s,i)=> (
-          <div key={i} className="group p-6 border rounded-2xl bg-white shadow-sm hover:shadow-md transition overflow-hidden relative">
-            <div className="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-demargo-orange/10" />
-            <div className="relative mb-3">
-              <div className="h-32 w-full rounded-xl overflow-hidden ring-2 ring-transparent bg-gradient-to-r from-demargo-orange to-demargo-blue p-[2px]">
-                <div className="h-full w-full rounded-[10px] overflow-hidden bg-white">
-                  <img src={s.img} alt={s.title} className="w-full h-full object-cover" />
-                </div>
-              </div>
-            </div>
-            <h3 className="text-slate-900 font-semibold mt-2">{s.title}</h3>
-            <p className="mt-2 text-gray-700">{s.desc}</p>
-            <div className="mt-4 flex items-center text-sm text-demargo-orange opacity-100">
-              <Link to="/contact" className="inline-flex items-center gap-1 hover:underline">Get a quote
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-              </Link>
-            </div>
-          </div>
+
+      {/* Top hero row */}
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="bg-orange-50 rounded-2xl p-6 md:p-10">
+          <div className="text-sm text-gray-600">Demargo Services</div>
+          <h1 className="text-3xl md:text-5xl font-extrabold mt-2 leading-tight">Interior Design, Renovation & More in Ghana</h1>
+        </div>
+        <div className="rounded-2xl overflow-hidden shadow-sm">
+          <img src={heroImg} alt="Services hero" className="w-full h-64 md:h-72 object-cover" />
+        </div>
+      </div>
+
+      {/* Intro and first row */}
+      <div className="mt-10 grid md:grid-cols-3 gap-6 items-start">
+        <article className="bg-white rounded-2xl p-6 shadow-sm">
+          <div className="text-sm text-gray-500">Demargo Services</div>
+          <h2 className="text-2xl font-semibold mt-2">Our Services</h2>
+          <p className="text-gray-700 mt-3">We provide expert interior design and renovation services across Ghana. From homes to offices, we create beautiful, functional spaces with style and precision — serving Accra, Kumasi, Tema, Takoradi, Cape Coast, and beyond.</p>
+        </article>
+        {allServices.slice(0,2).map((s,i)=> (
+          <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+            <div className="text-demargo-blue mb-2">{s.icon}</div>
+            <h3 className="font-semibold">{s.title}</h3>
+            <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
+          </article>
         ))}
       </div>
-      <div className="mt-10 p-6 rounded-2xl bg-gradient-to-r from-demargo-blue/10 to-demargo-orange/10 border text-center">
-        <div className="text-sm text-gray-600">Not sure where to start?</div>
-        <Link to="/contact" className="btn-primary mt-3">Book a Free Consultation</Link>
+
+      {/* Remaining grid */}
+      <div className="mt-6 grid md:grid-cols-3 gap-6">
+        {allServices.slice(2,8).map((s,i)=> (
+          <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+            <div className="text-demargo-blue mb-2">{s.icon}</div>
+            <h3 className="font-semibold">{s.title}</h3>
+            <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
+          </article>
+        ))}
+      </div>
+
+      {/* Cleaning full width */}
+      <div className="mt-6">
+        {allServices.slice(8,9).map((s,i)=> (
+          <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+            <div className="text-demargo-blue mb-2">{s.icon}</div>
+            <h3 className="font-semibold">{s.title}</h3>
+            <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
+          </article>
+        ))}
       </div>
     </section>
   )
@@ -367,11 +453,10 @@ function Fabrics() {
       <h2 className="text-2xl font-semibold mt-10 mb-4 text-center">Blinds</h2>
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
         {['/assets/b1.jpg','/assets/b2.jpg','/assets/s2.jpg','/assets/s1.jpg','/assets/s4.jpg','/assets/s7.jpg'].map((src,i)=>(
-          <figure key={i} className="group rounded-xl overflow-hidden bg-white">
+          <figure key={i} className="group rounded-xl overflow-hidden bg-white card-hover">
             <button className="relative w-full" onClick={()=>openLightbox(src)}>
-              <img src={src} alt={`Blind ${i+1}`} className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src={src} alt={`Blind ${i+1}`} className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
             </button>
-            <figcaption className="p-3 text-sm text-gray-700">Click to view</figcaption>
           </figure>
         ))}
       </div>
@@ -468,7 +553,7 @@ function About() {
             { name: 'Omar', role: 'Head of Measurements', img: '/assets/Omar.jpg' }
           ].map((m,i)=>(
             <figure key={i} className="rounded-xl overflow-hidden bg-white text-center shadow-sm">
-              <img src={m.img} alt={m.name} className="w-full h-52 object-cover" />
+              <img src={m.img} alt={m.name} className="w-full h-60 md:h-52 object-contain md:object-cover bg-slate-100" />
               <figcaption className="px-3 py-2">
                 <div className="font-semibold">{m.name}</div>
                 <div className="text-sm text-gray-600">{m.role}</div>
@@ -486,7 +571,7 @@ function About() {
             <div className="grid sm:grid-cols-3 gap-4">
               {['/assets/s2.jpg','/assets/s3.jpg','/assets/s4.jpg'].map((src,i)=>(
                 <figure key={i} className="rounded-xl overflow-hidden bg-white">
-                  <img src={src} alt="Admin" className="w-full h-36 object-cover" />
+                  <img src={src} alt="Admin" className="w-full h-48 md:h-36 object-contain md:object-cover bg-slate-100" />
                   <figcaption className="px-3 py-2 text-sm">Role – Name</figcaption>
                 </figure>
               ))}
@@ -497,7 +582,7 @@ function About() {
             <div className="grid sm:grid-cols-3 gap-4">
               {['/assets/s5.jpg','/assets/s6.jpg','/assets/s7.jpg'].map((src,i)=>(
                 <figure key={i} className="rounded-xl overflow-hidden bg-white">
-                  <img src={src} alt="Production" className="w-full h-36 object-cover" />
+                  <img src={src} alt="Production" className="w-full h-48 md:h-36 object-contain md:object-cover bg-slate-100" />
                   <figcaption className="px-3 py-2 text-sm">Role – Name</figcaption>
                 </figure>
               ))}
@@ -508,7 +593,7 @@ function About() {
             <div className="grid sm:grid-cols-3 gap-4">
               {['/assets/s10.jpg','/assets/s3.jpg','/assets/s4.jpg'].map((src,i)=>(
                 <figure key={i} className="rounded-xl overflow-hidden bg-white">
-                  <img src={src} alt="Media" className="w-full h-36 object-cover" />
+                  <img src={src} alt="Media" className="w-full h-48 md:h-36 object-contain md:object-cover bg-slate-100" />
                   <figcaption className="px-3 py-2 text-sm">Role – Name</figcaption>
                 </figure>
               ))}
@@ -519,7 +604,7 @@ function About() {
             <div className="grid sm:grid-cols-3 gap-4">
               {['/assets/s2.jpg','/assets/s5.jpg','/assets/s6.jpg'].map((src,i)=>(
                 <figure key={i} className="rounded-xl overflow-hidden bg-white">
-                  <img src={src} alt="Installation" className="w-full h-36 object-cover" />
+                  <img src={src} alt="Installation" className="w-full h-48 md:h-36 object-contain md:object-cover bg-slate-100" />
                   <figcaption className="px-3 py-2 text-sm">Role – Name</figcaption>
                 </figure>
               ))}
@@ -710,54 +795,48 @@ function Portfolio() {
 
       {/* Portfolio grid */}
       <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
           <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/Contemporary%20living%20suite.jpg','image')}>
-            <img src="/assets/Contemporary%20living%20suite.jpg" alt="Contemporary Living Suite" className="w-full h-56 md:h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src="/assets/Contemporary%20living%20suite.jpg" alt="Contemporary Living Suite" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
           </button>
           <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
           <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Living</div>
-          <div className="p-4"><h3 className="text-lg font-semibold">Contemporary Living Suite</h3></div>
         </article>
 
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
           <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/s10.jpg','image')}>
-            <img src="/assets/s10.jpg" alt="Kitchen Project" className="w-full h-56 md:h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src="/assets/s10.jpg" alt="Kitchen Project" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
           </button>
           <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
           <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Kitchen</div>
-          <div className="p-4"><h3 className="text-lg font-semibold">Modern Kitchen Finish</h3></div>
         </article>
 
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
           <button className="relative w-full" onClick={()=>openLightbox('/assets/video.mp4','video')}>
-            <VideoReveal src="/assets/video.mp4" className="w-full h-56 md:h-64 object-cover" />
+            <VideoReveal src="/assets/video.mp4" className="w-full h-64 object-cover" />
           </button>
           <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
           <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Showreel</div>
-          <div className="p-4"><h3 className="text-lg font-semibold">Demargo Interiors • Highlights</h3></div>
         </article>
 
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
           <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/Serene%20Master%20Retreat.jpg','image')}>
-            <img src="/assets/Serene%20Master%20Retreat.jpg" alt="Serene Master Retreat" className="w-full h-56 md:h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src="/assets/Serene%20Master%20Retreat.jpg" alt="Serene Master Retreat" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
           </button>
           <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
           <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Bedroom</div>
-          <div className="p-4"><h3 className="text-lg font-semibold">Serene Master Retreat</h3></div>
         </article>
 
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
           <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/Executive%20Dining%20Experience.jpg','image')}>
-            <img src="/assets/Executive%20Dining%20Experience.jpg" alt="Executive Dining Experience" className="w-full h-56 md:h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src="/assets/Executive%20Dining%20Experience.jpg" alt="Executive Dining Experience" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
           </button>
           <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
           <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Dining</div>
-          <div className="p-4"><h3 className="text-lg font-semibold">Executive Dining Experience</h3></div>
         </article>
 
-        {/* extra video placeholders */}
         {Array.from({length:4}).map((_,i)=> (
-          <article key={`vid-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+          <article key={`vid-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
             <button className="relative w-full" onClick={()=>openLightbox(i===0?'/assets/v2.mp4':i===1?'/assets/v3.mp4':i===2?'/assets/v4.mp4':'/assets/v1.mp4', 'video')}>
               <video
                 src={i===0?'/assets/v2.mp4':i===1?'/assets/v3.mp4':i===2?'/assets/v4.mp4':'/assets/v1.mp4'}
@@ -765,38 +844,34 @@ function Portfolio() {
                 playsInline
                 loop
                 autoPlay
-                className="w-full h-56 md:h-64 object-cover"
+                className="w-full h-64 object-cover"
               />
             </button>
-            <div className="p-4"><h3 className="text-lg font-semibold">Project Video {i+1}</h3></div>
           </article>
         ))}
 
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
           <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/Lighting%20design.jpg','image')}>
-            <img src="/assets/Lighting%20design.jpg" alt="Ambient Lighting System" className="w-full h-56 md:h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src="/assets/Lighting%20design.jpg" alt="Ambient Lighting System" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
           </button>
           <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2023</div>
           <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Lighting</div>
-          <div className="p-4"><h3 className="text-lg font-semibold">Ambient Lighting System</h3></div>
         </article>
 
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
           <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/s1.jpg','image')}>
-            <img src="/assets/s1.jpg" alt="Kitchen Counter" className="w-full h-56 md:h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src="/assets/s1.jpg" alt="Kitchen Counter" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
           </button>
           <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
           <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Kitchen</div>
-          <div className="p-4"><h3 className="text-lg font-semibold">Premium Countertops</h3></div>
         </article>
 
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
           <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/custom%20curtains.jpg','image')}>
-            <img src="/assets/custom%20curtains.jpg" alt="Custom Curtains & Drapes" className="w-full h-56 md:h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src="/assets/custom%20curtains.jpg" alt="Custom Curtains & Drapes" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
           </button>
           <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2023</div>
           <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Curtains</div>
-          <div className="p-4"><h3 className="text-lg font-semibold">Custom Curtains & Drapes</h3></div>
         </article>
       </div>
 
