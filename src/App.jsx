@@ -257,7 +257,7 @@ function Home() {
           <h2 className="text-center text-4xl md:text-5xl font-extrabold">What Our Clients Say</h2>
           <p className="text-center text-white/80 mt-3 max-w-3xl mx-auto">Don't just take our word for it. Here's what our satisfied clients have to say about their Demargo experience.</p>
           <div className="mt-10 grid md:grid-cols-2 gap-6">
-            {[{n:'Sarah Johnson',r:'Homeowner',q:'Demargo transformed our living space beyond our expectations. The attention to detail and quality of work is exceptional.'},{n:'Michael Chen',r:'Business Owner',q:'Professional, timely, and absolutely stunning results. Our office space now reflects the quality of our business.'}].map((t,i)=> (
+            {[{n:'Adom Bright',r:'Homeowner',q:'Demargo transformed our living space beyond our expectations. The attention to detail and quality of work is exceptional.'},{n:'Ayi Homes',r:'Developer',q:'Professional, timely, and absolutely stunning results. Our spaces now reflect the quality of our brand.'}].map((t,i)=> (
               <figure key={i} className="panel-glass p-6 text-white">
                 <div className="text-demargo-orange mb-2">★★★★★</div>
                 <blockquote className="text-white/90">“{t.q}”</blockquote>
@@ -363,12 +363,16 @@ function Services() {
       <div className="grid md:grid-cols-2 gap-8 items-center">
         <div className="bg-orange-50 rounded-2xl p-6 md:p-10">
           <div className="text-sm text-gray-600">Demargo Services</div>
-          <h1 className="text-3xl md:text-5xl font-extrabold mt-2 leading-tight">Interior Design, Renovation & More in Ghana</h1>
-        </div>
+          <h1 className="text-3xl md:text-5xl font-extrabold mt-2 leading-tight">
+            <span className="text-demargo-orange">Interior Design</span>
+            <span className="text-gray-800">, </span>
+            <span className="text-demargo-blue">Renovation & More in Ghana</span>
+          </h1>
+                </div>
         <div className="rounded-2xl overflow-hidden shadow-sm">
           <img src={heroImg} alt="Services hero" className="w-full h-64 md:h-72 object-cover" />
-        </div>
-      </div>
+              </div>
+            </div>
 
       {/* Intro and first row */}
       <div className="mt-10 grid md:grid-cols-3 gap-6 items-start">
@@ -384,7 +388,7 @@ function Services() {
             <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
           </article>
         ))}
-      </div>
+            </div>
 
       {/* Remaining grid */}
       <div className="mt-6 grid md:grid-cols-3 gap-6">
@@ -395,7 +399,7 @@ function Services() {
             <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
           </article>
         ))}
-      </div>
+          </div>
 
       {/* Cleaning full width */}
       <div className="mt-6">
@@ -418,9 +422,11 @@ function Fabrics() {
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Fabric Display" description="Browse Demargo's curated fabric samples for curtains and upholstery." />
-      <h1 className="text-3xl font-bold mb-6 text-center text-demargo-blue">Fabric Display</h1>
-      <p className="text-center text-gray-600 mb-6">Our fabric catalog. Click a tile to view details.</p>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <h1 className="text-3xl md:text-5xl font-extrabold mb-3 text-center">
+        <span className="text-demargo-orange">Fabric</span> <span className="text-demargo-blue">Display</span>
+      </h1>
+      <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">Browse a curated selection of premium fabrics. Tap any tile to preview in a larger view.</p>
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
         {[
           {file:'1.png', code:'MILAN-7'},
           {file:'2.png', code:'8021-04'},
@@ -429,9 +435,11 @@ function Fabrics() {
           {file:'5.png', code:'MILAN-10'},
           {file:'6.png', code:'8021-09'}
         ].map((f,i)=>(
-          <figure key={i} className="group rounded-xl overflow-hidden bg-white">
-            <img src={`/assets/${f.file}`} alt={`Fabric ${f.code}`} className="w-full h-48 object-cover" />
-            <figcaption className="p-3 text-sm flex items-center justify-between">
+          <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100">
+            <button className="relative w-full block" onClick={()=>openLightbox(`/assets/${f.file}`)}>
+              <img src={`/assets/${f.file}`} alt={`Fabric ${f.code}`} className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+            </button>
+            <figcaption className="p-3 text-sm flex items-center justify-between bg-slate-50 border-t">
               <span className="font-medium">Fabric Code</span>
               <span className="px-2 py-1 rounded bg-orange-50 text-demargo-orange text-xs">{f.code}</span>
             </figcaption>
@@ -450,10 +458,10 @@ function Fabrics() {
         </a>
       </div>
 
-      <h2 className="text-2xl font-semibold mt-10 mb-4 text-center">Blinds</h2>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <h2 className="text-2xl md:text-3xl font-bold mt-12 mb-5 text-center">Blinds</h2>
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
         {['/assets/b1.jpg','/assets/b2.jpg','/assets/s2.jpg','/assets/s1.jpg','/assets/s4.jpg','/assets/s7.jpg'].map((src,i)=>(
-          <figure key={i} className="group rounded-xl overflow-hidden bg-white card-hover">
+          <figure key={i} className="group rounded-2xl overflow-hidden bg-white card-hover shadow border border-gray-100">
             <button className="relative w-full" onClick={()=>openLightbox(src)}>
               <img src={src} alt={`Blind ${i+1}`} className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
             </button>
@@ -464,11 +472,11 @@ function Fabrics() {
       {lightbox.open && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={closeLightbox}>
           <div className="max-w-5xl w-full" onClick={(e)=>e.stopPropagation()}>
-            <div className="relative w-full overflow-hidden rounded-lg bg-black">
+            <div className="relative w-full overflow-hidden rounded-2xl bg-black shadow-xl">
               <img src={lightbox.src} alt="preview" className="w-full h-[70vh] object-contain bg-black" />
             </div>
             <div className="mt-3 flex justify-center">
-              <button onClick={closeLightbox} className="inline-flex px-4 py-2 rounded bg-white text-gray-800">Close</button>
+              <button onClick={closeLightbox} className="inline-flex px-4 py-2 rounded-md bg-white text-gray-800 shadow">Close</button>
             </div>
           </div>
         </div>
@@ -503,12 +511,15 @@ function Clientele() {
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Clientele" description="Some of the clients Demargo Interior Contractors has served." />
-      <h1 className="text-3xl font-bold mb-6 text-center text-demargo-blue">Our Esteemed Clients</h1>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <h1 className="text-3xl md:text-5xl font-extrabold mb-2 text-center">
+        <span className="text-demargo-orange">Our</span> <span className="text-demargo-blue">Esteemed Clients</span>
+      </h1>
+      <p className="text-center text-gray-600 mb-8 max-w-3xl mx-auto">A selection of brands, residences, and developments we’ve had the privilege to style and fit with premium interior solutions.</p>
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
         {clients.map((c,i)=>(
-          <figure key={i} className="rounded-xl overflow-hidden bg-white shadow-sm">
-            <img src={c.img} alt={c.name} className="w-full h-36 object-cover" />
-            <figcaption className="px-3 py-2 text-sm text-gray-800 font-medium text-center">{c.name}</figcaption>
+          <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5">
+            <img src={c.img} alt={c.name} className="w-full aspect-[4/3] object-cover" />
+            <figcaption className="px-4 py-3 text-sm text-gray-800 font-medium text-center bg-slate-50 border-t">{c.name}</figcaption>
           </figure>
         ))}
       </div>
@@ -520,7 +531,9 @@ function About() {
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="About" description="About Demargo Interior Contractors - mission, vision, and company story." />
-      <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center">About Demargo</h1>
+      <h1 className="text-3xl md:text-4xl font-extrabold mb-6 text-center">
+        <span className="text-demargo-orange">About</span> <span className="text-demargo-blue">Demargo</span>
+      </h1>
       <div className="grid md:grid-cols-2 gap-8 items-center">
         <div className="grid grid-cols-2 gap-3">
           <div className="col-span-2 rounded-2xl overflow-hidden">
@@ -534,7 +547,11 @@ function About() {
           </div>
         </div>
         <div>
-          <p className="text-gray-700">Demargo Interior Contractors is a leading interior decoration and fitting company based in Ghana, serving clients across Africa. We deliver high-quality bespoke curtains and blinds, comprehensive renovation projects, woodwork and smart home integrations focused on craftsmanship and exceptional service.</p>
+      <p className="text-gray-700">Demargo Interior Contractors is a leading interior decoration and fitting company based in Ghana, serving clients across Africa. We deliver high-quality bespoke curtains and blinds, comprehensive renovation projects, woodwork and smart home integrations focused on craftsmanship and exceptional service.</p>
+          <div className="mt-6">
+            <h2 className="text-xl font-semibold">Mission Statement</h2>
+            <p className="mt-2 text-gray-700">At De Margo Interior contractors, we are dedicated to transforming spaces into timeless environments that reflect the unique identities, lifestyles, and aspirations of our clients. Through innovative design, exceptional craftsmanship, and a commitment to sustainability, we create interiors that are both beautiful and functional elevating everyday living through thoughtful detail and enduring quality.</p>
+          </div>
           <div className="mt-6 grid sm:grid-cols-2 gap-4">
             {['Insured & Certified','Dedicated Project Managers','Trusted Vendor Network','After‑service Support'].map((b,i)=>(
               <div key={i} className="p-4 rounded-lg bg-gradient-to-r from-demargo-orange/10 to-demargo-blue/10 border">{b}</div>
@@ -547,10 +564,10 @@ function About() {
         <h2 className="text-2xl font-bold text-center mb-6">Leadership</h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { name: 'George', role: 'Head of Media', img: '/assets/George.jpg' },
-            { name: 'Kessy', role: 'Managing Director', img: '/assets/Kessy.jpg' },
-            { name: 'MDK', role: 'Head of Installation', img: '/assets/MDK.jpg' },
-            { name: 'Omar', role: 'Head of Measurements', img: '/assets/Omar.jpg' }
+            { name: 'Blessing Kesinornu', role: 'Managing Director', img: '/assets/Kessy.jpg' },
+            { name: 'George Nettey', role: 'Head of Media', img: '/assets/George.jpg' },
+            { name: 'Micheal Martey', role: 'Head of Installation', img: '/assets/MDK.jpg' },
+            { name: 'Samuel Nettey', role: 'Head of Measurements', img: '/assets/Omar.jpg' }
           ].map((m,i)=>(
             <figure key={i} className="rounded-xl overflow-hidden bg-white text-center shadow-sm">
               <img src={m.img} alt={m.name} className="w-full h-60 md:h-52 object-contain md:object-cover bg-slate-100" />
@@ -560,56 +577,6 @@ function About() {
               </figcaption>
             </figure>
           ))}
-        </div>
-      </div>
-
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold text-center mb-6">Our Team</h2>
-        <div className="grid md:grid-cols-2 gap-8">
-          <div>
-            <h3 className="font-semibold mb-3">Administration</h3>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {['/assets/s2.jpg','/assets/s3.jpg','/assets/s4.jpg'].map((src,i)=>(
-                <figure key={i} className="rounded-xl overflow-hidden bg-white">
-                  <img src={src} alt="Admin" className="w-full h-48 md:h-36 object-contain md:object-cover bg-slate-100" />
-                  <figcaption className="px-3 py-2 text-sm">Role – Name</figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-3">Production</h3>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {['/assets/s5.jpg','/assets/s6.jpg','/assets/s7.jpg'].map((src,i)=>(
-                <figure key={i} className="rounded-xl overflow-hidden bg-white">
-                  <img src={src} alt="Production" className="w-full h-48 md:h-36 object-contain md:object-cover bg-slate-100" />
-                  <figcaption className="px-3 py-2 text-sm">Role – Name</figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-3">Media</h3>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {['/assets/s10.jpg','/assets/s3.jpg','/assets/s4.jpg'].map((src,i)=>(
-                <figure key={i} className="rounded-xl overflow-hidden bg-white">
-                  <img src={src} alt="Media" className="w-full h-48 md:h-36 object-contain md:object-cover bg-slate-100" />
-                  <figcaption className="px-3 py-2 text-sm">Role – Name</figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-3">Installation</h3>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {['/assets/s2.jpg','/assets/s5.jpg','/assets/s6.jpg'].map((src,i)=>(
-                <figure key={i} className="rounded-xl overflow-hidden bg-white">
-                  <img src={src} alt="Installation" className="w-full h-48 md:h-36 object-contain md:object-cover bg-slate-100" />
-                  <figcaption className="px-3 py-2 text-sm">Role – Name</figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -622,31 +589,24 @@ function Contact() {
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Contact / Booking" description="Contact Demargo to schedule a consultation or request a quote." />
-      <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center">Let's Create Something Amazing Together</h1>
-      <p className="text-center text-gray-700 mb-10">Reach out by phone or WhatsApp. For email, tap the button below.</p>
-      <div className="grid md:grid-cols-3 gap-6 items-start">
-        <div className="md:col-span-2 bg-white p-6 rounded-xl shadow ring-2 ring-transparent bg-gradient-to-r from-demargo-orange/10 to-demargo-blue/10">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <a href="tel:+233546478040" className="btn-primary text-center">Call Us</a>
-            <a href="https://wa.me/233546478040" target="_blank" rel="noreferrer" className="px-4 py-2 rounded-md border text-center">WhatsApp Us</a>
-            <a href="mailto:demargo1987@gmail.com" className="sm:col-span-2 px-4 py-2 rounded-md bg-demargo-blue text-white text-center hover:opacity-90">Send Email</a>
+      <h1 className="text-3xl md:text-5xl font-extrabold mb-3 text-center">Let's Create Something Amazing Together</h1>
+      <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Reach us via phone, WhatsApp, or email. You can also find our working hours and location below.</p>
+      <div className="grid lg:grid-cols-3 gap-6 items-start">
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-2xl shadow border border-gray-100 p-6">
+            <div className="grid sm:grid-cols-3 gap-4">
+              <a href="tel:+233546478040" className="inline-flex items-center justify-center px-4 py-3 rounded-md bg-demargo-orange text-white font-medium hover:opacity-90">Call Us</a>
+              <a href="https://wa.me/233546478040" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center px-4 py-3 rounded-md border font-medium">WhatsApp Us</a>
+              <a href="mailto:demargo1987@gmail.com" className="inline-flex items-center justify-center px-4 py-3 rounded-md bg-demargo-blue text-white font-medium hover:opacity-90">Send Email</a>
+            </div>
           </div>
-        </div>
-        <div className="bg-slate-50 p-6 rounded-xl">
-          <div className="font-semibold mb-2">Contact Info</div>
-          <div className="text-sm text-gray-700 space-y-2">
-            <div>Phone: 0546478040</div>
-            <div>Email: demargo1987@gmail.com</div>
-            <div>Address: Demargo Contractors, HM8Q+XJR, Gbawe</div>
-            <div>Hours: Mon–Fri 8AM–6PM, Sat 9AM–4PM</div>
-          </div>
-          <div className="mt-4">
-            <div className="text-lg font-semibold mb-2 flex items-center gap-2"><span>📍</span>Live Map</div>
+          <div className="mt-6 bg-white rounded-2xl shadow border border-gray-100 p-6">
+            <div className="text-lg font-semibold mb-3 flex items-center gap-2"><span>📍</span>Live Map</div>
             <div className="rounded-xl overflow-hidden">
               <iframe
                 title="Demargo Location"
                 src={`https://www.google.com/maps?q=${encodeURIComponent('Demargo Contractors, HM8Q+XJR, Gbawe')}&output=embed`}
-                className="w-full h-56"
+                className="w-full h-64"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
@@ -661,6 +621,15 @@ function Contact() {
             </a>
           </div>
         </div>
+        <aside className="bg-white rounded-2xl shadow border border-gray-100 p-6">
+          <div className="text-lg font-semibold mb-3">Contact Info</div>
+          <div className="text-sm text-gray-700 space-y-2">
+            <div>Phone: 0546478040</div>
+            <div>Email: demargo1987@gmail.com</div>
+            <div>Address: Demargo Contractors, HM8Q+XJR, Gbawe</div>
+            <div className="pt-2 border-t"><span className="font-medium">Hours:</span> Mon–Fri 8AM–5PM, Sat 8AM–4PM</div>
+          </div>
+        </aside>
       </div>
     </section>
   )
@@ -698,7 +667,7 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-slate-50 text-gray-900">
+      <div className="min-h-screen bg-slate-50 text-gray-900 overflow-x-hidden">
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -717,7 +686,7 @@ export default function App() {
               <div className="mt-4 text-sm text-white/70 space-y-1">
                 <div>Tel: 0546478040</div>
                 <div>Email: demargo1987@gmail.com</div>
-                <div>Mon–Fri 8AM–6PM, Sat 9AM–4PM</div>
+                <div>Mon–Fri 8AM–5PM, Sat 8AM–4PM</div>
               </div>
             </div>
             <div>
@@ -741,13 +710,18 @@ export default function App() {
             <div>
               <div className="font-semibold mb-3">Follow</div>
               <div className="flex gap-4 text-white/90 text-xl">
-                <a href="#" aria-label="Facebook" title="Facebook">
+                <a href="https://www.facebook.com/share/1Jui7wFk7G/?mibextid=wwXIfr" target="_blank" rel="noreferrer" aria-label="Facebook" title="Facebook">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 10-11.5 9.9v-7H8v-3h2.5V9.5c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12H17l-.5 3h-2.3v7A10 10 0 0022 12z"/></svg>
                 </a>
-                <a href="#" aria-label="Instagram" title="Instagram">
+                <a href="https://instagram.com/demargo_blinds_curtains" target="_blank" rel="noreferrer" aria-label="Instagram" title="Instagram">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-1a1 1 0 100 2 1 1 0 000-2z"/></svg>
                 </a>
-                <a href="#" aria-label="LinkedIn" title="LinkedIn">
+                <a href="https://www.tiktok.com/@demargo_blinds?_t=ZM-90QcyZHzNTE&_r=1" target="_blank" rel="noreferrer" aria-label="TikTok" title="TikTok">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 7a5 5 0 015-5h1c.2 2.1 1.6 3.9 3.6 4.6A7 7 0 0021 7v3a9 9 0 01-4.5-1.3v6.2A6.9 6.9 0 019.5 22 5.5 5.5 0 019 11.1V13a3.5 3.5 0 103.5 3.5V2H14a3 3 0 00-3 3v2H9z"/>
+                  </svg>
+                </a>
+                <a href="https://www.linkedin.com/in/de-margo-interior-contractors-5a6153262?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7.5 0h3.8v2.2h.1c.5-.9 1.8-2.2 3.7-2.2 4 0 4.7 2.6 4.7 6V24h-4v-7.1c0-1.7 0-3.9-2.4-3.9-2.4 0-2.8 1.8-2.8 3.8V24h-4V8z"/></svg>
                 </a>
               </div>
@@ -790,7 +764,9 @@ function Portfolio() {
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Portfolio" description="Recent interior projects by Demargo." />
-      <h1 className="text-3xl md:text-5xl font-extrabold text-center">Demargo Project Showcase</h1>
+      <h1 className="text-3xl md:text-5xl font-extrabold text-center">
+        <span className="text-demargo-orange">Demargo</span> <span className="text-demargo-blue">Project Showcase</span>
+      </h1>
       <p className="text-center text-gray-600 mt-3 max-w-3xl mx-auto">A curated selection of interiors we’ve crafted — curtains, lighting systems and bespoke styling across living, dining and bedroom spaces.</p>
 
       {/* Portfolio grid */}
