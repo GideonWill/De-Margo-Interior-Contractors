@@ -107,7 +107,7 @@ function Home() {
       {/* HERO - Updated to Serene Master Retreat with Demargo theme */}
       <section className="relative h-[82vh] md:h-[90vh] flex items-center overflow-hidden bg-slate-900">
         <img
-          src="/assets/hero%20pic.jpg"
+          src="/assets/Executive%20Dining%20Experience.jpg"
           alt="Luxury interior hero"
           className="absolute inset-0 w-full h-full object-cover brightness-[0.8] transform scale-[0.98]"
           ref={videoRef}
@@ -117,14 +117,13 @@ function Home() {
           <div className="animate-fade-in">
             <div className="badge-glass mb-4"><span>★</span><span>Premium Interior Design Since 2018</span></div>
             <h1 className="text-4xl md:text-6xl font-extrabold leading-[1.05]">
-              <span className="text-white">Create</span><br />
-              <span className="text-white">Luxury</span><br />
-              <span className="text-demargo-orange">Interiors</span>
+              <span className="text-white">RELIABLE</span><br />
+              <span className="text-white">HIGH CLASS</span><br />
+              <span className="text-demargo-orange">GREAT AMBIENCE</span>
             </h1>
-            <p className="mt-4 text-white/90 text-lg md:text-xl max-w-xl">Elevate your home with custom curtains, vibrant accents and soothing palettes crafted for modern luxury.</p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <Link to="/contact" className="btn-primary">Start Your Project</Link>
-              <Link to="/fabrics" className="btn-ghost">View Portfolio</Link>
+              <Link to="/portfolio" className="btn-ghost">View Portfolio</Link>
             </div>
           </div>
           <div className="hidden md:flex flex-col gap-4">
@@ -182,18 +181,16 @@ function Home() {
         <div className="text-demargo-orange font-semibold text-center">OUR SERVICES</div>
         <h2 className="text-4xl md:text-5xl font-extrabold text-center mt-2">Comprehensive Interior Solutions</h2>
         <p className="text-center text-gray-600 mt-3 max-w-3xl mx-auto">From custom curtains to sophisticated lighting, we offer complete interior design services that transform your space into a masterpiece of luxury and functionality.</p>
-        <div className="mt-10 grid md:grid-cols-3 gap-8">
+        <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {[
-            { title: 'Custom Curtains & Drapes', img: '/assets/custom%20curtains.jpg' },
+            { title: 'Living Room Setting', img: '/assets/hero%20pic.jpg' },
             { title: 'Lighting System', img: '/assets/Lighting%20design.jpg' },
-            { title: 'Bedroom Styling', img: '/assets/bedroom%20styling.jpg' }
+            { title: 'Bedroom Styling', img: '/assets/custom%20curtains.jpg' },
+            { title: '3D Rendering', img: '/assets/d2.jpg' }
           ].map((s,i)=> (
-            <article key={i} className="rounded-2xl overflow-hidden bg-white border card-glow">
-              <img src={i===2 ? '/assets/p1.jpg' : s.img} alt={s.title} className="w-full h-64 object-cover" />
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold">{s.title}</h3>
-              </div>
-            </article>
+            <Link to="/portfolio" key={i} className="rounded-2xl overflow-hidden bg-white border card-glow block">
+              <img src={s.img} alt={s.title} className="w-full h-64 object-cover" />
+            </Link>
           ))}
         </div>
       </section>
@@ -220,9 +217,9 @@ function Home() {
         <p className="text-center text-gray-600 mt-3 max-w-4xl mx-auto">Explore our latest interior design projects that showcase our commitment to excellence, innovation, and the art of creating beautiful spaces.</p>
         <div className="mt-10 space-y-14">
           {[
-            { img: '/assets/Contemporary%20living%20suite.jpg', tag: 'RESIDENTIAL DESIGN', title: 'Contemporary Living Suite', idx: 1 },
-            { img: '/assets/Serene%20Master%20Retreat.jpg', tag: 'BEDROOM DESIGN', title: 'Serene Master Retreat', idx: 2 },
-            { img: '/assets/Executive%20Dining%20Experience.jpg', tag: 'DINING DESIGN', title: 'Executive Dining Experience', idx: 3 }
+            { img: '/assets/Contemporary%20living%20suite.jpg', tag: 'RELIABLE', title: 'Contemporary Living Suite', idx: 1 },
+            { img: '/assets/Serene%20Master%20Retreat.jpg', tag: 'HIGH CLASS INTERIOR', title: 'Serene Master Retreat', idx: 2 },
+            { img: '/assets/Executive%20Dining%20Experience.jpg', tag: 'TOP-NOTCH DELIVERY', title: 'Executive Dining Experience', idx: 3 }
           ].map((item,i)=> (
             <div key={i} className={`grid md:grid-cols-2 gap-8 items-center ${i % 2 ? '' : 'md:flex-row-reverse'}`}>
               <div className="panel-glass p-2 card-glow order-1 md:order-none">
@@ -507,6 +504,7 @@ function Clientele() {
     { name: 'The Signature Apartments', img: '/assets/The%20Signature%20Apartments.jpg' },
     { name: 'Tribute House', img: '/assets/Tribute%20House.jpeg' },
     { name: 'Ashanti Gardens', img: '/assets/Ashanti%20Gardens.jpeg' },
+    { name: 'Williot Constructions', img: '/assets/Williot%20Constructions.png' },
   ]
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
@@ -663,6 +661,86 @@ function VideoReveal({ src, className }) {
   )
 }
 
+/* Floating Back-to-Top button */
+function BackToTop() {
+  const [visible, setVisible] = React.useState(false)
+  React.useEffect(()=>{
+    const onScroll = () => setVisible(window.scrollY > 400)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+  return (
+    <button
+      onClick={scrollTop}
+      aria-label="Back to top"
+      className={`fixed bottom-6 right-6 z-50 rounded-full bg-gradient-to-tr from-demargo-blue to-demargo-orange text-white shadow-xl w-12 h-12 flex items-center justify-center hover:opacity-95 active:scale-95 transition-all duration-300 ease-out transform ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3 pointer-events-none'}`}
+    >
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+    </button>
+  )
+}
+
+/* Simple on-site FAQ ChatBot (client-only, placeholder for API integration) */
+function ChatBot() {
+  const [open, setOpen] = React.useState(false)
+  const [messages, setMessages] = React.useState([
+    { role: 'bot', text: 'Hi! I\'m Demargo Assistant. Ask about services, booking, fabrics, or hours.' }
+  ])
+  const [input, setInput] = React.useState('')
+  const [typing, setTyping] = React.useState(false)
+  const faq = [
+    { q: /hour|open|close|time/i, a: 'We\'re open Mon–Fri 8AM–5PM, Sat 8AM–4PM.' },
+    { q: /contact|phone|email/i, a: 'Phone: 0546478040 • Email: demargo1987@gmail.com' },
+    { q: /service|offer|do you/i, a: 'We offer interior design, renovations, curtains & blinds, lighting, POP ceilings, smart home, painting, tiling, and cleaning.' },
+    { q: /book|quote|consult/i, a: 'You can book via the Contact page: call, WhatsApp, or email. We\'ll schedule a site visit and provide a quote.' },
+    { q: /location|address/i, a: 'Address: Demargo Contractors, HM8Q+XJR, Gbawe.' }
+  ]
+  const onSend = () => {
+    if (!input.trim()) return
+    const userMsg = { role: 'user', text: input }
+    setMessages(m => [...m, userMsg])
+    setInput('')
+    setTyping(true)
+    const match = faq.find(f => f.q.test(userMsg.text))
+    const botMsg = { role: 'bot', text: match ? match.a : 'Thanks! A specialist will follow up. Meanwhile, view Services and Portfolio for details.' }
+    setTimeout(()=>{
+      setMessages(m => [...m, botMsg])
+      setTyping(false)
+    }, 650)
+  }
+  return (
+    <div className="fixed bottom-20 right-6 z-50">
+      {open && (
+        <div className="mb-3 w-80 max-w-[90vw] rounded-2xl bg-white shadow-2xl border overflow-hidden transition-all duration-300 ease-out transform origin-bottom-right">
+          <div className="px-4 py-3 bg-gradient-to-r from-demargo-orange/90 to-demargo-blue/90 text-white flex items-center justify-between">
+            <div className="font-semibold">Demargo Assistant</div>
+            <button onClick={()=>setOpen(false)} className="opacity-90 hover:opacity-100">×</button>
+          </div>
+          <div className="max-h-80 overflow-y-auto p-3 space-y-2 text-sm">
+            {messages.map((m,i)=> (
+              <div key={i} className={m.role==='bot' ? 'text-gray-800' : 'text-right'}>
+                <span className={`inline-block px-3 py-2 rounded-lg ${m.role==='bot' ? 'bg-slate-100' : 'bg-demargo-blue text-white'}`}>{m.text}</span>
+              </div>
+            ))}
+            {typing && (
+              <div className="text-gray-800">
+                <span className="inline-block px-3 py-2 rounded-lg bg-slate-100 animate-pulse">Typing…</span>
+              </div>
+            )}
+          </div>
+          <div className="p-3 border-t flex gap-2">
+            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&onSend()} placeholder="Type your question..." className="flex-1 px-3 py-2 rounded-md border outline-none" />
+            <button onClick={onSend} className="px-4 py-2 rounded-md bg-demargo-orange text-white">Send</button>
+          </div>
+        </div>
+      )}
+      <button onClick={()=>setOpen(v=>!v)} className="rounded-full w-12 h-12 shadow-xl bg-gradient-to-tr from-demargo-orange to-demargo-blue text-white flex items-center justify-center transition-transform duration-300 ease-out hover:scale-105">
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 00-9 9 9 9 0 009 9h6l3 3v-6a9 9 0 00-9-15z"/></svg>
+      </button>
+    </div>
+  )
+}
 export default function App() {
   return (
     <Router>
@@ -678,6 +756,8 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
+        <BackToTop />
+        <ChatBot />
         <footer className="mt-0 bg-slate-900 text-white">
           <div className="max-w-6xl mx-auto px-4 py-14 grid md:grid-cols-4 gap-8">
             <div>
@@ -769,87 +849,31 @@ function Portfolio() {
       </h1>
       <p className="text-center text-gray-600 mt-3 max-w-3xl mx-auto">A curated selection of interiors we’ve crafted — curtains, lighting systems and bespoke styling across living, dining and bedroom spaces.</p>
 
-      {/* Portfolio grid */}
-      <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-          <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/Contemporary%20living%20suite.jpg','image')}>
-            <img src="/assets/Contemporary%20living%20suite.jpg" alt="Contemporary Living Suite" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-          </button>
-          <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
-          <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Living</div>
-        </article>
-
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-          <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/s10.jpg','image')}>
-            <img src="/assets/s10.jpg" alt="Kitchen Project" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-          </button>
-          <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
-          <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Kitchen</div>
-        </article>
-
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-          <button className="relative w-full" onClick={()=>openLightbox('/assets/video.mp4','video')}>
-            <VideoReveal src="/assets/video.mp4" className="w-full h-64 object-cover" />
-          </button>
-          <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
-          <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Showreel</div>
-        </article>
-
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-          <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/Serene%20Master%20Retreat.jpg','image')}>
-            <img src="/assets/Serene%20Master%20Retreat.jpg" alt="Serene Master Retreat" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-          </button>
-          <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
-          <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Bedroom</div>
-        </article>
-
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-          <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/Executive%20Dining%20Experience.jpg','image')}>
-            <img src="/assets/Executive%20Dining%20Experience.jpg" alt="Executive Dining Experience" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-          </button>
-          <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
-          <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Dining</div>
-        </article>
-
-        {Array.from({length:4}).map((_,i)=> (
-          <article key={`vid-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-            <button className="relative w-full" onClick={()=>openLightbox(i===0?'/assets/v2.mp4':i===1?'/assets/v3.mp4':i===2?'/assets/v4.mp4':'/assets/v1.mp4', 'video')}>
-              <video
-                src={i===0?'/assets/v2.mp4':i===1?'/assets/v3.mp4':i===2?'/assets/v4.mp4':'/assets/v1.mp4'}
-                muted
-                playsInline
-                loop
-                autoPlay
-                className="w-full h-64 object-cover"
-              />
-            </button>
-          </article>
-        ))}
-
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-          <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/Lighting%20design.jpg','image')}>
-            <img src="/assets/Lighting%20design.jpg" alt="Ambient Lighting System" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-          </button>
-          <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2023</div>
-          <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Lighting</div>
-        </article>
-
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-          <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/s1.jpg','image')}>
-            <img src="/assets/s1.jpg" alt="Kitchen Counter" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-          </button>
-          <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2024</div>
-          <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Kitchen</div>
-        </article>
-
-        <article className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-          <button className="relative w-full text-left" onClick={()=>openLightbox('/assets/custom%20curtains.jpg','image')}>
-            <img src="/assets/custom%20curtains.jpg" alt="Custom Curtains & Drapes" className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-          </button>
-          <div className="absolute left-3 top-3 px-3 py-1 rounded-full bg-white/90 text-sm">2023</div>
-          <div className="absolute right-3 top-3 px-3 py-1 rounded-full bg-demargo-orange text-white text-sm">Curtains</div>
-        </article>
-      </div>
+      {/* Portfolio grid - shuffled, no tags */}
+      {(() => {
+        const gridItems = [
+          '/assets/Contemporary%20living%20suite.jpg', '/assets/s10.jpg', '/assets/video.mp4', '/assets/Serene%20Master%20Retreat.jpg', '/assets/Executive%20Dining%20Experience.jpg',
+          '/assets/v2.mp4','/assets/v3.mp4','/assets/v4.mp4','/assets/v1.mp4',
+          '/assets/Lighting%20design.jpg','/assets/custom%20curtains.jpg',
+          '/assets/s2.jpg','/assets/s3.jpg','/assets/s4.jpg','/assets/s5.jpg','/assets/s6.jpg','/assets/s7.jpg','/assets/s8.jpg','/assets/s9.jpg','/assets/s10.jpg','/assets/s11.jpg','/assets/c4.jpg','/assets/c3.jpg','/assets/c1.jpg','/assets/d1.jpg','/assets/d2.jpg','/assets/d3.jpg','/assets/d4.jpg','/assets/d5.jpg'
+        ]
+        const shuffled = React.useMemo(() => [...gridItems].sort(() => Math.random() - 0.5), [])
+        return (
+          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {shuffled.map((src,i)=> (
+              <article key={`itm-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
+                <button className="relative w-full text-left" onClick={()=>openLightbox(src, src.endsWith('.mp4')?'video':'image')}>
+                  {src.endsWith('.mp4') ? (
+                    <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
+                  ) : (
+                    <img src={src} alt={`Portfolio ${i+1}`} className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+                  )}
+                </button>
+              </article>
+            ))}
+          </div>
+        )
+      })()}
 
       {/* Hero-style video showcase */}
       <section className="mt-12">
@@ -859,12 +883,11 @@ function Portfolio() {
         </div>
         {/* Removed typing heading per request */}
         <div className="max-w-6xl mx-auto px-4 py-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {['/assets/v6.mp4','/assets/v7.mp4','/assets/v8.mp4','/assets/v9.mp4','/assets/v10.mp4','/assets/v11.mp4','/assets/v12.mp4','/assets/v13.mp4','/assets/v14.mp4','/assets/v15.mp4','/assets/v16.mp4'].map((src,i)=>(
+          {['/assets/v6.mp4','/assets/v7.mp4','/assets/v8.mp4'].map((src,i)=>(
             <article key={`vmore-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow">
               <button className="relative w-full" onClick={()=>openLightbox(src,'video')}>
                 <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
               </button>
-              <div className="p-4"><h3 className="text-lg font-semibold">Project Video {i+6}</h3></div>
             </article>
           ))}
         </div>
