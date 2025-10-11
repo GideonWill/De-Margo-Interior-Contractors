@@ -219,7 +219,9 @@ function Home() {
           {[
             { img: '/assets/Contemporary%20living%20suite.jpg', tag: 'RELIABLE', title: 'Contemporary Living Suite', idx: 1 },
             { img: '/assets/Serene%20Master%20Retreat.jpg', tag: 'HIGH CLASS INTERIOR', title: 'Serene Master Retreat', idx: 2 },
-            { img: '/assets/Executive%20Dining%20Experience.jpg', tag: 'TOP-NOTCH DELIVERY', title: 'Executive Dining Experience', idx: 3 }
+            { img: '/assets/Executive%20Dining%20Experience.jpg', tag: 'TOP-NOTCH DELIVERY', title: 'Executive Dining Experience', idx: 3 },
+            { img: '/assets/e1.jpg', tag: 'LUXURY DINING', title: 'Modern Dining Experience', idx: 4 },
+            { img: '/assets/e2.jpg', tag: 'PREMIUM INTERIOR', title: 'Elegant Living Space', idx: 5 }
           ].map((item,i)=> (
             <div key={i} className={`grid md:grid-cols-2 gap-8 items-center ${i % 2 ? '' : 'md:flex-row-reverse'}`}>
               <div className="panel-glass p-2 card-glow order-1 md:order-none">
@@ -231,9 +233,9 @@ function Home() {
               <div className="order-2 md:order-none">
                 <div className="text-demargo-orange font-semibold">{item.tag}</div>
                 <h3 className="text-3xl md:text-4xl font-extrabold mt-2">{item.title}</h3>
-                <p className="mt-3 text-gray-700">{i===0 ? 'Stunning modern living space featuring sophisticated furniture arrangements, premium textiles, and carefully curated lighting that creates an atmosphere of understated luxury.' : i===1 ? 'Elegant bedroom sanctuary featuring luxury bedding, custom window treatments, and thoughtful lighting design that promotes rest and relaxation.' : 'Sophisticated dining space showcasing modern furniture, elegant ceiling treatments, and premium finishes that create the perfect atmosphere for memorable gatherings.'}</p>
+                <p className="mt-3 text-gray-700">{i===0 ? 'Stunning modern living space featuring sophisticated furniture arrangements, premium textiles, and carefully curated lighting that creates an atmosphere of understated luxury.' : i===1 ? 'Elegant bedroom sanctuary featuring luxury bedding, custom window treatments, and thoughtful lighting design that promotes rest and relaxation.' : i===2 ? 'Sophisticated dining space showcasing modern furniture, elegant ceiling treatments, and premium finishes that create the perfect atmosphere for memorable gatherings.' : i===3 ? 'Contemporary dining room featuring modern furniture, elegant lighting fixtures, and premium finishes that create an atmosphere of luxury and sophistication.' : 'Spacious living area with modern furniture arrangements, premium lighting design, and thoughtful interior styling that creates a welcoming and elegant atmosphere.'}</p>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  {(i===0 ? ['Modern Furniture','Premium Textiles','Ambient Lighting'] : i===1 ? ['Custom Bedding','Window Treatments','Mood Lighting'] : ['Modern Dining Set','Ceiling Design','Premium Finishes']).map((t,j)=> (
+                  {(i===0 ? ['Modern Furniture','Premium Textiles','Ambient Lighting'] : i===1 ? ['Custom Bedding','Window Treatments','Mood Lighting'] : i===2 ? ['Modern Dining Set','Ceiling Design','Premium Finishes'] : i===3 ? ['Dining Furniture','Lighting Design','Premium Materials'] : ['Modern Seating','Lighting Systems','Interior Styling']).map((t,j)=> (
                     <span key={j} className="tag-pill">{t}</span>
                   ))}
                 </div>
@@ -245,6 +247,16 @@ function Home() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* VIDEO HERO SECTION */}
+      <section className="relative h-[70vh] md:h-[85vh] flex items-center overflow-hidden mt-4">
+        <VideoReveal src="/assets/v17.mp4" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4">
+          <h2 className="text-white text-3xl md:text-5xl font-extrabold">Experience Our Latest Work</h2>
+          <p className="text-white/80 mt-2 max-w-xl">Watch our newest project showcase featuring cutting-edge interior design and premium craftsmanship.</p>
         </div>
       </section>
 
