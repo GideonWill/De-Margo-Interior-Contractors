@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 
 function Seo({ title, description }) {
@@ -817,30 +817,105 @@ function BackToTop() {
 function ChatBot() {
   const [open, setOpen] = React.useState(false)
   const [messages, setMessages] = React.useState([
-    { role: 'bot', text: 'Hi! I\'m Demargo Assistant. Ask about services, booking, fabrics, or hours.' }
+    { role: 'bot', text: 'Hi! I\'m Demargo Assistant. Ask about services, pricing, booking, fabrics, or hours.' }
   ])
   const [input, setInput] = React.useState('')
   const [typing, setTyping] = React.useState(false)
-  const faq = [
-    { q: /hour|open|close|time/i, a: 'We\'re open Mon–Fri 8AM–5PM, Sat 8AM–4PM.' },
-    { q: /contact|phone|email/i, a: 'Phone: 0546478040 • Email: demargo1987@gmail.com' },
-    { q: /service|offer|do you/i, a: 'We offer interior design, renovations, curtains & blinds, lighting, POP ceilings, smart home, painting, tiling, and cleaning.' },
-    { q: /book|quote|consult/i, a: 'You can book via the Contact page: call, WhatsApp, or email. We\'ll schedule a site visit and provide a quote.' },
-    { q: /location|address/i, a: 'Address: Demargo Contractors, HM8Q+XJR, Gbawe.' }
+  const [mode, setMode] = React.useState('default') // 'default' | 'booking-name' | 'booking-phone' | 'booking-service'
+  const bookingRef = React.useRef({ name: '', phone: '', service: '' })
+  const listRef = React.useRef(null)
+  const navigate = useNavigate()
+
+  const quickReplies = [
+    { t: 'View Services', a: () => pushBotAction('Opening Services…', () => navigate('/services')) },
+    { t: 'Interior Design', a: () => pushBotAction('Opening Interior Design…', () => navigate('/interior-design-services')) },
+    { t: '3D Rendering', a: () => pushBotAction('Opening 3D Rendering…', () => navigate('/3d-rendering')) },
+    { t: 'Contact', a: () => pushBotText('Phone: 0546478040 • Email: demargo1987@gmail.com') },
   ]
+
+  const intents = [
+    { q: /hour|open|close|time|working|when/i, a: () => 'We\'re open Mon–Fri 8AM–5PM, Sat 8AM–4PM.' },
+    { q: /address|location|where/i, a: () => 'Address: Demargo Contractors, HM8Q+XJR, Gbawe. Service areas: Accra, Kumasi, Tema, Takoradi, Cape Coast and more.' },
+    { q: /contact|phone|email|reach/i, a: () => 'Phone: 0546478040 • WhatsApp: wa.me/233546478040 • Email: demargo1987@gmail.com' },
+    { q: /price|cost|how much|quote|estimate/i, a: () => 'Pricing varies by scope. Share your room size and preferred style, and we\'ll provide a tailored estimate. You can also book a free site visit.' },
+    { q: /service|offer|do you|provide/i, a: () => 'We offer interior design, renovations, curtains & blinds, lighting, POP ceilings, smart home, painting, tiling, and cleaning. See /services for details.' },
+    { q: /fabric|material|catalog|samples?/i, a: () => 'Browse our fabric display on the Fabrics page. We also bring samples to site during consultations.' },
+    { q: /3d|render|visual/i, a: () => 'We create photorealistic 3D renders and walkthroughs so you can preview designs, materials, and lighting before build. See /3d-rendering.' },
+    { q: /interior design|design my/i, a: () => 'Yes — full interior design: concept, space planning, lighting, curtains & blinds, styling, and installation. See /interior-design-services.' },
+    { q: /book|booking|consult|site visit|appointment/i, a: () => startBooking() },
+  ]
+
+  function pushBotText(text) {
+    setMessages(m => [...m, { role: 'bot', text }])
+  }
+  function pushBotAction(prefix, action) {
+    setMessages(m => [...m, { role: 'bot', text: prefix }])
+    setTimeout(()=> action(), 200)
+  }
+
+  function startBooking() {
+    setMode('booking-name')
+    return 'Great! To book a free consultation, what\'s your full name?'
+  }
+
+  function handleBookingStep(text) {
+    if (mode === 'booking-name') {
+      bookingRef.current.name = text.trim()
+      setMode('booking-phone')
+      return 'Thanks! What\'s the best phone or WhatsApp number to reach you?'
+    }
+    if (mode === 'booking-phone') {
+      bookingRef.current.phone = text.trim()
+      setMode('booking-service')
+      return 'Noted. Which service are you interested in? (e.g., Interior Design, 3D Rendering, Curtains & Blinds)'
+    }
+    if (mode === 'booking-service') {
+      bookingRef.current.service = text.trim()
+      setMode('default')
+      const { name, phone, service } = bookingRef.current
+      const wa = `https://wa.me/233546478040?text=${encodeURIComponent(`Hi, I am ${name}. My number is ${phone}. I\'d like to book: ${service}.`)}`
+      const mail = `mailto:demargo1987@gmail.com?subject=${encodeURIComponent('Booking Request')}&body=${encodeURIComponent(`Name: ${name}\nPhone: ${phone}\nService: ${service}`)}`
+      return {
+        type: 'actions',
+        text: `Thanks ${name}! We\'ll contact you shortly. You can also message us now:`,
+        buttons: [
+          { label: 'WhatsApp', href: wa },
+          { label: 'Email', href: mail }
+        ]
+      }
+    }
+    return null
+  }
+
   const onSend = () => {
-    if (!input.trim()) return
-    const userMsg = { role: 'user', text: input }
+    const trimmed = input.trim()
+    if (!trimmed) return
+    const userMsg = { role: 'user', text: trimmed }
     setMessages(m => [...m, userMsg])
     setInput('')
     setTyping(true)
-    const match = faq.find(f => f.q.test(userMsg.text))
-    const botMsg = { role: 'bot', text: match ? match.a : 'Thanks! A specialist will follow up. Meanwhile, view Services and Portfolio for details.' }
+
     setTimeout(()=>{
-      setMessages(m => [...m, botMsg])
+      let reply = null
+      if (mode !== 'default') reply = handleBookingStep(trimmed)
+      if (!reply) {
+        const found = intents.find(f => f.q.test(trimmed))
+        reply = found ? (typeof found.a === 'function' ? found.a() : found.a) : 'Thanks! A specialist will follow up. Meanwhile, explore our Services, Portfolio, or Fabrics.'
+      }
+      if (reply && typeof reply === 'object' && reply.type === 'actions') {
+        setMessages(m => [...m, { role: 'bot', type: 'actions', text: reply.text, buttons: reply.buttons }])
+      } else {
+        setMessages(m => [...m, { role: 'bot', text: reply }])
+      }
       setTyping(false)
-    }, 650)
+    }, 550)
   }
+
+  React.useEffect(()=>{
+    if (!listRef.current) return
+    listRef.current.scrollTop = listRef.current.scrollHeight
+  }, [messages, typing, open])
+
   return (
     <div className="fixed bottom-20 right-6 z-50">
       {open && (
@@ -849,21 +924,44 @@ function ChatBot() {
             <div className="font-semibold">Demargo Assistant</div>
             <button onClick={()=>setOpen(false)} className="opacity-90 hover:opacity-100">×</button>
           </div>
-          <div className="max-h-80 overflow-y-auto p-3 space-y-2 text-sm">
+          <div ref={listRef} className="max-h-80 overflow-y-auto p-3 space-y-2 text-sm">
             {messages.map((m,i)=> (
               <div key={i} className={m.role==='bot' ? 'text-gray-800' : 'text-right'}>
-                <span className={`inline-block px-3 py-2 rounded-lg ${m.role==='bot' ? 'bg-slate-100' : 'bg-demargo-blue text-white'}`}>{m.text}</span>
+                {m.type === 'actions' ? (
+                  <div className="inline-block p-3 rounded-lg bg-slate-100">
+                    <div className="text-sm mb-2 text-gray-800">{m.text}</div>
+                    <div className="flex flex-wrap gap-2">
+                      {(m.buttons||[]).map((b,bi)=> (
+                        <a key={bi} href={b.href} target={b.href.startsWith('http')?'_blank':undefined} rel="noreferrer" className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-demargo-blue text-white hover:opacity-90">{b.label}</a>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <span className={`inline-block px-3 py-2 rounded-lg ${m.role==='bot' ? 'bg-slate-100' : 'bg-demargo-blue text-white'}`}>{m.text}</span>
+                )}
               </div>
             ))}
             {typing && (
               <div className="text-gray-800">
-                <span className="inline-block px-3 py-2 rounded-lg bg-slate-100 animate-pulse">Typing…</span>
+                <span className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100">
+                  <span className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{animationDelay:'0ms'}}></span>
+                  <span className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{animationDelay:'120ms'}}></span>
+                  <span className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{animationDelay:'240ms'}}></span>
+                </span>
               </div>
             )}
           </div>
-          <div className="p-3 border-t flex gap-2">
-            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&onSend()} placeholder="Type your question..." className="flex-1 px-3 py-2 rounded-md border outline-none" />
-            <button onClick={onSend} className="px-4 py-2 rounded-md bg-demargo-orange text-white">Send</button>
+          <div className="p-3 border-t">
+            <div className="flex flex-wrap gap-2 mb-2">
+              {quickReplies.map((q,i)=> (
+                <button key={i} onClick={q.a} className="px-2 py-1 rounded-md text-xs border">{q.t}</button>
+              ))}
+              <button onClick={()=>pushBotText(startBooking())} className="px-2 py-1 rounded-md text-xs border">Book a Visit</button>
+            </div>
+            <div className="flex gap-2">
+              <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&onSend()} placeholder={mode==='booking-name' ? 'Your full name' : mode==='booking-phone' ? 'Your phone or WhatsApp' : mode==='booking-service' ? 'Service (e.g., Interior Design)' : 'Type your question...'} className="flex-1 px-3 py-2 rounded-md border outline-none" />
+              <button onClick={onSend} className="px-4 py-2 rounded-md bg-demargo-orange text-white">Send</button>
+            </div>
           </div>
         </div>
       )}
