@@ -5,16 +5,89 @@ import { Helmet } from 'react-helmet'
 function Seo({ title, description }) {
   const loc = window.location.pathname
   useEffect(() => {
-    document.title = title ? title + ' • Demargo Interior Contractors' : 'Demargo Interior Contractors'
+    document.title = title ? title + ' • Demargo Interior Contractors' : 'Demargo Interior Contractors | Interior Design, Curtains & 3D Rendering in Ghana'
   }, [title])
   return (
     <Helmet>
-      <meta name="description" content={description || 'Demargo Interior Contractors - premium interior decoration and fitting services in Ghana and Africa.'} />
+      <meta name="description" content={description || 'Discover top-quality interior design, curtains, blinds, and 3D rendering services from Demargo Interior Contractors. Transform your space with elegance and creativity.'} />
       <meta property="og:site_name" content="Demargo Interior Contractors" />
       <meta property="og:url" content={window.location.origin + loc} />
+      <link rel="canonical" href={window.location.origin + loc} />
     </Helmet>
   )
 }
+
+// Shared services list used across Services page and footer
+const allServices = [
+  {
+    title: 'Interior Design',
+    desc: 'We create custom‑designed interiors that reflect your lifestyle, personality, and space needs.',
+    icon: (
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7h18"/><path d="M6 7v13"/><path d="M18 7v13"/><path d="M6 20h12"/><path d="M9 7V4h6v3"/></svg>
+    )
+  },
+  {
+    title: 'Home Renovation',
+    desc: 'From kitchen upgrades to full remodels, we handle all aspects of home renovation.',
+    icon: (
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
+    )
+  },
+  {
+    title: '3D Rendering and Visualization',
+    desc: 'Visualize your interior project in real‑time form with high‑quality 3D renders.',
+    icon: (
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg>
+    )
+  },
+  {
+    title: 'Curtains and Blinds Installation',
+    desc: 'Fabric selection, measurement, and flawless installation for homes and offices.',
+    icon: (
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3h18"/><path d="M4 3v18"/><path d="M8 3v18"/><path d="M12 3v18"/><path d="M16 3v18"/><path d="M20 3v18"/></svg>
+    )
+  },
+  {
+    title: 'Smart Home Installation',
+    desc: 'Lighting automation, security, and remote‑controlled systems tailored to your lifestyle.',
+    icon: (
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l7 7v11H5V9l7-7z"/><path d="M9 13h6v6H9z"/></svg>
+    )
+  },
+  {
+    title: 'POP Ceiling Designs',
+    desc: 'Modern ceiling finishes that add depth, beauty, and sophistication to any room.',
+    icon: (
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7h18"/><path d="M6 10h12"/><path d="M9 13h6"/></svg>
+    )
+  },
+  {
+    title: 'Painting',
+    desc: 'Professional interior and exterior painting using high‑quality materials and techniques.',
+    icon: (
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 3h10v6H3z"/>
+        <path d="M13 5h8"/>
+        <path d="M13 8h6"/>
+        <path d="M7 9v10a2 2 0 002 2h2a2 2 0 002-2V9"/>
+      </svg>
+    )
+  },
+  {
+    title: 'Tiling',
+    desc: 'Durable, stylish floors and wall tiling for bathrooms, kitchens, offices and showrooms.',
+    icon: (
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    )
+  },
+  {
+    title: 'Cleaning Services',
+    desc: 'Post‑construction and deep cleaning to ensure your space is spotless, safe, and move‑in ready.',
+    icon: (
+      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18"/><path d="M6 12V6a3 3 0 013-3h6a3 3 0 013 3v6"/><path d="M6 12l2 9h8l2-9"/></svg>
+    )
+  }
+]
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -103,7 +176,33 @@ function Home() {
 
   return (
     <main>
-      <Seo title="Home" description="Demargo Interior Contractors - custom curtains, blinds, renovation, woodwork and smart home systems across Ghana & Africa." />
+      <Seo
+        title="Demargo Interior Contractors | Interior Design, Curtains & 3D Rendering in Ghana"
+        description="Discover top-quality interior design, curtains, blinds, and 3D rendering services from Demargo Interior Contractors. Transform your space with elegance and creativity."
+      />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'LocalBusiness',
+          name: 'Demargo Interior Contractors',
+          url: typeof window !== 'undefined' ? window.location.origin : 'https://demargointerior.com',
+          image: 'https://demargointerior.com/assets/hero%201.jpg',
+          telephone: '+233546478040',
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Gbawe',
+            addressRegion: 'Greater Accra',
+            addressCountry: 'GH'
+          },
+          sameAs: [
+            'https://www.facebook.com/share/1Jui7wFk7G/?mibextid=wwXIfr',
+            'https://instagram.com/demargo_blinds_curtains',
+            'https://www.linkedin.com/in/de-margo-interior-contractors-5a6153262?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+          ],
+          areaServed: ['Ghana','Accra','Kumasi','Tema','Takoradi','Cape Coast','Africa'],
+          priceRange: '$$'
+        })}</script>
+      </Helmet>
       {/* HERO - Updated to Serene Master Retreat with Demargo theme */}
       <section className="relative h-[82vh] md:h-[90vh] flex items-center overflow-hidden bg-slate-900">
         <img
@@ -293,76 +392,7 @@ function Home() {
 
 function Services() {
   const heroImg = '/assets/bedroom%20styling.jpg'
-  const allServices = [
-    {
-      title: 'Interior Design',
-      desc: 'We create custom‑designed interiors that reflect your lifestyle, personality, and space needs.',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7h18"/><path d="M6 7v13"/><path d="M18 7v13"/><path d="M6 20h12"/><path d="M9 7V4h6v3"/></svg>
-      )
-    },
-    {
-      title: 'Home Renovation',
-      desc: 'From kitchen upgrades to full remodels, we handle all aspects of home renovation.',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
-      )
-    },
-    {
-      title: '3D Rendering and Visualization',
-      desc: 'Visualize your interior project in real‑time form with high‑quality 3D renders.',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg>
-      )
-    },
-    {
-      title: 'Curtains and Blinds Installation',
-      desc: 'Fabric selection, measurement, and flawless installation for homes and offices.',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3h18"/><path d="M4 3v18"/><path d="M8 3v18"/><path d="M12 3v18"/><path d="M16 3v18"/><path d="M20 3v18"/></svg>
-      )
-    },
-    {
-      title: 'Smart Home Installation',
-      desc: 'Lighting automation, security, and remote‑controlled systems tailored to your lifestyle.',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l7 7v11H5V9l7-7z"/><path d="M9 13h6v6H9z"/></svg>
-      )
-    },
-    {
-      title: 'POP Ceiling Designs',
-      desc: 'Modern ceiling finishes that add depth, beauty, and sophistication to any room.',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7h18"/><path d="M6 10h12"/><path d="M9 13h6"/></svg>
-      )
-    },
-    {
-      title: 'Painting',
-      desc: 'Professional interior and exterior painting using high‑quality materials and techniques.',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 3h10v6H3z"/>
-          <path d="M13 5h8"/>
-          <path d="M13 8h6"/>
-          <path d="M7 9v10a2 2 0 002 2h2a2 2 0 002-2V9"/>
-        </svg>
-      )
-    },
-    {
-      title: 'Tiling',
-      desc: 'Durable, stylish floors and wall tiling for bathrooms, kitchens, offices and showrooms.',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      )
-    },
-    {
-      title: 'Cleaning Services',
-      desc: 'Post‑construction and deep cleaning to ensure your space is spotless, safe, and move‑in ready.',
-      icon: (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18"/><path d="M6 12V6a3 3 0 013-3h6a3 3 0 013 3v6"/><path d="M6 12l2 9h8l2-9"/></svg>
-      )
-    }
-  ]
+  // uses shared allServices defined above
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
@@ -416,6 +446,96 @@ function Services() {
           <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
             <div className="text-demargo-blue mb-2">{s.icon}</div>
             <h3 className="font-semibold">{s.title}</h3>
+            <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function InteriorDesign() {
+  return (
+    <section className="max-w-6xl mx-auto px-4 py-16">
+      <Seo
+        title="Interior Design Services in Ghana | Demargo Interior Contractors"
+        description="Premium interior design services in Ghana. Space planning, material selection, lighting, and bespoke styling tailored to homes and offices."
+      />
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h1 className="text-3xl md:text-5xl font-extrabold">Interior Design Services</h1>
+          <p className="mt-4 text-gray-700">We design beautiful, functional spaces that reflect your lifestyle and brand. From concept to completion, our team manages space planning, finishes, lighting, and styling for consistent quality delivery.</p>
+          <ul className="mt-5 grid sm:grid-cols-2 gap-3 text-sm text-gray-700">
+            {[
+              'Space planning & layout optimization',
+              'Material & finish selection',
+              'Lighting design & ambiance',
+              'Custom curtains & blinds',
+              'Furniture sourcing & styling',
+              'Project management'
+            ].map((b,i)=>(
+              <li key={`id-b-${i}`} className="p-3 rounded-lg bg-orange-50">{b}</li>
+            ))}
+          </ul>
+          <div className="mt-6">
+            <Link to="/contact" className="btn-primary">Book a Consultation</Link>
+          </div>
+        </div>
+        <div className="rounded-2xl overflow-hidden shadow">
+          <img src="/assets/Contemporary%20living%20suite.jpg" alt="Interior design in Ghana" className="w-full h-72 object-cover" />
+        </div>
+      </div>
+
+      <div className="mt-10 grid md:grid-cols-3 gap-6">
+        {allServices.filter(s => ['Interior Design','Curtains and Blinds Installation','Lighting Design'].includes(s.title)).map((s,i)=> (
+          <article key={`id-s-${i}`} className="bg-white rounded-2xl p-6 shadow-sm">
+            <div className="text-demargo-blue mb-2">{s.icon}</div>
+            <h2 className="font-semibold">{s.title}</h2>
+            <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function Rendering3D() {
+  return (
+    <section className="max-w-6xl mx-auto px-4 py-16">
+      <Seo
+        title="3D Rendering in Ghana | Interior Visualization by Demargo"
+        description="High‑quality 3D interior rendering and visualization in Ghana. Preview designs, materials, and lighting before build."
+      />
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="rounded-2xl overflow-hidden shadow">
+          <img src="/assets/d2.jpg" alt="3D interior rendering" className="w-full h-72 object-cover" />
+        </div>
+        <div>
+          <h1 className="text-3xl md:text-5xl font-extrabold">3D Rendering & Visualization</h1>
+          <p className="mt-4 text-gray-700">See your space before construction. We create photorealistic 3D visuals for faster approvals, accurate budgeting, and confident decision‑making.</p>
+          <ul className="mt-5 grid sm:grid-cols-2 gap-3 text-sm text-gray-700">
+            {[
+              'Photoreal interior renders',
+              'Material & colorway variations',
+              'Lighting simulations',
+              'Multiple viewpoint options',
+              'Fast iterations',
+              'Handover-ready assets'
+            ].map((b,i)=>(
+              <li key={`r-b-${i}`} className="p-3 rounded-lg bg-blue-50">{b}</li>
+            ))}
+          </ul>
+          <div className="mt-6">
+            <Link to="/contact" className="btn-primary">Request a Rendering</Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-10 grid md:grid-cols-3 gap-6">
+        {allServices.filter(s => s.title === '3D Rendering and Visualization').map((s,i)=> (
+          <article key={`rd-s-${i}`} className="bg-white rounded-2xl p-6 shadow-sm">
+            <div className="text-demargo-blue mb-2">{s.icon}</div>
+            <h2 className="font-semibold">{s.title}</h2>
             <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
           </article>
         ))}
@@ -763,6 +883,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/interior-design-services" element={<InteriorDesign />} />
+          <Route path="/3d-rendering" element={<Rendering3D />} />
           <Route path="/fabrics" element={<Fabrics />} />
           <Route path="/clientele" element={<Clientele />} />
           <Route path="/about" element={<About />} />
@@ -784,10 +906,9 @@ export default function App() {
             <div>
               <div className="font-semibold mb-3">Services</div>
               <ul className="space-y-2 text-white/80 text-sm">
-                <li>Curtain Installation</li>
-                <li>Blind Installation</li>
-                <li>Lighting Design</li>
-                <li>Bedroom Arrangements</li>
+                {allServices.map((s, i) => (
+                  <li key={`fs-${i}`}>{s.title}</li>
+                ))}
               </ul>
             </div>
             <div>
