@@ -125,6 +125,8 @@ function Navbar() {
           <li><NavLink to="/services" className={linkClass}>Services</NavLink></li>
           <li><NavLink to="/fabrics" className={linkClass}>Fabric Display</NavLink></li>
           <li><NavLink to="/clientele" className={linkClass}>Clientele</NavLink></li>
+          <li><NavLink to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
+          <li><NavLink to="/awards" className={linkClass}>Awards</NavLink></li>
           <li><NavLink to="/about" className={linkClass}>About</NavLink></li>
           <li><NavLink to="/contact" className={({isActive}) => `px-3 py-2 rounded-md text-white transition-colors ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
         </ul>
@@ -138,6 +140,8 @@ function Navbar() {
               <li><NavLink onClick={()=>setOpen(false)} to="/services" className={linkClass}>Services</NavLink></li>
               <li><NavLink onClick={()=>setOpen(false)} to="/fabrics" className={linkClass}>Fabric Display</NavLink></li>
               <li><NavLink onClick={()=>setOpen(false)} to="/clientele" className={linkClass}>Clientele</NavLink></li>
+              <li><NavLink onClick={()=>setOpen(false)} to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
+              <li><NavLink onClick={()=>setOpen(false)} to="/awards" className={linkClass}>Awards</NavLink></li>
               <li><NavLink onClick={()=>setOpen(false)} to="/about" className={linkClass}>About</NavLink></li>
               <li><NavLink onClick={()=>setOpen(false)} to="/contact" className={({isActive}) => `px-3 py-2 rounded-md text-white inline-block ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
             </ul>
@@ -285,7 +289,7 @@ function Home() {
             { title: 'Living Room Setting', img: '/assets/hero%20pic.jpg' },
             { title: 'Lighting System', img: '/assets/Lighting%20design.jpg' },
             { title: 'Bedroom Styling', img: '/assets/custom%20curtains.jpg' },
-            { title: '3D Rendering', img: '/assets/d2.jpg' }
+            { title: '3D Rendering', img: '/assets/3D%20Rendering.jpg' }
           ].map((s,i)=> (
             <Link to="/portfolio" key={i} className="rounded-2xl overflow-hidden bg-white border card-glow block">
               <img src={s.img} alt={s.title} className="w-full h-64 object-cover" />
@@ -319,7 +323,7 @@ function Home() {
             { img: '/assets/Contemporary%20living%20suite.jpg', tag: 'RELIABLE', title: 'Contemporary Living Suite', idx: 1 },
             { img: '/assets/Serene%20Master%20Retreat.jpg', tag: 'HIGH CLASS INTERIOR', title: 'Serene Master Retreat', idx: 2 },
             { img: '/assets/Executive%20Dining%20Experience.jpg', tag: 'TOP-NOTCH DELIVERY', title: 'Executive Dining Experience', idx: 3 },
-            { img: '/assets/e1.jpg', tag: 'LUXURY DINING', title: 'Modern Dining Experience', idx: 4 },
+            { img: '/assets/Modern%20Dining%20Experience.jpg', tag: 'LUXURY DINING', title: 'Modern Dining Experience', idx: 4 },
             { img: '/assets/e2.jpg', tag: 'PREMIUM INTERIOR', title: 'Elegant Living Space', idx: 5 }
           ].map((item,i)=> (
             <div key={i} className={`grid md:grid-cols-2 gap-8 items-center ${i % 2 ? '' : 'md:flex-row-reverse'}`}>
@@ -587,17 +591,6 @@ function Fabrics() {
         </a>
       </div>
 
-      <h2 className="text-2xl md:text-3xl font-bold mt-12 mb-5 text-center">Blinds</h2>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
-        {['/assets/b1.jpg','/assets/b2.jpg','/assets/s2.jpg','/assets/s1.jpg','/assets/s4.jpg','/assets/s7.jpg'].map((src,i)=>(
-          <figure key={i} className="group rounded-2xl overflow-hidden bg-white card-hover shadow border border-gray-100">
-            <button className="relative w-full" onClick={()=>openLightbox(src)}>
-              <img src={src} alt={`Blind ${i+1}`} className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-            </button>
-          </figure>
-        ))}
-      </div>
-
       {lightbox.open && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={closeLightbox}>
           <div className="max-w-5xl w-full" onClick={(e)=>e.stopPropagation()}>
@@ -615,43 +608,88 @@ function Fabrics() {
 }
 
 function Clientele() {
-  const clients = [
-    { name: 'Ayi Mensah Park by Indigo Homes', img: '/assets/Ayi%20Mensah%20Park%20by%20Indigo%20Homes.jpeg' },
-    { name: 'Bel Rose Place', img: '/assets/Bel%20Rose%20Place.jpeg' },
-    { name: 'Cantoment Gardens', img: '/assets/Cantoment%20Gardens.jpg' },
-    { name: 'City Galleria', img: '/assets/City%20Galleria.jpeg' },
-    { name: 'Contemporary living suite', img: '/assets/Contemporary%20living%20suite.jpg' },
-    { name: 'Embassy Gardens', img: '/assets/Embassy%20Gardens.jpg' },
-    { name: 'Harvey Terraces', img: '/assets/Harvey%20Terraces.jpeg' },
-    { name: 'Flagstaff House', img: '/assets/flagstaff%20house.jpg' },
-    { name: 'Holiday Inn Hotel', img: '/assets/Holiday%20Inn%20Hotel.jpg' },
-    { name: 'Loxwood House', img: '/assets/Loxwood%20House.jpg' },
-    { name: 'Lindsay Square', img: '/assets/Lindsay%20Square.jpg' },
-    { name: 'Nova by Devtraco Plus', img: '/assets/Nova%20by%20Devtraco%20Plus.jpg' },
-    { name: 'Narcotics Control Commission', img: '/assets/Narcotics%20Control%20Commission.png' },
-    { name: 'Oyarifa Park by Indigo Homes', img: '/assets/Oyarifa%20Park%20by%20Indigo%20Homes.jpeg' },
-    { name: 'Silicon Valley', img: '/assets/Silicon%20Valley.jpeg' },
-    { name: 'The Lennox Apartments', img: '/assets/The%20Lennox%20Apartments.jpg' },
-    { name: 'The Palms - Kaybee Gardens', img: '/assets/The%20Palms%20-%20Kaybee%20Gardens.jpeg' },
-    { name: 'The Signature Apartments', img: '/assets/The%20Signature%20Apartments.jpg' },
-    { name: 'Tribute House', img: '/assets/Tribute%20House.jpeg' },
-    { name: 'Ashanti Gardens', img: '/assets/Ashanti%20Gardens.jpeg' },
-    { name: 'Williot Constructions', img: '/assets/Williot%20Constructions.png' },
+  const governmentProjects = [
+    { name: 'Flagstaff House', img: '/assets/flagstaff%20house.jpg', category: 'Government' },
+    { name: 'Narcotics Control Commission', img: '/assets/Narcotics%20Control%20Commission.png', category: 'Government' },
+    { name: 'Ghana Armed Forces', img: '/assets/GAF.jpg', category: 'Government' },
   ]
+  
+  const residentialProjects = [
+    { name: 'Ayi Mensah Park by Indigo Homes', img: '/assets/Ayi%20Mensah%20Park%20by%20Indigo%20Homes.jpeg', category: 'Residential' },
+    { name: 'Bel Rose Place', img: '/assets/Bel%20Rose%20Place.jpeg', category: 'Residential' },
+    { name: 'Cantoment Gardens', img: '/assets/Cantoment%20Gardens.jpg', category: 'Residential' },
+    { name: 'City Galleria', img: '/assets/City%20Galleria.jpeg', category: 'Residential' },
+    { name: 'Contemporary living suite', img: '/assets/Contemporary%20living%20suite.jpg', category: 'Residential' },
+    { name: 'Embassy Gardens', img: '/assets/Embassy%20Gardens.jpg', category: 'Residential' },
+    { name: 'Harvey Terraces', img: '/assets/Harvey%20Terraces.jpeg', category: 'Residential' },
+    { name: 'Loxwood House', img: '/assets/Loxwood%20House.jpg', category: 'Residential' },
+    { name: 'Lindsay Square', img: '/assets/Lindsay%20Square.jpg', category: 'Residential' },
+    { name: 'Nova by Devtraco Plus', img: '/assets/Nova%20by%20Devtraco%20Plus.jpg', category: 'Residential' },
+    { name: 'Oyarifa Park by Indigo Homes', img: '/assets/Oyarifa%20Park%20by%20Indigo%20Homes.jpeg', category: 'Residential' },
+    { name: 'Silicon Valley', img: '/assets/Silicon%20Valley.jpeg', category: 'Residential' },
+    { name: 'The Lennox Apartments', img: '/assets/The%20Lennox%20Apartments.jpg', category: 'Residential' },
+    { name: 'The Palms - Kaybee Gardens', img: '/assets/The%20Palms%20-%20Kaybee%20Gardens.jpeg', category: 'Residential' },
+    { name: 'The Signature Apartments', img: '/assets/The%20Signature%20Apartments.jpg', category: 'Residential' },
+    { name: 'Tribute House', img: '/assets/Tribute%20House.jpeg', category: 'Residential' },
+    { name: 'Ashanti Gardens', img: '/assets/Ashanti%20Gardens.jpeg', category: 'Residential' },
+  ]
+  
+  const commercialProjects = [
+    { name: 'Holiday Inn Hotel', img: '/assets/Holiday%20Inn%20Hotel.jpg', category: 'Commercial' },
+    { name: 'Williot Constructions', img: '/assets/Williot%20Constructions.png', category: 'Commercial' },
+  ]
+
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Clientele" description="Some of the clients Demargo Interior Contractors has served." />
       <h1 className="text-3xl md:text-5xl font-extrabold mb-2 text-center">
         <span className="text-demargo-orange">Our</span> <span className="text-demargo-blue">Esteemed Clients</span>
       </h1>
-      <p className="text-center text-gray-600 mb-8 max-w-3xl mx-auto">A selection of brands, residences, and developments we’ve had the privilege to style and fit with premium interior solutions.</p>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
-        {clients.map((c,i)=>(
-          <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5">
-            <img src={c.img} alt={c.name} className="w-full aspect-[4/3] object-cover" />
-            <figcaption className="px-4 py-3 text-sm text-gray-800 font-medium text-center bg-slate-50 border-t">{c.name}</figcaption>
-          </figure>
-        ))}
+      <p className="text-center text-gray-600 mb-8 max-w-3xl mx-auto">A selection of brands, residences, and developments we've had the privilege to style and fit with premium interior solutions.</p>
+      
+      {/* Government Projects */}
+      <div className="mb-16">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+          <span className="text-demargo-orange">Government</span> <span className="text-demargo-blue">Projects</span>
+        </h2>
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
+          {governmentProjects.map((c,i)=>(
+            <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5">
+              <img src={c.img} alt={c.name} className="w-full aspect-[4/3] object-cover" />
+              <figcaption className="px-4 py-3 text-sm text-gray-800 font-medium text-center bg-slate-50 border-t">{c.name}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+
+      {/* Residential Projects */}
+      <div className="mb-16">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+          <span className="text-demargo-orange">Residential</span> <span className="text-demargo-blue">Projects</span>
+        </h2>
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
+          {residentialProjects.map((c,i)=>(
+            <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5">
+              <img src={c.img} alt={c.name} className="w-full aspect-[4/3] object-cover" />
+              <figcaption className="px-4 py-3 text-sm text-gray-800 font-medium text-center bg-slate-50 border-t">{c.name}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+
+      {/* Commercial Projects */}
+      <div>
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+          <span className="text-demargo-orange">Commercial</span> <span className="text-demargo-blue">Projects</span>
+        </h2>
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
+          {commercialProjects.map((c,i)=>(
+            <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5">
+              <img src={c.img} alt={c.name} className="w-full aspect-[4/3] object-cover" />
+              <figcaption className="px-4 py-3 text-sm text-gray-800 font-medium text-center bg-slate-50 border-t">{c.name}</figcaption>
+            </figure>
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -692,8 +730,9 @@ function About() {
 
       <div className="mt-12">
         <h2 className="text-2xl font-bold text-center mb-6">Leadership</h2>
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-5 gap-6">
           {[
+            { name: 'Mr Jeffery Ofosu-Hene Appenteng', role: 'Chief Executive Officer', img: '/assets/Mr%20Jeffery%20Ofosu-Hene%20Appenteng.jpg' },
             { name: 'Blessing Kesinornu', role: 'Managing Director', img: '/assets/Kessy.jpg' },
             { name: 'George Nettey', role: 'Head of Media', img: '/assets/George.jpg' },
             { name: 'Micheal Martey', role: 'Head of Installation', img: '/assets/MDK.jpg' },
@@ -714,6 +753,218 @@ function About() {
 }
 
 
+
+function Awards() {
+  const [lightbox, setLightbox] = useState({ open: false, src: '', award: null })
+  const openLightbox = (src, award) => setLightbox({ open: true, src, award })
+  const closeLightbox = () => setLightbox({ open: false, src: '', award: null })
+
+  return (
+    <section className="max-w-6xl mx-auto px-4 py-16">
+      <Seo title="Awards & Citations" description="Recognition and awards received by Demargo Interior Contractors for excellence in interior design and construction." />
+      <h1 className="text-3xl md:text-5xl font-extrabold mb-3 text-center">
+        <span className="text-demargo-orange">Awards &</span> <span className="text-demargo-blue">Citations</span>
+      </h1>
+      <p className="text-center text-gray-600 mb-10 max-w-3xl mx-auto">Recognition for our commitment to excellence in interior design, craftsmanship, and client satisfaction across Ghana and Africa.</p>
+      
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[
+          {
+            title: "Excellence in Interior Design Services",
+            organization: "Ghana Armed Forces Staff College",
+            year: "2024",
+            description: "Recognized for outstanding interior design and renovation services provided to military facilities and government buildings.",
+            category: "Government Service Excellence",
+            logo: "/assets/GAF.jpg",
+            awardImage: "/assets/awards%20GAF.jpg"
+          }
+        ].map((award, i) => (
+          <div key={i} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow cursor-pointer" onClick={() => openLightbox(award.awardImage, award)}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="text-demargo-orange text-sm font-semibold">{award.category}</div>
+              <div className="text-gray-500 text-sm">{award.year}</div>
+            </div>
+            <div className="flex items-center mb-4">
+              <img src={award.logo} alt={award.organization} className="w-12 h-12 object-contain mr-3" />
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{award.title}</h3>
+                <div className="text-demargo-blue font-semibold">{award.organization}</div>
+              </div>
+            </div>
+            <p className="text-gray-600 text-sm leading-relaxed">{award.description}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-16 bg-gradient-to-r from-demargo-orange/10 to-demargo-blue/10 rounded-2xl p-8">
+        <h2 className="text-2xl font-bold text-center mb-6">Our Commitment to Excellence</h2>
+        <div className="grid md:grid-cols-3 gap-6 text-center">
+          <div>
+            <div className="text-3xl font-extrabold text-demargo-orange mb-2">7+</div>
+            <div className="text-gray-700">Years of Excellence</div>
+          </div>
+          <div>
+            <div className="text-3xl font-extrabold text-demargo-blue mb-2">2000+</div>
+            <div className="text-gray-700">Projects Completed</div>
+          </div>
+          <div>
+            <div className="text-3xl font-extrabold text-demargo-orange mb-2">100%</div>
+            <div className="text-gray-700">Client Satisfaction</div>
+          </div>
+        </div>
+      </div>
+
+      {lightbox.open && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeLightbox}>
+          <div className="max-w-6xl w-full" onClick={(e)=>e.stopPropagation()}>
+            <div className="relative w-full overflow-hidden rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row">
+              {/* Award Image on Left */}
+              <div className="w-full md:w-1/2 p-4 bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
+                <img src={lightbox.src} alt="Award Certificate" className="w-full h-auto object-contain max-h-[85vh] rounded-lg" />
+              </div>
+              
+              {/* Description on Right */}
+              {lightbox.award && (
+                <div className="w-full md:w-1/2 p-8 bg-gradient-to-br from-white to-slate-50 flex flex-col justify-center relative">
+                  <button 
+                    onClick={closeLightbox} 
+                    className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Close"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <div className="text-demargo-orange text-xs font-bold uppercase tracking-wider mb-3">{lightbox.award.category}</div>
+                      <h2 className="text-3xl font-extrabold text-gray-900 leading-tight mb-4">{lightbox.award.title}</h2>
+                      <div className="text-demargo-blue text-lg font-bold mb-6">{lightbox.award.organization}</div>
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-demargo-orange/10 to-demargo-blue/10 rounded-lg">
+                        <span className="text-sm font-bold text-gray-700">Year:</span>
+                        <span className="text-lg font-extrabold text-demargo-orange">{lightbox.award.year}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-6 border-t-2 border-gray-200">
+                      <p className="text-gray-700 text-base leading-relaxed font-medium">
+                        {lightbox.award.description}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 pt-4">
+                      <img src={lightbox.award.logo} alt={lightbox.award.organization} className="w-16 h-16 object-contain" />
+                      <div className="flex-1">
+                        <div className="text-xs font-bold text-gray-500 uppercase tracking-wide">Presented by</div>
+                        <div className="text-lg font-bold text-gray-900">{lightbox.award.organization}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function Testimonials() {
+  return (
+    <section className="max-w-6xl mx-auto px-4 py-16">
+      <Seo title="Testimonials" description="What our clients say about Demargo Interior Contractors - real testimonials from satisfied customers." />
+      <h1 className="text-3xl md:text-5xl font-extrabold mb-3 text-center">
+        <span className="text-demargo-orange">What They</span> <span className="text-demargo-blue">Say</span>
+      </h1>
+      <p className="text-center text-gray-600 mb-10 max-w-3xl mx-auto">Don't just take our word for it. Here's what our satisfied clients have to say about their Demargo experience.</p>
+      
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          {
+            name: "Adom Bright",
+            role: "Owner - Adom City Estates",
+            rating: 5,
+            quote: "Demargo transformed our living space beyond our expectations. The attention to detail and quality of work is exceptional. They delivered exactly what we envisioned and more."
+          },
+          {
+            name: "Ayi Homes",
+            role: "Developer - Ayi Mensah Park",
+            rating: 5,
+            quote: "Professional, timely, and absolutely stunning results. Our spaces now reflect the quality of our brand. Demargo's expertise in interior design is unmatched."
+          },
+          {
+            name: "Sarah Mensah",
+            role: "Business Owner - Holiday Inn Hotel",
+            rating: 5,
+            quote: "Working with Demargo was a game-changer for our office space. Their ability to understand our vision and bring it to life was extraordinary. Highly recommended!"
+          },
+          {
+            name: "David Thompson",
+            role: "Property Manager - Embassy Gardens",
+            rating: 5,
+            quote: "Demargo's team is incredibly talented. They not only delivered a stunning design but also made the entire process smooth and enjoyable. The quality of their work speaks for itself."
+          },
+          {
+            name: "Grace Ofori",
+            role: "Interior Designer - City Galleria",
+            rating: 5,
+            quote: "As a fellow designer, I can attest to Demargo's exceptional craftsmanship and attention to detail. Their work sets the standard for interior design in Ghana."
+          },
+          {
+            name: "Michael Asante",
+            role: "Hotel Manager - Holiday Inn Hotel",
+            rating: 5,
+            quote: "Demargo brought our hotel lobby to life with their innovative design approach. The transformation exceeded our expectations and has significantly improved our guest experience."
+          },
+          {
+            name: "Efua Boateng",
+            role: "Residential Client - Bel Rose Place",
+            rating: 5,
+            quote: "From start to finish, Demargo was a partner in our success. Their creative insights and seamless execution made a significant impact on our home renovation project."
+          },
+          {
+            name: "Kwame Nkrumah",
+            role: "Corporate Client - Flagstaff House",
+            rating: 5,
+            quote: "Demargo is hands down the best interior design company we've ever worked with. Their team understands the intricacies of commercial interior design and delivers exceptional results."
+          },
+          {
+            name: "Ama Serwaa",
+            role: "Real Estate Developer - Nova by Devtraco Plus",
+            rating: 5,
+            quote: "Our experience with Demargo was nothing short of phenomenal. They approached our project with creativity, expertise, and a deep understanding of our industry needs."
+          }
+        ].map((testimonial, i) => (
+          <div key={i} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+            <div className="flex items-center mb-4">
+              {[...Array(testimonial.rating)].map((_, j) => (
+                <svg key={j} className="w-5 h-5 text-demargo-orange" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+            </div>
+            <blockquote className="text-gray-700 mb-4 italic">"{testimonial.quote}"</blockquote>
+            <div className="border-t pt-4">
+              <div className="font-semibold text-gray-900">{testimonial.name}</div>
+              <div className="text-sm text-gray-600">{testimonial.role}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-16 text-center">
+        <h2 className="text-2xl font-bold mb-6">Ready to Experience Excellence?</h2>
+        <p className="text-gray-600 mb-8 max-w-2xl mx-auto">Join our growing list of satisfied clients and transform your space with Demargo's premium interior design services.</p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link to="/contact" className="btn-primary">Get Started Today</Link>
+          <Link to="/portfolio" className="btn-ghost">View Our Work</Link>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function Contact() {
   return (
@@ -985,6 +1236,8 @@ export default function App() {
           <Route path="/3d-rendering" element={<Rendering3D />} />
           <Route path="/fabrics" element={<Fabrics />} />
           <Route path="/clientele" element={<Clientele />} />
+          <Route path="/testimonials" element={<Testimonials />} />
+          <Route path="/awards" element={<Awards />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
@@ -1015,6 +1268,8 @@ export default function App() {
                 <li><Link to="/about">About Us</Link></li>
                 <li><Link to="/fabrics">Fabric Library</Link></li>
                 <li><Link to="/clientele">Our Clientele</Link></li>
+                <li><Link to="/testimonials">Testimonials</Link></li>
+                <li><Link to="/awards">Awards</Link></li>
                 <li><Link to="/contact">Contact</Link></li>
               </ul>
             </div>
@@ -1056,15 +1311,275 @@ function Portfolio() {
   const openLightbox = (src, kind) => setLightbox({ open: true, src, kind })
   const closeLightbox = () => setLightbox({ open: false, src: '', kind: 'image' })
   const items = [
-    '/assets/Contemporary%20living%20suite.jpg',
-    '/assets/video.mp4',
-    '/assets/Serene%20Master%20Retreat.jpg',
-    '/assets/Executive%20Dining%20Experience.jpg',
-    '/assets/v1.mp4','/assets/v2.mp4','/assets/v3.mp4','/assets/v4.mp4','/assets/v5.mp4',
-    '/assets/v6.mp4','/assets/v7.mp4','/assets/v8.mp4','/assets/v9.mp4','/assets/v10.mp4',
-    '/assets/v11.mp4','/assets/v12.mp4','/assets/v13.mp4','/assets/v14.mp4','/assets/v15.mp4','/assets/v16.mp4',
-    '/assets/Lighting%20design.jpg','/assets/custom%20curtains.jpg'
+    '/assets/video.mp4', '/assets/Contemporary%20living%20suite.jpg', '/assets/Living%20Space.mp4',
+    '/assets/Serene%20Master%20Retreat.jpg', '/assets/v1.mp4', '/assets/Modern%20Dining%20Experience.jpg',
+    '/assets/Office%20space.mp4', '/assets/bedroom.jpg', '/assets/Lighting%20design.jpg',
+    '/assets/v3.mp4', '/assets/Executive%20Dining%20Experience.jpg', '/assets/kitchen.jpg',
+    '/assets/Conference%20space.mp4', '/assets/livingspace.jpg', '/assets/v6.mp4',
+    '/assets/Dinning%20and%20Solaret%20space.mp4', '/assets/custom%20curtains.jpg', '/assets/bedroom1.jpg',
+    '/assets/v8.mp4', '/assets/dinning%20space%201%20.mp4', '/assets/Living%20Room%20Space.mp4',
+    '/assets/3D%20Rendering.jpg', '/assets/v11.mp4', '/assets/Bedroom%20Space.mp4',
+    '/assets/livingspace1.jpg', '/assets/v13.mp4', '/assets/Living%20Space%201.mp4',
+    '/assets/kitchen1.jpg', '/assets/v16.mp4', '/assets/Living%20Space%20Room.mp4',
+    '/assets/livingspace2.jpg', '/assets/v17.mp4', '/assets/Luxury%20Living%20space.jpg',
+    '/assets/bedroom2.jpg', '/assets/diningspace.jpg', '/assets/livingspace3.jpg',
+    '/assets/kitchen2.jpg', '/assets/dinin%20space1.jpg', '/assets/bedroom3.jpg',
+    '/assets/livingspace4.jpg', '/assets/dining%20space2.jpg', '/assets/bedroom4.jpg',
+    '/assets/conference%20room.jpg', '/assets/livingspace5.jpg', '/assets/bedroom5.jpg',
+    '/assets/executive%20office.jpg', '/assets/livingspace6.jpg', '/assets/official%20space.jpg',
+    '/assets/blinds.jpg', '/assets/wooden%20blinds.jpg', '/assets/zebra%20and%20roller%20blinds.jpg',
+    '/assets/classy%20wardrobe.jpg'
   ]
+  
+  // Project descriptions mapping - Updated with renamed images and video captions
+  const projectDescriptions = {
+    '/assets/Contemporary%20living%20suite.jpg': {
+      title: 'Contemporary Living Suite',
+      description: 'Modern living space featuring sophisticated furniture arrangements and premium lighting design'
+    },
+    '/assets/Serene%20Master%20Retreat.jpg': {
+      title: 'Serene Master Retreat',
+      description: 'Elegant bedroom sanctuary with luxury bedding and custom window treatments'
+    },
+    '/assets/Executive%20Dining%20Experience.jpg': {
+      title: 'Executive Living Space',
+      description: 'Luxurious living room featuring premium furniture, elegant lighting, and sophisticated design elements'
+    },
+    '/assets/Lighting%20design.jpg': {
+      title: 'Premium Lighting Design',
+      description: 'Custom lighting solutions creating perfect ambiance and mood'
+    },
+    '/assets/custom%20curtains.jpg': {
+      title: 'Custom Curtains Installation',
+      description: 'Bespoke window treatments with premium fabric selection and flawless installation'
+    },
+    '/assets/video.mp4': {
+      title: 'Project Showcase',
+      description: 'Behind-the-scenes look at our interior design process and craftsmanship'
+    },
+    '/assets/v1.mp4': {
+      title: 'Project Showcase',
+      description: 'Contemporary living space with elegant furniture and ambient lighting'
+    },
+    '/assets/v2.mp4': {
+      title: 'Project Showcase',
+      description: 'Master bedroom featuring premium materials and sophisticated styling'
+    },
+    '/assets/v3.mp4': {
+      title: 'Project Showcase',
+      description: 'Professional workspace with modern furniture and smart lighting systems'
+    },
+    '/assets/v4.mp4': {
+      title: 'Project Showcase',
+      description: 'Elegant dining area with custom furniture and premium finishes'
+    },
+    '/assets/v5.mp4': {
+      title: 'Project Showcase',
+      description: 'Modern kitchen design with premium appliances and custom cabinetry'
+    },
+    '/assets/v6.mp4': {
+      title: 'Project Showcase',
+      description: 'Complete living space transformation with modern furniture and lighting'
+    },
+    '/assets/v7.mp4': {
+      title: 'Project Showcase',
+      description: 'Luxury bedroom design with custom bedding and window treatments'
+    },
+    '/assets/v8.mp4': {
+      title: 'Project Showcase',
+      description: 'Professional office space with modern furniture and smart home integration'
+    },
+    '/assets/v9.mp4': {
+      title: 'Project Showcase',
+      description: 'Sophisticated dining space with premium furniture and elegant lighting'
+    },
+    '/assets/v10.mp4': {
+      title: 'Project Showcase',
+      description: 'Modern kitchen with premium appliances and custom finishes'
+    },
+    '/assets/v11.mp4': {
+      title: 'Project Showcase',
+      description: 'Contemporary living area with elegant furniture and ambient lighting'
+    },
+    '/assets/v12.mp4': {
+      title: 'Project Showcase',
+      description: 'Luxury master bedroom with premium materials and custom styling'
+    },
+    '/assets/v13.mp4': {
+      title: 'Project Showcase',
+      description: 'Professional office space transformation with modern design elements'
+    },
+    '/assets/v14.mp4': {
+      title: 'Project Showcase',
+      description: 'Elegant dining space with sophisticated furniture and premium finishes'
+    },
+    '/assets/v15.mp4': {
+      title: 'Project Showcase',
+      description: 'Complete kitchen renovation with modern appliances and custom cabinetry'
+    },
+    '/assets/v16.mp4': {
+      title: 'Project Showcase',
+      description: 'Contemporary living space with premium furniture and lighting design'
+    },
+    '/assets/v17.mp4': {
+      title: 'Project Showcase',
+      description: 'Premium interior design project showcasing our expertise and craftsmanship'
+    },
+    // Updated with renamed images and better captions
+    '/assets/bedroom.jpg': {
+      title: 'Luxury Bedroom Design',
+      description: 'Elegant bedroom sanctuary featuring premium materials, custom bedding, and sophisticated styling'
+    },
+    '/assets/bedroom1.jpg': {
+      title: 'Master Bedroom Suite',
+      description: 'Contemporary master bedroom with luxury finishes and custom window treatments'
+    },
+    '/assets/bedroom2.jpg': {
+      title: 'Modern Bedroom Design',
+      description: 'Sleek bedroom design with premium furniture and ambient lighting'
+    },
+    '/assets/bedroom3.jpg': {
+      title: 'Elegant Bedroom Space',
+      description: 'Sophisticated bedroom featuring custom furniture and premium materials'
+    },
+    '/assets/bedroom4.jpg': {
+      title: 'Contemporary Bedroom',
+      description: 'Modern bedroom design with elegant styling and premium finishes'
+    },
+    '/assets/bedroom5.jpg': {
+      title: 'Luxury Bedroom Retreat',
+      description: 'Premium bedroom sanctuary with custom design elements and sophisticated lighting'
+    },
+    '/assets/kitchen.jpg': {
+      title: 'Modern Kitchen Design',
+      description: 'Contemporary kitchen featuring premium appliances, custom cabinetry, and elegant finishes'
+    },
+    '/assets/kitchen1.jpg': {
+      title: 'Luxury Kitchen Space',
+      description: 'Sophisticated kitchen design with premium materials and modern appliances'
+    },
+    '/assets/kitchen2.jpg': {
+      title: 'Executive Kitchen',
+      description: 'High-end kitchen featuring custom cabinetry and premium finishes'
+    },
+    '/assets/livingspace.jpg': {
+      title: 'Contemporary Living Space',
+      description: 'Modern living area with elegant furniture and sophisticated lighting design'
+    },
+    '/assets/livingspace1.jpg': {
+      title: 'Elegant Living Room',
+      description: 'Sophisticated living space featuring premium furniture and custom styling'
+    },
+    '/assets/livingspace2.jpg': {
+      title: 'Modern Living Area',
+      description: 'Contemporary living room with luxury finishes and ambient lighting'
+    },
+    '/assets/livingspace3.jpg': {
+      title: 'Premium Living Space',
+      description: 'High-end living area featuring custom furniture and sophisticated design'
+    },
+    '/assets/livingspace4.jpg': {
+      title: 'Luxury Living Room',
+      description: 'Elegant living space with premium materials and modern styling'
+    },
+    '/assets/livingspace5.jpg': {
+      title: 'Contemporary Living Design',
+      description: 'Modern living space featuring sophisticated furniture and premium finishes'
+    },
+    '/assets/livingspace6.jpg': {
+      title: 'Executive Living Space',
+      description: 'High-end living area with custom design elements and luxury finishes'
+    },
+    '/assets/diningspace.jpg': {
+      title: 'Elegant Dining Space',
+      description: 'Sophisticated dining area with premium furniture and custom lighting'
+    },
+    '/assets/dinin%20space1.jpg': {
+      title: 'Modern Dining Area',
+      description: 'Contemporary dining space featuring elegant furniture and premium finishes'
+    },
+    '/assets/dining%20space2.jpg': {
+      title: 'Luxury Dining Room',
+      description: 'High-end dining space with sophisticated styling and custom elements'
+    },
+    '/assets/conference%20room.jpg': {
+      title: 'Executive Conference Room',
+      description: 'Professional conference space with modern furniture and smart technology integration'
+    },
+    '/assets/executive%20office.jpg': {
+      title: 'Executive Office Design',
+      description: 'Premium office space featuring custom furniture and sophisticated lighting'
+    },
+    '/assets/official%20space.jpg': {
+      title: 'Official Meeting Space',
+      description: 'Professional meeting room with modern design and premium finishes'
+    },
+    '/assets/blinds.jpg': {
+      title: 'Custom Blinds Installation',
+      description: 'Premium window treatments with elegant styling and perfect functionality'
+    },
+    '/assets/wooden%20blinds.jpg': {
+      title: 'Wooden Blinds Design',
+      description: 'Sophisticated wooden blinds installation with premium materials'
+    },
+    '/assets/zebra%20and%20roller%20blinds.jpg': {
+      title: 'Zebra & Roller Blinds',
+      description: 'Modern window treatments combining functionality with elegant design'
+    },
+    '/assets/classy%20wardrobe.jpg': {
+      title: 'Classy Wardrobe Design',
+      description: 'Luxury wardrobe featuring custom organization and premium materials'
+    },
+    '/assets/Office%20space.mp4': {
+      title: 'Office Space',
+      description: 'A professional and sophisticated office space designed for productivity and elegance'
+    },
+    '/assets/Conference%20space.mp4': {
+      title: 'Conference Space',
+      description: 'A modern conference space featuring premium furnishings and smart technology integration'
+    },
+    '/assets/Dinning%20and%20Solaret%20space.mp4': {
+      title: 'Dining and Solaret Space',
+      description: 'An elegant dining and solaret space showcasing sophisticated design and premium finishes'
+    },
+    '/assets/dinning%20space%201%20.mp4': {
+      title: 'Dining Space',
+      description: 'A beautiful dining space with modern furniture and elegant lighting design'
+    },
+    '/assets/Living%20Room%20Space.mp4': {
+      title: 'Living Room Space',
+      description: 'A beautiful living room space featuring elegant furniture and sophisticated design elements'
+    },
+    '/assets/Bedroom%20Space.mp4': {
+      title: 'Bedroom Space',
+      description: 'A top-notch bedroom showcasing luxury finishes and premium styling'
+    },
+    '/assets/Living%20Space.mp4': {
+      title: 'Living Space',
+      description: 'A stunning living room space featuring an automated curtain system that opens and closes with elegance'
+    },
+    '/assets/Living%20Space%201.mp4': {
+      title: 'Living Space 1',
+      description: 'A beautiful living room space showing great elegance and sophisticated design'
+    },
+    '/assets/Living%20Space%20Room.mp4': {
+      title: 'Living Space Room',
+      description: 'A stunning view of a living space featuring premium furniture and elegant design elements'
+    },
+    '/assets/3D%20Rendering.jpg': {
+      title: '3D Rendering',
+      description: 'High-quality 3D visualization showcasing photorealistic interior design concepts and material finishes'
+    },
+    '/assets/Modern%20Dining%20Experience.jpg': {
+      title: 'Modern Dining Experience',
+      description: 'Contemporary dining space featuring elegant furniture, sophisticated lighting, and premium finishes'
+    },
+    '/assets/Luxury%20Living%20space.jpg': {
+      title: 'Luxury Living Space',
+      description: 'Premium living area showcasing sophisticated design, elegant furniture, and luxury finishes'
+    }
+  }
+  
   const inferKind = (src) => src.endsWith('.mp4') ? 'video' : 'image'
   const getAdjacentSrc = (current, dir) => {
     const idx = Math.max(0, items.findIndex(i => i === current))
@@ -1080,47 +1595,81 @@ function Portfolio() {
       </h1>
       <p className="text-center text-gray-600 mt-3 max-w-3xl mx-auto">A curated selection of interiors we’ve crafted — curtains, lighting systems and bespoke styling across living, dining and bedroom spaces.</p>
 
-      {/* Portfolio grid - shuffled, no tags */}
-      {(() => {
-        const gridItems = [
-          '/assets/Contemporary%20living%20suite.jpg', '/assets/s10.jpg', '/assets/video.mp4', '/assets/Serene%20Master%20Retreat.jpg', '/assets/Executive%20Dining%20Experience.jpg',
-          '/assets/v2.mp4','/assets/v3.mp4','/assets/v4.mp4','/assets/v1.mp4',
-          '/assets/Lighting%20design.jpg','/assets/custom%20curtains.jpg',
-          '/assets/s2.jpg','/assets/s3.jpg','/assets/s4.jpg','/assets/s5.jpg','/assets/s6.jpg','/assets/s7.jpg','/assets/s8.jpg','/assets/s9.jpg','/assets/s10.jpg','/assets/s11.jpg','/assets/c4.jpg','/assets/c3.jpg','/assets/c1.jpg','/assets/d1.jpg','/assets/d2.jpg','/assets/d3.jpg','/assets/d4.jpg','/assets/d5.jpg'
-        ]
-        const shuffled = React.useMemo(() => [...gridItems].sort(() => Math.random() - 0.5), [])
-        return (
-          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {shuffled.map((src,i)=> (
-              <article key={`itm-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
-                <button className="relative w-full text-left" onClick={()=>openLightbox(src, src.endsWith('.mp4')?'video':'image')}>
-                  {src.endsWith('.mp4') ? (
-                    <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
-                  ) : (
-                    <img src={src} alt={`Portfolio ${i+1}`} className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-                  )}
-                </button>
-              </article>
-            ))}
-          </div>
-        )
-      })()}
+      {/* Portfolio grid - shuffled for variety */}
+      <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          '/assets/video.mp4', '/assets/Contemporary%20living%20suite.jpg', '/assets/Living%20Space.mp4',
+          '/assets/Serene%20Master%20Retreat.jpg', '/assets/v1.mp4', '/assets/Modern%20Dining%20Experience.jpg',
+          '/assets/Office%20space.mp4', '/assets/bedroom.jpg', '/assets/Lighting%20design.jpg',
+          '/assets/v3.mp4', '/assets/Executive%20Dining%20Experience.jpg', '/assets/kitchen.jpg',
+          '/assets/Conference%20space.mp4', '/assets/livingspace.jpg', '/assets/v6.mp4',
+          '/assets/Dinning%20and%20Solaret%20space.mp4', '/assets/custom%20curtains.jpg', '/assets/bedroom1.jpg',
+          '/assets/v8.mp4', '/assets/dinning%20space%201%20.mp4', '/assets/Living%20Room%20Space.mp4',
+          '/assets/3D%20Rendering.jpg', '/assets/v11.mp4', '/assets/Bedroom%20Space.mp4',
+          '/assets/livingspace1.jpg', '/assets/v13.mp4', '/assets/Living%20Space%201.mp4',
+          '/assets/kitchen1.jpg', '/assets/v16.mp4', '/assets/Living%20Space%20Room.mp4',
+          '/assets/livingspace2.jpg', '/assets/v17.mp4', '/assets/Luxury%20Living%20space.jpg',
+          '/assets/bedroom2.jpg', '/assets/diningspace.jpg', '/assets/livingspace3.jpg',
+          '/assets/kitchen2.jpg', '/assets/dinin%20space1.jpg', '/assets/bedroom3.jpg',
+          '/assets/livingspace4.jpg', '/assets/dining%20space2.jpg', '/assets/bedroom4.jpg',
+          '/assets/conference%20room.jpg', '/assets/livingspace5.jpg', '/assets/bedroom5.jpg',
+          '/assets/executive%20office.jpg', '/assets/livingspace6.jpg', '/assets/official%20space.jpg',
+          '/assets/blinds.jpg', '/assets/wooden%20blinds.jpg', '/assets/zebra%20and%20roller%20blinds.jpg',
+          '/assets/classy%20wardrobe.jpg'
+        ].map((src,i)=> {
+          const project = projectDescriptions[src] || {
+            title: `Project ${i+1}`,
+            description: 'Premium interior design project showcasing our expertise and craftsmanship'
+          }
+          return (
+            <article key={`itm-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
+              <button className="relative w-full text-left" onClick={()=>openLightbox(src, src.endsWith('.mp4')?'video':'image')}>
+                {src.endsWith('.mp4') ? (
+                  <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
+                ) : (
+                  <img src={src} alt={`Portfolio ${i+1}`} className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
+                )}
+                {/* Hover overlay with project description */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                  <div className="p-4 text-white">
+                    <h3 className="text-lg font-semibold mb-1">{project.title}</h3>
+                    <p className="text-sm text-white/90 leading-relaxed">{project.description}</p>
+                  </div>
+                </div>
+              </button>
+            </article>
+          )
+        })}
+      </div>
 
       {/* Hero-style video showcase */}
       <section className="mt-12">
         <div className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] h-[50vh] md:h-[75vh] overflow-hidden">
-          <VideoReveal src="/assets/v5.mp4" className="absolute inset-0 w-full h-full object-cover" />
+          <VideoReveal src="/assets/video.mp4" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/20" />
         </div>
         {/* Removed typing heading per request */}
         <div className="max-w-6xl mx-auto px-4 py-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {['/assets/v6.mp4','/assets/v7.mp4','/assets/v8.mp4'].map((src,i)=>(
-            <article key={`vmore-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow">
-              <button className="relative w-full" onClick={()=>openLightbox(src,'video')}>
-                <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
-              </button>
-            </article>
-          ))}
+          {['/assets/v1.mp4','/assets/v3.mp4','/assets/v6.mp4'].map((src,i)=> {
+            const project = projectDescriptions[src] || {
+              title: `Project Video ${i+1}`,
+              description: 'Premium interior design project showcasing our expertise and craftsmanship'
+            }
+            return (
+              <article key={`vmore-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow">
+                <button className="relative w-full" onClick={()=>openLightbox(src,'video')}>
+                  <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
+                  {/* Hover overlay with project description */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                    <div className="p-4 text-white">
+                      <h3 className="text-lg font-semibold mb-1">{project.title}</h3>
+                      <p className="text-sm text-white/90 leading-relaxed">{project.description}</p>
+                    </div>
+                  </div>
+                </button>
+              </article>
+            )
+          })}
         </div>
       </section>
 
