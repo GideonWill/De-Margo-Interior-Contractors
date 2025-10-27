@@ -925,7 +925,7 @@ function Testimonials() {
             quote: "From start to finish, Demargo was a partner in our success. Their creative insights and seamless execution made a significant impact on our home renovation project."
           },
           {
-            name: "Kwame Nkrumah",
+            name: "John Dramani Mahama",
             role: "Corporate Client - Flagstaff House",
             rating: 5,
             quote: "Demargo is hands down the best interior design company we've ever worked with. Their team understands the intricacies of commercial interior design and delivers exceptional results."
