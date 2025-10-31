@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 
@@ -178,6 +179,23 @@ function Home() {
     return () => revealObs.disconnect()
   }, [])
 
+  // Simple parallax for hero images and scroll-triggered background shift
+  useEffect(() => {
+    const onScroll = () => {
+      const parallaxEls = Array.from(document.querySelectorAll('[data-parallax]'))
+      const y = window.scrollY
+      parallaxEls.forEach((el) => {
+        const rect = el.getBoundingClientRect()
+        const offset = (rect.top + window.scrollY)
+        const delta = Math.max(-40, Math.min(40, (y - offset) * 0.08))
+        el.style.transform = `translateY(${delta}px) scale(1.05)`
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
     <main>
       <Seo
@@ -212,8 +230,10 @@ function Home() {
         <img
           src="/assets/Executive%20Dining%20Experience.jpg"
           alt="Luxury interior hero"
-          className="absolute inset-0 w-full h-full object-cover brightness-[0.8] transform scale-[0.98]"
-          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.8]"
+          ref={el=> (revealRefs.current[10]=el)}
+          style={{ transform: 'translateY(0px) scale(1.05)' }}
+          data-parallax
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-demargo-blue/60 via-black/40 to-demargo-orange/60" />
         <div className="relative z-10 max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-6 items-center w-full">
@@ -245,6 +265,58 @@ function Home() {
                 <li className="flex items-center gap-2"><span className="text-demargo-orange">●</span>Expert Installation Team</li>
                 <li className="flex items-center gap-2"><span className="text-demargo-orange">●</span>Custom Design Solutions</li>
               </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CAPTION BETWEEN HERO SECTIONS */}
+      <section className="py-8 bg-white">
+        <p className="text-center text-2xl md:text-4xl text-gray-900 font-extrabold tracking-wide font-serif">
+          An Honourable Award from the Ghana Armed Forces (GAP)
+        </p>
+      </section>
+
+      {/* AWARD HERO - Classy spotlight section (moved below main hero) */}
+      <section ref={el=>revealRefs.current[5]=el} className="reveal relative h-[76vh] md:h-[88vh] flex items-center overflow-hidden">
+        <img
+          src="/assets/award.jpg"
+          alt="Award Certificate - Ghana Armed Forces Staff College"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          ref={el=> (revealRefs.current[11]=el)}
+          style={{ transform: 'translateY(0px) scale(1.05)' }}
+          data-parallax
+        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-demargo-blue/40 to-demargo-orange/40" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center w-full">
+          <div className="text-white">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-sm">
+              <span>🏆</span>
+              <span className="tracking-wide">Award & Recognition</span>
+            </div>
+            <h2 className="mt-4 text-3xl md:text-5xl font-extrabold leading-tight max-w-2xl">
+              Excellence in Interior Design Services
+            </h2>
+            <p className="mt-4 text-white/85 max-w-xl">
+              Honored by the Ghana Armed Forces Staff College for outstanding interior design and renovation services.
+            </p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Link to="/awards" className="btn-primary btn-elevate">View Award</Link>
+              <Link to="/contact" className="btn-ghost btn-elevate">Start Your Project</Link>
+            </div>
+            <div className="mt-6 flex items-center gap-3 text-white/80">
+              <img src="/assets/GAF.jpg" alt="GAF Logo" className="w-10 h-10 rounded-full object-contain bg-white/90 p-1" />
+              <div className="text-sm">
+                <div className="font-semibold">Ghana Armed Forces Staff College</div>
+                <div>2024 • Government Service Excellence</div>
+              </div>
+            </div>
+          </div>
+          <div className="hidden md:flex justify-end">
+            <div className="panel-glass p-3 rounded-2xl max-w-md w-full">
+              <div className="aspect-[4/5] rounded-xl overflow-hidden bg-black/20">
+                <img src="/assets/award.jpg" alt="Award Certificate" className="w-full h-full object-cover" />
+              </div>
             </div>
           </div>
         </div>
@@ -552,6 +624,12 @@ function Fabrics() {
   const [lightbox, setLightbox] = useState({ open: false, src: '', kind: 'image' })
   const openLightbox = (src) => setLightbox({ open: true, src, kind: 'image' })
   const closeLightbox = () => setLightbox({ open: false, src: '', kind: 'image' })
+  useEffect(() => {
+    if (!lightbox.open) return
+    const onKeyDown = (e) => { if (e.key === 'Escape') closeLightbox() }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [lightbox.open])
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Fabric Display" description="Browse Demargo's curated fabric samples for curtains and upholstery." />
@@ -758,6 +836,12 @@ function Awards() {
   const [lightbox, setLightbox] = useState({ open: false, src: '', award: null })
   const openLightbox = (src, award) => setLightbox({ open: true, src, award })
   const closeLightbox = () => setLightbox({ open: false, src: '', award: null })
+  useEffect(() => {
+    if (!lightbox.open) return
+    const onKeyDown = (e) => { if (e.key === 'Escape') closeLightbox() }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [lightbox.open])
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
@@ -773,13 +857,16 @@ function Awards() {
             title: "Excellence in Interior Design Services",
             organization: "Ghana Armed Forces Staff College",
             year: "2024",
-            description: "Recognized for outstanding interior design and renovation services provided to military facilities and government buildings.",
+            description: "Presented in appreciation of generous support to the Ghana Armed Forces Command and Staff College, recognizing meaningful contribution and service.",
             category: "Government Service Excellence",
             logo: "/assets/GAF.jpg",
-            awardImage: "/assets/awards%20GAF.jpg"
+            awardImage: "/assets/award.jpg",
+            extraImages: ["/assets/awards%20GAF.jpg"]
           }
         ].map((award, i) => (
-          <div key={i} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow cursor-pointer" onClick={() => openLightbox(award.awardImage, award)}>
+          <div key={i} className="relative overflow-hidden bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow cursor-pointer" onClick={() => openLightbox(award.awardImage, award)}>
+            <div className="absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: `url(${award.awardImage})` }} />
+            <div className="relative">
             <div className="flex items-start justify-between mb-4">
               <div className="text-demargo-orange text-sm font-semibold">{award.category}</div>
               <div className="text-gray-500 text-sm">{award.year}</div>
@@ -792,6 +879,7 @@ function Awards() {
               </div>
             </div>
             <p className="text-gray-600 text-sm leading-relaxed">{award.description}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -817,10 +905,19 @@ function Awards() {
       {lightbox.open && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeLightbox}>
           <div className="max-w-6xl w-full" onClick={(e)=>e.stopPropagation()}>
-            <div className="relative w-full overflow-hidden rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row">
-              {/* Award Image on Left */}
-              <div className="w-full md:w-1/2 p-4 bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
-                <img src={lightbox.src} alt="Award Certificate" className="w-full h-auto object-contain max-h-[85vh] rounded-lg" />
+            <div className="relative w-full overflow-hidden rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row max-h-[90vh] overflow-y-auto overscroll-contain touch-pan-y">
+              {/* Award Images on Left */}
+              <div className="w-full md:w-1/2 p-4 bg-gradient-to-br from-slate-50 to-white overflow-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start min-w-0">
+                  <div className="w-full h-[70vh] rounded-lg bg-white shadow overflow-hidden flex items-center justify-center">
+                    <img src={lightbox.src} alt="Award Certificate" className="max-w-full max-h-full object-contain" />
+                  </div>
+                  {lightbox.award?.extraImages?.map((img, idx) => (
+                    <div key={idx} className="w-full h-[70vh] rounded-lg bg-white shadow overflow-hidden flex items-center justify-center">
+                      <img src={img} alt="Award Additional" className="max-w-full max-h-full object-contain" />
+                    </div>
+                  ))}
+                </div>
               </div>
               
               {/* Description on Right */}
@@ -1228,19 +1325,7 @@ export default function App() {
       <ScrollToTop />
       <div className="min-h-screen bg-slate-50 text-gray-900 overflow-x-hidden">
         <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/interior-design-services" element={<InteriorDesign />} />
-          <Route path="/3d-rendering" element={<Rendering3D />} />
-          <Route path="/fabrics" element={<Fabrics />} />
-          <Route path="/clientele" element={<Clientele />} />
-          <Route path="/testimonials" element={<Testimonials />} />
-          <Route path="/awards" element={<Awards />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
+        <AnimatedRoutes />
         <BackToTop />
         <ChatBot />
         <footer className="mt-0 bg-slate-900 text-white">
@@ -1306,10 +1391,42 @@ export default function App() {
   )
 }
 
+function AnimatedRoutes() {
+  const location = useLocation()
+  const page = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 }
+  }
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Home /></motion.div>} />
+        <Route path="/portfolio" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Portfolio /></motion.div>} />
+        <Route path="/services" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Services /></motion.div>} />
+        <Route path="/interior-design-services" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><InteriorDesign /></motion.div>} />
+        <Route path="/3d-rendering" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Rendering3D /></motion.div>} />
+        <Route path="/fabrics" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Fabrics /></motion.div>} />
+        <Route path="/clientele" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Clientele /></motion.div>} />
+        <Route path="/testimonials" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Testimonials /></motion.div>} />
+        <Route path="/awards" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Awards /></motion.div>} />
+        <Route path="/about" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><About /></motion.div>} />
+        <Route path="/contact" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Contact /></motion.div>} />
+      </Routes>
+    </AnimatePresence>
+  )
+}
+
 function Portfolio() {
   const [lightbox, setLightbox] = React.useState({ open: false, src: '', kind: 'image' })
   const openLightbox = (src, kind) => setLightbox({ open: true, src, kind })
   const closeLightbox = () => setLightbox({ open: false, src: '', kind: 'image' })
+  React.useEffect(()=>{
+    if (!lightbox.open) return
+    const onKeyDown = (e) => { if (e.key === 'Escape') closeLightbox() }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [lightbox.open])
   const items = [
     '/assets/video.mp4', '/assets/Contemporary%20living%20suite.jpg', '/assets/Living%20Space.mp4',
     '/assets/Serene%20Master%20Retreat.jpg', '/assets/v1.mp4', '/assets/Modern%20Dining%20Experience.jpg',
