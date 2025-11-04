@@ -1064,50 +1064,66 @@ function Testimonials() {
 }
 
 function Contact() {
+  const address = 'Demargo Contractors, HM8Q+XJR, Gbawe'
+  const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`
+  const dirHref = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`
   return (
-    <section className="max-w-6xl mx-auto px-4 py-16">
+    <section className="pb-0">
       <Seo title="Contact / Booking" description="Contact Demargo to schedule a consultation or request a quote." />
-      <h1 className="text-3xl md:text-5xl font-extrabold mb-3 text-center">Let's Create Something Amazing Together</h1>
-      <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Reach us via phone, WhatsApp, or email. You can also find our working hours and location below.</p>
-      <div className="grid lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl shadow border border-gray-100 p-6">
-            <div className="grid sm:grid-cols-3 gap-4">
-              <a href="tel:+233546478040" className="inline-flex items-center justify-center px-4 py-3 rounded-md bg-demargo-orange text-white font-medium hover:opacity-90">Call Us</a>
-              <a href="https://wa.me/233546478040" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center px-4 py-3 rounded-md border font-medium">WhatsApp Us</a>
-              <a href="mailto:demargo1987@gmail.com" className="inline-flex items-center justify-center px-4 py-3 rounded-md bg-demargo-blue text-white font-medium hover:opacity-90">Send Email</a>
-            </div>
-          </div>
-          <div className="mt-6 bg-white rounded-2xl shadow border border-gray-100 p-6">
-            <div className="text-lg font-semibold mb-3 flex items-center gap-2"><span>📍</span>Live Map</div>
-            <div className="rounded-xl overflow-hidden">
-              <iframe
-                title="Demargo Location"
-                src={`https://www.google.com/maps?q=${encodeURIComponent('Demargo Contractors, HM8Q+XJR, Gbawe')}&output=embed`}
-                className="w-full h-64"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
-            <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent('Demargo Contractors, HM8Q+XJR, Gbawe')}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 rounded-md bg-white border"
-            >
-              Get Directions
-            </a>
+
+      {/* Backdrop image with centered map overlay (not edge-to-edge) */}
+      <div className="w-full h-64 md:h-80 bg-center bg-cover" style={{backgroundImage: 'url(/assets/Serene%20Master%20Retreat.jpg)'}} />
+      <div className="-mt-12 md:-mt-16 relative z-10">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="rounded-xl overflow-hidden shadow-xl ring-1 ring-black/10 bg-white">
+            <iframe title="Demargo Location" src={mapSrc} className="w-full h-60 md:h-80" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
           </div>
         </div>
-        <aside className="bg-white rounded-2xl shadow border border-gray-100 p-6">
-          <div className="text-lg font-semibold mb-3">Contact Info</div>
-          <div className="text-sm text-gray-700 space-y-2">
-            <div>Phone: 0546478040</div>
-            <div>Email: demargo1987@gmail.com</div>
-            <div>Address: Demargo Contractors, HM8Q+XJR, Gbawe</div>
-            <div className="pt-2 border-t"><span className="font-medium">Hours:</span> Mon–Fri 8AM–5PM, Sat 8AM–4PM</div>
+      </div>
+
+      {/* Blue Contact banner */}
+      <div className="relative -mt-10 md:-mt-14">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="rounded-xl md:rounded-2xl bg-[#0f4560] text-white px-6 md:px-12 py-10 md:py-16 shadow-xl">
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-3">Contact</h2>
+            <p className="text-center text-white/90 mb-8">Send an email if you have questions about our services</p>
+            <div className="flex justify-center">
+              <a href="mailto:demargo1987@gmail.com" className="px-5 py-3 rounded-md border border-white/40 hover:bg-white hover:text-[#0f4560] transition">CONTACT US VIA FORM</a>
+            </div>
           </div>
-        </aside>
+        </div>
+      </div>
+
+      {/* Contact info tiles */}
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="grid md:grid-cols-3 gap-6 bg-white rounded-b-2xl md:rounded-b-2xl">
+          <div className="text-center px-6 py-10">
+            <div className="mx-auto mb-3 w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center">
+              <svg className="w-6 h-6 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l7 7-7 7-7-7 7-7z"/></svg>
+            </div>
+            <div className="font-medium mb-1">Where are we?</div>
+            <div className="text-sm text-gray-600">{address}</div>
+            <div className="text-sm text-gray-600">Accra - Ghana</div>
+            <a href={dirHref} target="_blank" rel="noreferrer" className="inline-block mt-3 text-demargo-blue underline">Directions</a>
+          </div>
+          <div className="text-center px-6 py-10 border-t md:border-t-0 md:border-l md:border-r">
+            <div className="mx-auto mb-3 w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center">
+              <svg className="w-6 h-6 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92V21a2 2 0 01-2.18 2A19.86 19.86 0 013 5.18 2 2 0 015 3h4.09a2 2 0 012 1.72c.12.89.3 1.76.54 2.6a2 2 0 01-.45 2.11L9.91 10.09a16 16 0 006 6l.66-1.27a2 2 0 012.11-.45c.84.24 1.71.42 2.6.54A2 2 0 0122 16.92z"/></svg>
+            </div>
+            <div className="font-medium mb-1">Call us</div>
+            <div className="mt-2 flex items-center justify-center gap-4 text-sm">
+              <a href="tel:+233546478040" className="underline">Phone</a>
+              <a href="https://wa.me/233546478040" target="_blank" rel="noreferrer" className="underline">WhatsApp</a>
+            </div>
+          </div>
+          <div className="text-center px-6 py-10">
+            <div className="mx-auto mb-3 w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center">
+              <svg className="w-6 h-6 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg>
+            </div>
+            <div className="font-medium mb-1">E-mail</div>
+            <a href="mailto:demargo1987@gmail.com" className="text-sm text-gray-600 underline">info@demargointeriors.com</a>
+          </div>
+        </div>
       </div>
     </section>
   )
