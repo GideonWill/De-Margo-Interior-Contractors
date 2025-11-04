@@ -1319,6 +1319,31 @@ function ChatBot() {
     </div>
   )
 }
+
+function InstagramHero() {
+  const items = [
+    { src: '/assets/dinin%20space1.jpg', alt: 'Dining Space' },
+    { src: '/assets/kitchen.jpg', alt: 'Kitchen' },
+    { src: '/assets/Lighting%20design.jpg', alt: 'Lighting Design' }
+  ]
+  const igUrl = 'https://instagram.com/demargo_blinds_curtains'
+  return (
+    <section aria-label="Instagram showcase" className="bg-black">
+      <div className="grid md:grid-cols-3">
+        {items.map((it, i) => (
+          <a key={i} href={igUrl} target="_blank" rel="noreferrer" className="group relative block h-[55vh] md:h-[70vh] overflow-hidden">
+            <img src={it.src} alt={it.alt} className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition duration-500 ease-out" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition duration-300" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
+              <img src="/assets/ig%20white%20logo.png" alt="Instagram" className="w-16 h-16 object-contain" />
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export default function App() {
   return (
     <Router>
@@ -1328,6 +1353,7 @@ export default function App() {
         <AnimatedRoutes />
         <BackToTop />
         <ChatBot />
+        <InstagramHero />
         <footer className="mt-0 bg-slate-900 text-white">
           <div className="max-w-6xl mx-auto px-4 py-14 grid md:grid-cols-4 gap-8">
             <div>
