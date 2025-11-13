@@ -905,18 +905,18 @@ function Awards() {
       {lightbox.open && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeLightbox}>
           <div className="max-w-6xl w-full" onClick={(e)=>e.stopPropagation()}>
-            <div className="relative w-full overflow-hidden rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row max-h-[90vh] overflow-y-auto overscroll-contain touch-pan-y">
+            <div className="relative w-full rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row max-h-[90vh] overflow-y-auto overscroll-contain touch-pan-y">
               {/* Award Images on Left */}
-              <div className="w-full md:w-1/2 p-4 bg-gradient-to-br from-slate-50 to-white overflow-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start min-w-0">
-                  <div className="w-full h-[70vh] rounded-lg bg-white shadow overflow-hidden flex items-center justify-center">
-                    <img src={lightbox.src} alt="Award Certificate" className="max-w-full max-h-full object-contain" />
-                  </div>
+              <div className="w-full md:w-1/2 p-4 bg-gradient-to-br from-slate-50 to-white">
+                <div className="flex flex-col md:grid md:grid-cols-2 gap-4 items-start min-w-0 max-h-[80vh] md:max-h-[85vh] overflow-y-auto pr-1">
                   {lightbox.award?.extraImages?.map((img, idx) => (
-                    <div key={idx} className="w-full h-[70vh] rounded-lg bg-white shadow overflow-hidden flex items-center justify-center">
-                      <img src={img} alt="Award Additional" className="max-w-full max-h-full object-contain" />
+                    <div key={idx} className="w-full rounded-lg bg-white shadow flex items-center justify-center">
+                      <img src={img} alt="Award Additional" className="w-full h-auto object-contain" />
                     </div>
                   ))}
+                  <div className="w-full rounded-lg bg-white shadow flex items-center justify-center">
+                    <img src={lightbox.src} alt="Award Certificate" className="w-full h-auto object-contain" />
+                  </div>
                 </div>
               </div>
               
