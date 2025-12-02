@@ -862,16 +862,31 @@ function About() {
 
       <div className="mt-12">
         <h2 className="text-2xl font-bold text-center mb-6">Leadership</h2>
-        <div className="grid sm:grid-cols-2 md:grid-cols-5 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[
             { name: 'Mr Jeffery Ofosu-Hene Appenteng', role: 'Chief Executive Officer', img: '/assets/Mr%20Jeffery%20Ofosu-Hene%20Appenteng.jpg' },
+            { name: 'Mrs Babara Ofusu-Hene Appenteng', role: 'Chief Operating Officer', img: '/assets/Mrs%20Babara%20Ofusu-Hene%20Appenteng.jpg' },
             { name: 'Blessing Kesinornu', role: 'Managing Director', img: '/assets/Kessy.jpg' },
             { name: 'George Nettey', role: 'Head of Media', img: '/assets/George.jpg' },
             { name: 'Micheal Martey', role: 'Head of Installation', img: '/assets/MDK.jpg' },
             { name: 'Samuel Nettey', role: 'Head of Measurements', img: '/assets/Omar.jpg' }
           ].map((m, i) => (
             <figure key={i} className="rounded-xl overflow-hidden bg-white text-center shadow-sm">
-              <img src={m.img} alt={m.name} className="w-full h-60 md:h-52 object-contain md:object-cover bg-slate-100" />
+              <img
+                src={m.img}
+                alt={m.name}
+                className={`w-full h-60 md:h-52 bg-slate-100 ${i === 0 ? 'object-contain md:object-cover' :
+                    i === 5 ? 'object-contain' :
+                      'object-cover'
+                  }`}
+                style={
+                  i === 0 || i === 5 ? {} :
+                    i === 1 ? { objectPosition: 'center 20%' } : // Mrs Babara
+                      i === 2 ? { objectPosition: 'center 25%' } : // Blessing
+                        i === 3 ? { objectPosition: 'center 30%' } : // George
+                          { objectPosition: 'center 25%' } // Micheal
+                }
+              />
               <figcaption className="px-3 py-2">
                 <div className="font-semibold">{m.name}</div>
                 <div className="text-sm text-gray-600">{m.role}</div>
