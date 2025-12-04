@@ -864,8 +864,8 @@ function About() {
         <h2 className="text-2xl font-bold text-center mb-6">Leadership</h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[
-            { name: 'Mr Jeffery Ofosu-Hene Appenteng', role: 'Chief Executive Officer', img: '/assets/Mr%20Jeffery%20Ofosu-Hene%20Appenteng.jpg' },
-            { name: 'Mrs Babara Ofusu-Hene Appenteng', role: 'Chief Operating Officer', img: '/assets/Mrs%20Babara%20Ofusu-Hene%20Appenteng.jpg' },
+            { name: 'Mr Jeffery Ofosuhene Apenteng', role: 'Chief Executive Officer', img: '/assets/Mr%20Jeffery%20Ofosu-Hene%20Appenteng.jpg' },
+            { name: 'Mrs Barbara Apenteng', role: 'Chief Operating Officer', img: '/assets/Mrs%20Babara%20Ofusu-Hene%20Appenteng.jpg' },
             { name: 'Blessing Kesinornu', role: 'Managing Director', img: '/assets/Kessy.jpg' },
             { name: 'George Nettey', role: 'Head of Media', img: '/assets/George.jpg' },
             { name: 'Micheal Martey', role: 'Head of Installation', img: '/assets/MDK.jpg' },
@@ -876,8 +876,8 @@ function About() {
                 src={m.img}
                 alt={m.name}
                 className={`w-full h-60 md:h-52 bg-slate-100 ${i === 0 ? 'object-contain md:object-cover' :
-                    i === 5 ? 'object-contain' :
-                      'object-cover'
+                  i === 5 ? 'object-contain' :
+                    'object-cover'
                   }`}
                 style={
                   i === 0 || i === 5 ? {} :
