@@ -525,75 +525,79 @@ function Services() {
   // uses shared allServices defined above
 
   return (
-    <section className="max-w-6xl mx-auto px-4 py-16">
-      <Seo title="Services" description="Detailed list of Demargo services including curtains, renovations, woodwork and smart home systems." />
+    <>
+      <section className="max-w-6xl mx-auto px-4 py-16">
+        <Seo title="Services" description="Detailed list of Demargo services including curtains, renovations, woodwork and smart home systems." />
 
-      {/* Top hero row */}
-      <div className="grid md:grid-cols-2 gap-8 items-center">
-        <div className="bg-orange-50 rounded-2xl p-6 md:p-10">
-          <div className="text-sm text-gray-600">Demargo Services</div>
-          <h1 className="text-3xl md:text-5xl font-extrabold mt-2 leading-tight">
-            <span className="text-demargo-orange">Interior Design</span>
-            <span className="text-gray-800">, </span>
-            <span className="text-demargo-blue">Renovation & More in Ghana</span>
-          </h1>
+        {/* Top hero row */}
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="bg-orange-50 rounded-2xl p-6 md:p-10">
+            <div className="text-sm text-gray-600">Demargo Services</div>
+            <h1 className="text-3xl md:text-5xl font-extrabold mt-2 leading-tight">
+              <span className="text-demargo-orange">Interior Design</span>
+              <span className="text-gray-800">, </span>
+              <span className="text-demargo-blue">Renovation & More in Ghana</span>
+            </h1>
+          </div>
+          <div className="rounded-2xl overflow-hidden shadow-sm">
+            <img src={heroImg} alt="Services hero" className="w-full h-64 md:h-72 object-cover" />
+          </div>
         </div>
-        <div className="rounded-2xl overflow-hidden shadow-sm">
-          <img src={heroImg} alt="Services hero" className="w-full h-64 md:h-72 object-cover" />
+
+        {/* Intro and first row */}
+        <div className="mt-10 grid md:grid-cols-3 gap-6 items-start">
+          <article className="bg-white rounded-2xl p-6 shadow-sm">
+            <div className="text-sm text-gray-500">Demargo Services</div>
+            <h2 className="text-2xl font-semibold mt-2">Our Services</h2>
+            <p className="text-gray-700 mt-3">We provide expert interior design and renovation services across Ghana. From homes to offices, we create beautiful, functional spaces with style and precision — serving Accra, Kumasi, Tema, Takoradi, Cape Coast, and beyond.</p>
+          </article>
+          {allServices.slice(0, 2).map((s, i) => (
+            <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+              <div className="text-demargo-blue mb-2">{s.icon}</div>
+              <h3 className="font-semibold">{s.title}</h3>
+              <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
+            </article>
+          ))}
         </div>
-      </div>
 
-      {/* Intro and first row */}
-      <div className="mt-10 grid md:grid-cols-3 gap-6 items-start">
-        <article className="bg-white rounded-2xl p-6 shadow-sm">
-          <div className="text-sm text-gray-500">Demargo Services</div>
-          <h2 className="text-2xl font-semibold mt-2">Our Services</h2>
-          <p className="text-gray-700 mt-3">We provide expert interior design and renovation services across Ghana. From homes to offices, we create beautiful, functional spaces with style and precision — serving Accra, Kumasi, Tema, Takoradi, Cape Coast, and beyond.</p>
-        </article>
-        {allServices.slice(0, 2).map((s, i) => (
-          <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
-            <div className="text-demargo-blue mb-2">{s.icon}</div>
-            <h3 className="font-semibold">{s.title}</h3>
-            <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
-          </article>
-        ))}
-      </div>
+        {/* Remaining grid */}
+        <div className="mt-6 grid md:grid-cols-3 gap-6">
+          {allServices.slice(2, 8).map((s, i) => (
+            <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+              <div className="text-demargo-blue mb-2">{s.icon}</div>
+              <h3 className="font-semibold">{s.title}</h3>
+              <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
+            </article>
+          ))}
+        </div>
 
-      {/* Remaining grid */}
-      <div className="mt-6 grid md:grid-cols-3 gap-6">
-        {allServices.slice(2, 8).map((s, i) => (
-          <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
-            <div className="text-demargo-blue mb-2">{s.icon}</div>
-            <h3 className="font-semibold">{s.title}</h3>
-            <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
-          </article>
-        ))}
-      </div>
+        {/* Cleaning full width (anchors feature video below) */}
+        <div className="mt-6">
+          {allServices.slice(8, 9).map((s, i) => (
+            <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+              <div className="text-demargo-blue mb-2">{s.icon}</div>
+              <h3 className="font-semibold">{s.title}</h3>
+              <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
 
-      {/* Cleaning full width (anchors feature video below) */}
-      <div className="mt-6">
-        {allServices.slice(8, 9).map((s, i) => (
-          <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
-            <div className="text-demargo-blue mb-2">{s.icon}</div>
-            <h3 className="font-semibold">{s.title}</h3>
-            <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
-          </article>
-        ))}
-      </div>
-
-      {/* Hero video highlight */}
-      <section className="relative mt-10 rounded-2xl overflow-hidden shadow-lg">
+      {/* Hero video highlight - full width */}
+      <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] mt-10 overflow-hidden">
         <VideoReveal src="/assets/v19.mp4" className="w-full h-[60vh] md:h-[75vh] object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         <div className="absolute inset-0 flex items-end md:items-center">
-          <div className="px-6 py-8 md:py-12 md:px-10 text-white max-w-2xl space-y-3">
-            <div className="badge-glass">Feature Project</div>
-            <h3 className="text-3xl md:text-4xl font-extrabold leading-tight">Double-height curtain showcase</h3>
-            <p className="text-white/85 text-lg">Tailored charcoal panels and sheer layering framing a statement chandelier — a glimpse of our craftsmanship in motion.</p>
+          <div className="max-w-6xl mx-auto px-4 md:px-6 w-full">
+            <div className="px-6 py-8 md:py-12 md:px-10 text-white max-w-2xl space-y-3">
+              <div className="badge-glass">Feature Project</div>
+              <h3 className="text-3xl md:text-4xl font-extrabold leading-tight">Double-height curtain showcase</h3>
+              <p className="text-white/85 text-lg">Tailored charcoal panels and sheer layering framing a statement chandelier — a glimpse of our craftsmanship in motion.</p>
+            </div>
           </div>
         </div>
       </section>
-    </section>
+    </>
   )
 }
 
