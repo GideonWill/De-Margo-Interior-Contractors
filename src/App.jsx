@@ -570,7 +570,7 @@ function Services() {
         ))}
       </div>
 
-      {/* Cleaning full width */}
+      {/* Cleaning full width (anchors feature video below) */}
       <div className="mt-6">
         {allServices.slice(8, 9).map((s, i) => (
           <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
@@ -580,6 +580,19 @@ function Services() {
           </article>
         ))}
       </div>
+
+      {/* Hero video highlight */}
+      <section className="relative mt-10 rounded-2xl overflow-hidden shadow-lg">
+        <VideoReveal src="/assets/v19.mp4" className="w-full h-[60vh] md:h-[75vh] object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        <div className="absolute inset-0 flex items-end md:items-center">
+          <div className="px-6 py-8 md:py-12 md:px-10 text-white max-w-2xl space-y-3">
+            <div className="badge-glass">Feature Project</div>
+            <h3 className="text-3xl md:text-4xl font-extrabold leading-tight">Double-height curtain showcase</h3>
+            <p className="text-white/85 text-lg">Tailored charcoal panels and sheer layering framing a statement chandelier — a glimpse of our craftsmanship in motion.</p>
+          </div>
+        </div>
+      </section>
     </section>
   )
 }
@@ -1350,14 +1363,14 @@ function ChatBot() {
   }, [messages, typing, open])
 
   return (
-    <div className="fixed bottom-20 right-6 z-50">
+    <div className="fixed z-50 right-4 sm:right-6 bottom-4 sm:bottom-20 left-4 sm:left-auto pointer-events-none">
       {open && (
-        <div className="mb-3 w-80 max-w-[90vw] rounded-2xl bg-white shadow-2xl border overflow-hidden transition-all duration-300 ease-out transform origin-bottom-right">
+        <div className="mb-3 w-[min(92vw,360px)] rounded-2xl bg-white shadow-2xl border overflow-hidden transition-all duration-300 ease-out transform origin-bottom-right pointer-events-auto">
           <div className="px-4 py-3 bg-gradient-to-r from-demargo-orange/90 to-demargo-blue/90 text-white flex items-center justify-between">
             <div className="font-semibold">Demargo Assistant</div>
             <button onClick={() => setOpen(false)} className="opacity-90 hover:opacity-100">×</button>
           </div>
-          <div ref={listRef} className="max-h-80 overflow-y-auto p-3 space-y-2 text-sm">
+          <div ref={listRef} className="max-h-[70vh] overflow-y-auto p-3 space-y-2 text-sm">
             {messages.map((m, i) => (
               <div key={i} className={m.role === 'bot' ? 'text-gray-800' : 'text-right'}>
                 {m.type === 'actions' ? (
@@ -1398,7 +1411,7 @@ function ChatBot() {
           </div>
         </div>
       )}
-      <button onClick={() => setOpen(v => !v)} className="rounded-full w-12 h-12 shadow-xl bg-gradient-to-tr from-demargo-orange to-demargo-blue text-white flex items-center justify-center transition-transform duration-300 ease-out hover:scale-105">
+      <button onClick={() => setOpen(v => !v)} className="pointer-events-auto rounded-full w-12 h-12 shadow-xl bg-gradient-to-tr from-demargo-orange to-demargo-blue text-white flex items-center justify-center transition-transform duration-300 ease-out hover:scale-105 ml-auto block">
         <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 00-9 9 9 9 0 009 9h6l3 3v-6a9 9 0 00-9-15z" /></svg>
       </button>
     </div>
@@ -1556,7 +1569,7 @@ function Portfolio() {
     '/assets/conference%20room.jpg', '/assets/livingspace5.jpg', '/assets/bedroom5.jpg',
     '/assets/executive%20office.jpg', '/assets/livingspace6.jpg', '/assets/official%20space.jpg',
     '/assets/blinds.jpg', '/assets/wooden%20blinds.jpg', '/assets/zebra%20and%20roller%20blinds.jpg',
-    '/assets/classy%20wardrobe.jpg'
+    '/assets/classy%20wardrobe.jpg', '/assets/Hall%20Space.jpg', '/assets/v18.mp4', '/assets/v19.mp4'
   ]
 
   // Project descriptions mapping - Updated with renamed images and video captions
@@ -1758,6 +1771,18 @@ function Portfolio() {
       title: 'Classy Wardrobe Design',
       description: 'Luxury wardrobe featuring custom organization and premium materials'
     },
+    '/assets/Hall%20Space.jpg': {
+      title: 'Grand Hall Drapery',
+      description: 'Double-height hall featuring layered sheers and slate drapery framing a statement chandelier'
+    },
+    '/assets/v18.mp4': {
+      title: 'Curtain Reveal Showcase',
+      description: 'Flowing automated drapery opening to unveil a softly lit living space'
+    },
+    '/assets/v19.mp4': {
+      title: 'Luxury Curtain Installation',
+      description: 'Two-story feature window dressed with tailored charcoal panels and sheer center layering'
+    },
     '/assets/Office%20space.mp4': {
       title: 'Office Space',
       description: 'A professional and sophisticated office space designed for productivity and elegance'
@@ -1843,7 +1868,7 @@ function Portfolio() {
           '/assets/conference%20room.jpg', '/assets/livingspace5.jpg', '/assets/bedroom5.jpg',
           '/assets/executive%20office.jpg', '/assets/livingspace6.jpg', '/assets/official%20space.jpg',
           '/assets/blinds.jpg', '/assets/wooden%20blinds.jpg', '/assets/zebra%20and%20roller%20blinds.jpg',
-          '/assets/classy%20wardrobe.jpg'
+          '/assets/classy%20wardrobe.jpg', '/assets/Hall%20Space.jpg', '/assets/v18.mp4', '/assets/v19.mp4'
         ].map((src, i) => {
           const project = projectDescriptions[src] || {
             title: `Project ${i + 1}`,
