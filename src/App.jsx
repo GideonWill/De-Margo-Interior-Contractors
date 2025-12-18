@@ -324,6 +324,20 @@ function Home() {
         </div>
       </section>
 
+      {/* NEWLY COMPLETED PROJECT HERO SECTION */}
+      <section ref={el => revealRefs.current[12] = el} className="reveal relative h-[76vh] md:h-[88vh] overflow-hidden bg-slate-900 flex items-start justify-center">
+        <VideoReveal 
+          src="/assets/Aesthetical%20living%20space.mp4" 
+          className="absolute inset-0 w-full h-full object-cover" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-black/30 to-black/50" />
+        <div className="relative z-10 w-full pt-8 md:pt-12">
+          <p className="text-center text-xl md:text-3xl lg:text-4xl text-white font-serif font-light tracking-wider italic drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+            newly completed project, check it out!
+          </p>
+        </div>
+      </section>
+
       {/* CAPTION BETWEEN HERO SECTIONS */}
       <section className="py-8 bg-white">
         <p className="text-center text-2xl md:text-4xl text-gray-900 font-extrabold tracking-wide font-serif">
@@ -1556,7 +1570,7 @@ function Portfolio() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [lightbox.open])
   const items = [
-    '/assets/video.mp4', '/assets/Contemporary%20living%20suite.jpg', '/assets/Living%20Space.mp4',
+    '/assets/Aesthetical%20living%20space.mp4', '/assets/video.mp4', '/assets/Contemporary%20living%20suite.jpg', '/assets/Living%20Space.mp4',
     '/assets/Serene%20Master%20Retreat.jpg', '/assets/v1.mp4', '/assets/Modern%20Dining%20Experience.jpg',
     '/assets/Office%20space.mp4', '/assets/bedroom.jpg', '/assets/Lighting%20design.jpg',
     '/assets/v3.mp4', '/assets/Executive%20Dining%20Experience.jpg', '/assets/kitchen.jpg',
@@ -1834,6 +1848,10 @@ function Portfolio() {
     '/assets/Luxury%20Living%20space.jpg': {
       title: 'Luxury Living Space',
       description: 'Premium living area showcasing sophisticated design, elegant furniture, and luxury finishes'
+    },
+    '/assets/Aesthetical%20living%20space.mp4': {
+      title: 'Aesthetical Living Space',
+      description: 'A beautifully designed living space showcasing elegant aesthetics, premium furniture, and sophisticated interior design elements'
     }
   }
 
@@ -1855,7 +1873,7 @@ function Portfolio() {
       {/* Portfolio grid - shuffled for variety */}
       <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
-          '/assets/video.mp4', '/assets/Contemporary%20living%20suite.jpg', '/assets/Living%20Space.mp4',
+          '/assets/Aesthetical%20living%20space.mp4', '/assets/video.mp4', '/assets/Contemporary%20living%20suite.jpg', '/assets/Living%20Space.mp4',
           '/assets/Serene%20Master%20Retreat.jpg', '/assets/v1.mp4', '/assets/Modern%20Dining%20Experience.jpg',
           '/assets/Office%20space.mp4', '/assets/bedroom.jpg', '/assets/Lighting%20design.jpg',
           '/assets/v3.mp4', '/assets/Executive%20Dining%20Experience.jpg', '/assets/kitchen.jpg',
