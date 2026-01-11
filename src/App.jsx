@@ -326,9 +326,9 @@ function Home() {
 
       {/* NEWLY COMPLETED PROJECT HERO SECTION */}
       <section ref={el => revealRefs.current[12] = el} className="reveal relative h-[76vh] md:h-[88vh] overflow-hidden bg-slate-900 flex items-start justify-center">
-        <VideoReveal 
-          src="/assets/Aesthetical%20living%20space.mp4" 
-          className="absolute inset-0 w-full h-full object-cover" 
+        <VideoReveal
+          src="/assets/newweek.mp4"
+          className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-black/30 to-black/50" />
         <div className="relative z-10 w-full pt-8 md:pt-12">
