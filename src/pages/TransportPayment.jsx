@@ -37,6 +37,13 @@ function TransportPayment() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+
+        // If we already have a project for this form and it's the same fee, just re-open the modal
+        if (createdProject && Number(createdProject.totalAmount) === Number(formData.transportFee)) {
+            setShowPaymentModal(true)
+            return
+        }
+
         setLoading(true)
         setError(null)
 
@@ -47,7 +54,7 @@ function TransportPayment() {
                 throw new Error('Please enter a valid transport fee amount')
             }
 
-            // Create project in Firebase
+            // Create project in Firestore
             const projectData = {
                 clientName: formData.clientName.trim(),
                 clientEmail: formData.clientEmail.trim().toLowerCase(),
@@ -125,14 +132,15 @@ function TransportPayment() {
             console.error('Error updating database after payment:', err)
         }
 
-        // Hide success message after 4 seconds
+        // Hide success message after 3 seconds and redirect home
         setTimeout(() => {
             setShowSuccess(false)
-        }, 4000)
+            navigate('/') // Redirect to home page
+        }, 3000)
     }
 
-    const handlePaymentClose = () => {
-        if (isSuccessRef.current) {
+    const handlePaymentClose = (isSilent = false) => {
+        if (isSilent || isSuccessRef.current) {
             setShowPaymentModal(false)
             isSuccessRef.current = false
             return

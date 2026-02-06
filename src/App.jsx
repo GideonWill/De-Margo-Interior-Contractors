@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
-// import TransportPayment from './pages/TransportPayment'
+import TransportPayment from './pages/TransportPayment'
 
 function Seo({ title, description, image, type }) {
   const loc = window.location.pathname
@@ -148,7 +148,7 @@ function Navbar() {
           <li><NavLink to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
           <li><NavLink to="/awards" className={linkClass}>Awards</NavLink></li>
           <li><NavLink to="/about" className={linkClass}>About</NavLink></li>
-          {/* <li><NavLink to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li> */}
+          <li><NavLink to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li>
           <li><NavLink to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white transition-colors ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
         </ul>
       </nav>
@@ -164,7 +164,7 @@ function Navbar() {
               <li><NavLink onClick={() => setOpen(false)} to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/awards" className={linkClass}>Awards</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/about" className={linkClass}>About</NavLink></li>
-              {/* <li><NavLink onClick={() => setOpen(false)} to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li> */}
+              <li><NavLink onClick={() => setOpen(false)} to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white inline-block ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
             </ul>
           </div>
@@ -330,13 +330,13 @@ function Home() {
       {/* NEWLY COMPLETED PROJECT HERO SECTION */}
       <section ref={el => revealRefs.current[12] = el} className="reveal relative h-[76vh] md:h-[88vh] overflow-hidden bg-slate-900 flex items-start justify-center">
         <VideoReveal
-          src="/assets/newweek.mp4"
+          src="/assets/v21.mp4"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-black/30 to-black/50" />
         <div className="relative z-10 w-full pt-8 md:pt-12">
           <p className="text-center text-xl md:text-3xl lg:text-4xl text-white font-serif font-light tracking-wider italic drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-            newly completed project, check it out!
+            De Margo Always the Best
           </p>
         </div>
       </section>
@@ -1564,7 +1564,7 @@ function AnimatedRoutes() {
         <Route path="/testimonials" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Testimonials /></motion.div>} />
         <Route path="/awards" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Awards /></motion.div>} />
         <Route path="/about" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><About /></motion.div>} />
-        {/* <Route path="/transport-payment" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><TransportPayment /></motion.div>} /> */}
+        <Route path="/transport-payment" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><TransportPayment /></motion.div>} />
         <Route path="/contact" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Contact /></motion.div>} />
       </Routes>
     </AnimatePresence>

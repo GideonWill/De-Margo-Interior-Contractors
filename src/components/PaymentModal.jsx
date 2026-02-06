@@ -16,6 +16,7 @@ function PaymentModal({ project, onClose, onSuccess }) {
         amount: Math.round(project.balance * 100), // Paystack expects amount in kobo (pesewas)
         publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
         currency: 'GHS',
+        channels: ['mobile_money', 'card'],
         metadata: {
             projectId: project.id,
             projectTitle: project.projectTitle,
@@ -42,6 +43,10 @@ function PaymentModal({ project, onClose, onSuccess }) {
         if (onSuccess) {
             onSuccess(reference)
         }
+        // Force close local modal state if any
+        if (onClose) {
+            onClose()
+        }
     }
 
     const onPaymentClose = () => {
@@ -49,9 +54,24 @@ function PaymentModal({ project, onClose, onSuccess }) {
     }
 
     const initializePayment = usePaystackPayment(config)
+    const [isProcessing, setIsProcessing] = useState(false)
 
     const handlePayment = () => {
-        initializePayment(onPaymentSuccess, onPaymentClose)
+        setIsProcessing(true)
+        initializePayment(
+            (ref) => {
+                setIsProcessing(false) // Reset loading if it returns (though onSuccess usually closes the modal)
+                onPaymentSuccess(ref)
+            },
+            () => {
+                console.log('Payment popup closed')
+                setIsProcessing(false)
+            }
+        )
+        // Close the modal immediately so the user doesn't see it while the popup is opening/active
+        if (onClose) {
+            onClose(true)
+        }
     }
 
     return (
@@ -139,10 +159,10 @@ function PaymentModal({ project, onClose, onSuccess }) {
                         </button>
                         <button
                             onClick={handlePayment}
-                            disabled={loading}
-                            className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-demargo-orange to-demargo-blue text-white font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={loading || isProcessing}
+                            className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-demargo-orange to-demargo-blue text-white font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                         >
-                            {loading ? 'Processing...' : `Pay GHS ${project.balance.toLocaleString('en-GH', { minimumFractionDigits: 2 })}`}
+                            {loading || isProcessing ? 'Opening...' : `Pay GHS ${project.balance.toLocaleString('en-GH', { minimumFractionDigits: 2 })}`}
                         </button>
                     </div>
                 </div>
