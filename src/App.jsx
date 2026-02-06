@@ -1273,7 +1273,7 @@ function BackToTop() {
     <button
       onClick={scrollTop}
       aria-label="Back to top"
-      className={`fixed bottom-6 right-6 z-50 rounded-full bg-gradient-to-tr from-demargo-blue to-demargo-orange text-white shadow-xl w-12 h-12 flex items-center justify-center hover:opacity-95 active:scale-95 transition-all duration-300 ease-out transform ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3 pointer-events-none'}`}
+      className={`fixed bottom-24 right-6 sm:bottom-6 z-50 rounded-full bg-gradient-to-tr from-demargo-blue to-demargo-orange text-white shadow-xl w-12 h-12 flex items-center justify-center hover:opacity-95 active:scale-95 transition-all duration-300 ease-out transform ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3 pointer-events-none'}`}
     >
       <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></svg>
     </button>
@@ -1965,7 +1965,7 @@ function Portfolio() {
           <div className="max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
             <div className="relative w-full overflow-hidden rounded-lg bg-black">
               {lightbox.kind === 'video' ? (
-                <video src={lightbox.src || '/assets/video.mp4'} controls autoPlay muted className="w-full h-[70vh] object-contain bg-black" />
+                <video src={lightbox.src || '/assets/video.mp4'} autoPlay muted loop playsInline className="w-full h-[70vh] object-contain bg-black" />
               ) : (
                 <img src={lightbox.src} alt="preview" className="w-full h-[70vh] object-contain bg-black" />
               )}
