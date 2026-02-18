@@ -331,7 +331,7 @@ function Home() {
       {/* NEWLY COMPLETED PROJECT HERO SECTION */}
       <section ref={el => revealRefs.current[12] = el} className="reveal relative h-[76vh] md:h-[88vh] overflow-hidden bg-slate-900 flex items-start justify-center">
         <VideoReveal
-          src="/assets/v21.mp4"
+          src="/assets/v22.mp4"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-black/30 to-black/50" />
@@ -1600,7 +1600,7 @@ function Portfolio() {
     '/assets/conference%20room.jpg', '/assets/livingspace5.jpg', '/assets/bedroom5.jpg',
     '/assets/executive%20office.jpg', '/assets/livingspace6.jpg', '/assets/official%20space.jpg',
     '/assets/blinds.jpg', '/assets/wooden%20blinds.jpg', '/assets/zebra%20and%20roller%20blinds.jpg',
-    '/assets/classy%20wardrobe.jpg', '/assets/Hall%20Space.jpg', '/assets/v18.mp4', '/assets/v19.mp4'
+    '/assets/classy%20wardrobe.jpg', '/assets/Hall%20Space.jpg', '/assets/v18.mp4', '/assets/v19.mp4', '/assets/v22.mp4'
   ]
 
   // Project descriptions mapping - Updated with renamed images and video captions
@@ -1865,6 +1865,10 @@ function Portfolio() {
     '/assets/Aesthetical%20living%20space.mp4': {
       title: 'Aesthetical Living Space',
       description: 'A beautifully designed living space showcasing elegant aesthetics, premium furniture, and sophisticated interior design elements'
+    },
+    '/assets/v22.mp4': {
+      title: 'Demargo Elite Showcase',
+      description: 'Our latest masterpiece featuring high-end interior finishes and premium craftsmanship'
     }
   }
 
@@ -1903,7 +1907,7 @@ function Portfolio() {
           '/assets/conference%20room.jpg', '/assets/livingspace5.jpg', '/assets/bedroom5.jpg',
           '/assets/executive%20office.jpg', '/assets/livingspace6.jpg', '/assets/official%20space.jpg',
           '/assets/blinds.jpg', '/assets/wooden%20blinds.jpg', '/assets/zebra%20and%20roller%20blinds.jpg',
-          '/assets/classy%20wardrobe.jpg', '/assets/Hall%20Space.jpg', '/assets/v18.mp4', '/assets/v19.mp4'
+          '/assets/classy%20wardrobe.jpg', '/assets/Hall%20Space.jpg', '/assets/v18.mp4', '/assets/v19.mp4', '/assets/v22.mp4'
         ].map((src, i) => {
           const project = projectDescriptions[src] || {
             title: `Project ${i + 1}`,
