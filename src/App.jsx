@@ -1922,10 +1922,11 @@ function Portfolio() {
                   <img src={src} alt={`Portfolio ${i + 1}`} className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
                 )}
                 {/* Hover overlay with project description */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                  <div className="p-4 text-white">
-                    <h3 className="text-lg font-semibold mb-1">{project.title}</h3>
-                    <p className="text-sm text-white/90 leading-relaxed">{project.description}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-orange-600/95 via-orange-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                  <div className="w-full px-4 py-4">
+                    <p className="text-xs font-semibold tracking-widest uppercase text-white/80 mb-1">DEMARGO INTERIOR</p>
+                    <h3 className="text-base font-bold text-white flex items-center gap-1">{project.title} <span className="text-lg">›</span></h3>
+                    <p className="text-sm text-white/90 leading-relaxed mt-1">{project.description}</p>
                   </div>
                 </div>
               </button>
@@ -1952,10 +1953,11 @@ function Portfolio() {
                 <button className="relative w-full" onClick={() => openLightbox(src, 'video')}>
                   <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
                   {/* Hover overlay with project description */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                    <div className="p-4 text-white">
-                      <h3 className="text-lg font-semibold mb-1">{project.title}</h3>
-                      <p className="text-sm text-white/90 leading-relaxed">{project.description}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-orange-600/95 via-orange-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                    <div className="w-full px-4 py-4">
+                      <p className="text-xs font-semibold tracking-widest uppercase text-white/80 mb-1">DEMARGO INTERIOR</p>
+                      <h3 className="text-base font-bold text-white flex items-center gap-1">{project.title} <span className="text-lg">›</span></h3>
+                      <p className="text-sm text-white/90 leading-relaxed mt-1">{project.description}</p>
                     </div>
                   </div>
                 </button>
