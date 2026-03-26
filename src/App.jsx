@@ -1189,18 +1189,21 @@ function Contact() {
       <div className="relative -mt-10 md:-mt-14">
         <div className="max-w-6xl mx-auto px-4">
           <div className="rounded-xl md:rounded-2xl bg-[#0f4560] text-white px-6 md:px-12 py-10 md:py-16 shadow-xl">
-            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-3">Contact</h2>
-            <p className="text-center text-white/90 mb-8">Send an email if you have questions about our services</p>
-            <div className="flex justify-center">
-              <a href="mailto:demargo1987@gmail.com" className="px-5 py-3 rounded-md border border-white/40 hover:bg-white hover:text-[#0f4560] transition">CONTACT US VIA FORM</a>
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-3">Book a Consultation</h2>
+            <p className="text-center text-white/90 mb-8 max-w-2xl mx-auto">Schedule a consultation directly via Calendly to get started.</p>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <a href="https://calendly.com/gideonogunu/demargo-booking-consultation" target="_blank" rel="noreferrer" className="px-6 py-3 rounded-md bg-demargo-orange font-semibold hover:bg-white text-white hover:text-[#e46424] transition group relative overflow-hidden flex items-center shadow-lg hover:-translate-y-0.5">
+                <span className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition"></span>
+                <span className="relative">BOOK</span>
+              </a>
             </div>
           </div>
         </div>
       </div>
 
       {/* Contact info tiles */}
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-6 bg-white rounded-b-2xl md:rounded-b-2xl">
+      <div className="max-w-md mx-auto px-4">
+        <div className="bg-white rounded-b-2xl md:rounded-b-2xl">
           <div className="text-center px-6 py-10">
             <div className="mx-auto mb-3 w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center">
               <svg className="w-6 h-6 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l7 7-7 7-7-7 7-7z" /></svg>
@@ -1209,23 +1212,6 @@ function Contact() {
             <div className="text-sm text-gray-600">{address}</div>
             <div className="text-sm text-gray-600">Accra - Ghana</div>
             <a href={dirHref} target="_blank" rel="noreferrer" className="inline-block mt-3 text-demargo-blue underline">Directions</a>
-          </div>
-          <div className="text-center px-6 py-10 border-t md:border-t-0 md:border-l md:border-r">
-            <div className="mx-auto mb-3 w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center">
-              <svg className="w-6 h-6 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92V21a2 2 0 01-2.18 2A19.86 19.86 0 013 5.18 2 2 0 015 3h4.09a2 2 0 012 1.72c.12.89.3 1.76.54 2.6a2 2 0 01-.45 2.11L9.91 10.09a16 16 0 006 6l.66-1.27a2 2 0 012.11-.45c.84.24 1.71.42 2.6.54A2 2 0 0122 16.92z" /></svg>
-            </div>
-            <div className="font-medium mb-1">Call us</div>
-            <div className="mt-2 flex items-center justify-center gap-4 text-sm">
-              <a href="tel:+233546478040" className="underline">Phone</a>
-              <a href="https://wa.me/233546478040" target="_blank" rel="noreferrer" className="underline">WhatsApp</a>
-            </div>
-          </div>
-          <div className="text-center px-6 py-10">
-            <div className="mx-auto mb-3 w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center">
-              <svg className="w-6 h-6 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16v16H4z" /><path d="M22 6l-10 7L2 6" /></svg>
-            </div>
-            <div className="font-medium mb-1">E-mail</div>
-            <a href="mailto:demargo1987@gmail.com" className="text-sm text-gray-600 underline">info@demargointeriors.com</a>
           </div>
         </div>
       </div>
