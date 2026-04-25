@@ -285,15 +285,20 @@ function Home() {
       </Helmet>
       {/* HERO - Updated to Serene Master Retreat with Demargo theme */}
       <section className="relative h-[82vh] md:h-[90vh] flex items-center overflow-hidden bg-slate-900">
-        <img
-          src="/assets/Executive%20Dining%20Experience.jpg"
-          alt="Luxury interior hero"
-          className="absolute inset-0 w-full h-full object-cover brightness-[0.8]"
-          ref={el => (revealRefs.current[10] = el)}
+        <video
+          src="/assets/newweek.mp4"
+          muted
+          playsInline
+          loop
+          autoPlay
+          className="absolute inset-0 w-full h-full object-cover"
+          ref={el => {
+            videoRef.current = el
+            revealRefs.current[10] = el
+          }}
           style={{ transform: 'translateY(0px) scale(1.05)' }}
           data-parallax
         />
-        <div className="absolute inset-0 bg-gradient-to-tr from-demargo-blue/60 via-black/40 to-demargo-orange/60" />
         <div className="relative z-10 max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-6 items-center w-full">
           <div className="animate-fade-in">
             <div className="badge-glass mb-4"><span>★</span><span>Premium Interior Design Since 2018</span></div>
@@ -336,7 +341,7 @@ function Home() {
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-black/30 to-black/50" />
         <div className="relative z-10 w-full pt-8 md:pt-12">
-          <p className="text-center text-xl md:text-3xl lg:text-4xl text-white font-serif font-light tracking-wider italic drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+          <p className="text-center text-xl md:text-3xl lg:text-4xl text-white font-light tracking-wider drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
             De Margo Always the Best
           </p>
         </div>
@@ -344,7 +349,7 @@ function Home() {
 
       {/* CAPTION BETWEEN HERO SECTIONS */}
       <section className="py-8 bg-white">
-        <p className="text-center text-2xl md:text-4xl text-gray-900 font-extrabold tracking-wide font-serif">
+        <p className="text-center text-2xl md:text-4xl text-gray-900 font-extrabold tracking-wide">
           An Honourable Award from the Ghana Armed Forces (GAP)
         </p>
       </section>
@@ -1146,7 +1151,7 @@ function Testimonials() {
                 </svg>
               ))}
             </div>
-            <blockquote className="text-gray-700 mb-4 italic">"{testimonial.quote}"</blockquote>
+            <blockquote className="text-gray-700 mb-4">"{testimonial.quote}"</blockquote>
             <div className="border-t pt-4">
               <div className="font-semibold text-gray-900">{testimonial.name}</div>
               <div className="text-sm text-gray-600">{testimonial.role}</div>
@@ -1406,9 +1411,9 @@ function ChatBot() {
             {typing && (
               <div className="text-gray-800">
                 <span className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100">
-                  <span className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                  <span className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{ animationDelay: '120ms' }}></span>
-                  <span className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{ animationDelay: '240ms' }}></span>
+                  <span className="w-2 h-2 chatbot-icon bg-gray-500 animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-2 h-2 chatbot-icon bg-gray-500 animate-bounce" style={{ animationDelay: '120ms' }}></span>
+                  <span className="w-2 h-2 chatbot-icon bg-gray-500 animate-bounce" style={{ animationDelay: '240ms' }}></span>
                 </span>
               </div>
             )}
@@ -1427,7 +1432,7 @@ function ChatBot() {
           </div>
         </div>
       )}
-      <button onClick={() => setOpen(v => !v)} className="pointer-events-auto rounded-full w-12 h-12 shadow-xl bg-gradient-to-tr from-demargo-orange to-demargo-blue text-white flex items-center justify-center transition-transform duration-300 ease-out hover:scale-105 ml-auto block">
+      <button onClick={() => setOpen(v => !v)} className="pointer-events-auto chatbot-icon w-12 h-12 shadow-xl bg-gradient-to-tr from-demargo-orange to-demargo-blue text-white flex items-center justify-center transition-transform duration-300 ease-out hover:scale-105 ml-auto block">
         <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 00-9 9 9 9 0 009 9h6l3 3v-6a9 9 0 00-9-15z" /></svg>
       </button>
     </div>
