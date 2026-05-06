@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
+import Suspended from './components/Suspended'
 // import TransportPayment from './pages/TransportPayment'
 
 function Seo({ title, description, image, type }) {
@@ -1464,6 +1465,12 @@ function InstagramHero() {
 }
 
 export default function App() {
+  const isSuspended = true // Set to false to bring the site back
+
+  if (isSuspended) {
+    return <Suspended />
+  }
+
   return (
     <Router>
       <ScrollToTop />
