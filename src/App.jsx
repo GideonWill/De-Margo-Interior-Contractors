@@ -333,27 +333,6 @@ function Home() {
         </div>
       </section>
 
-      {/* NEWLY COMPLETED PROJECT HERO SECTION */}
-      <section ref={el => revealRefs.current[12] = el} className="reveal relative h-[76vh] md:h-[88vh] overflow-hidden bg-slate-900 flex items-start justify-center">
-        <VideoReveal
-          src="/assets/v22.mp4"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-black/30 to-black/50" />
-        <div className="relative z-10 w-full pt-8 md:pt-12">
-          <p className="text-center text-xl md:text-3xl lg:text-4xl text-white font-light tracking-wider drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-            De Margo Always the Best
-          </p>
-        </div>
-      </section>
-
-      {/* CAPTION BETWEEN HERO SECTIONS */}
-      <section className="py-8 bg-white">
-        <p className="text-center text-2xl md:text-4xl text-gray-900 font-extrabold tracking-wide">
-          An Honourable Award from the Ghana Armed Forces (GAP)
-        </p>
-      </section>
-
       {/* AWARD HERO - Classy spotlight section (moved below main hero) */}
       <section ref={el => revealRefs.current[5] = el} className="reveal relative h-[76vh] md:h-[88vh] flex items-center overflow-hidden">
         <img
@@ -433,16 +412,26 @@ function Home() {
         <div className="text-demargo-orange font-semibold text-center">OUR SERVICES</div>
         <h2 className="text-4xl md:text-5xl font-extrabold text-center mt-2">Comprehensive Interior Solutions</h2>
         <p className="text-center text-gray-600 mt-3 max-w-3xl mx-auto">From custom curtains to sophisticated lighting, we offer complete interior design services that transform your space into a masterpiece of luxury and functionality.</p>
-        <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-4 gap-8 card-perspective-container">
           {[
             { title: 'Living Room Setting', img: '/assets/hero%20pic.jpg' },
             { title: 'Lighting System', img: '/assets/Lighting%20design.jpg' },
             { title: 'Bedroom Styling', img: '/assets/custom%20curtains.jpg' },
             { title: '3D Rendering', img: '/assets/3D%20Rendering.jpg' }
           ].map((s, i) => (
-            <Link to="/portfolio" key={i} className="rounded-2xl overflow-hidden bg-white border card-glow block">
-              <img src={s.img} alt={s.title} className="w-full h-64 object-cover" />
-            </Link>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: 10 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: i * 0.1 }}
+              style={{ transformOrigin: 'bottom center' }}
+              className="perspective-card"
+            >
+              <Link to="/portfolio" className="rounded-2xl overflow-hidden bg-white border card-glow block h-full">
+                <img src={s.img} alt={s.title} className="w-full h-64 object-cover transition-transform duration-700 hover:scale-105" />
+              </Link>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -476,13 +465,25 @@ function Home() {
             { img: '/assets/e2.jpg', tag: 'PREMIUM INTERIOR', title: 'Elegant Living Space', idx: 5 }
           ].map((item, i) => (
             <div key={i} className={`grid md:grid-cols-2 gap-8 items-center ${i % 2 ? '' : 'md:flex-row-reverse'}`}>
-              <div className="panel-glass p-2 card-glow order-1 md:order-none">
+              <motion.div
+                initial={{ opacity: 0, x: i % 2 === 0 ? -50 : 50, y: 30, scale: 0.95 }}
+                whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="panel-glass p-2 card-glow order-1 md:order-none cursor-pointer"
+              >
                 <div className="aspect-[16/11] rounded-2xl overflow-hidden bg-slate-200 relative">
-                  <img src={item.img} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
+                  <img src={item.img} alt={item.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
                   <div className="absolute left-4 top-4 px-4 py-2 rounded-full bg-demargo-orange text-white font-semibold">2024</div>
                 </div>
-              </div>
-              <div className="order-2 md:order-none">
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: i % 2 === 0 ? 50 : -50, y: 30 }}
+                whileInView={{ opacity: 1, x: 0, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+                className="order-2 md:order-none"
+              >
                 <div className="text-demargo-orange font-semibold">{item.tag}</div>
                 <h3 className="text-3xl md:text-4xl font-extrabold mt-2">{item.title}</h3>
                 <p className="mt-3 text-gray-700">{i === 0 ? 'Stunning modern living space featuring sophisticated furniture arrangements, premium textiles, and carefully curated lighting that creates an atmosphere of understated luxury.' : i === 1 ? 'Elegant bedroom sanctuary featuring luxury bedding, custom window treatments, and thoughtful lighting design that promotes rest and relaxation.' : i === 2 ? 'Sophisticated dining space showcasing modern furniture, elegant ceiling treatments, and premium finishes that create the perfect atmosphere for memorable gatherings.' : i === 3 ? 'Contemporary dining room featuring modern furniture, elegant lighting fixtures, and premium finishes that create an atmosphere of luxury and sophistication.' : 'Spacious living area with modern furniture arrangements, premium lighting design, and thoughtful interior styling that creates a welcoming and elegant atmosphere.'}</p>
@@ -496,7 +497,7 @@ function Home() {
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5l7 7-7 7" /></svg>
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             </div>
           ))}
         </div>
@@ -517,13 +518,21 @@ function Home() {
         <div className="max-w-6xl mx-auto px-4 py-16">
           <h2 className="text-center text-4xl md:text-5xl font-extrabold">What Our Clients Say</h2>
           <p className="text-center text-white/80 mt-3 max-w-3xl mx-auto">Don't just take our word for it. Here's what our satisfied clients have to say about their Demargo experience.</p>
-          <div className="mt-10 grid md:grid-cols-2 gap-6">
+          <div className="mt-10 grid md:grid-cols-2 gap-6 card-perspective-container">
             {[{ n: 'Adom Bright', r: 'Homeowner', q: 'Demargo transformed our living space beyond our expectations. The attention to detail and quality of work is exceptional.' }, { n: 'Ayi Homes', r: 'Developer', q: 'Professional, timely, and absolutely stunning results. Our spaces now reflect the quality of our brand.' }].map((t, i) => (
-              <figure key={i} className="panel-glass p-6 text-white">
+              <motion.figure
+                key={i}
+                initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: i * 0.15 }}
+                style={{ transformOrigin: 'bottom center' }}
+                className="panel-glass p-6 text-white perspective-card"
+              >
                 <div className="text-demargo-orange mb-2">★★★★★</div>
                 <blockquote className="text-white/90">“{t.q}”</blockquote>
                 <figcaption className="mt-4 text-sm text-white/80">{t.n}<span className="mx-1">•</span>{t.r}</figcaption>
-              </figure>
+              </motion.figure>
             ))}
           </div>
         </div>
@@ -568,40 +577,71 @@ function Services() {
         </div>
 
         {/* Intro and first row */}
-        <div className="mt-10 grid md:grid-cols-3 gap-6 items-start">
-          <article className="bg-white rounded-2xl p-6 shadow-sm">
+        <div className="mt-10 grid md:grid-cols-3 gap-6 items-start card-perspective-container">
+          <motion.article 
+            initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            style={{ transformOrigin: 'bottom center' }}
+            className="bg-white rounded-2xl p-6 shadow-sm perspective-card"
+          >
             <div className="text-sm text-gray-500">Demargo Services</div>
             <h2 className="text-2xl font-semibold mt-2">Our Services</h2>
             <p className="text-gray-700 mt-3">We provide expert interior design and renovation services across Ghana. From homes to offices, we create beautiful, functional spaces with style and precision — serving Accra, Kumasi, Tema, Takoradi, Cape Coast, and beyond.</p>
-          </article>
+          </motion.article>
           {allServices.slice(0, 2).map((s, i) => (
-            <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+            <motion.article 
+              key={i} 
+              initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (i + 1) * 0.15 }}
+              style={{ transformOrigin: 'bottom center' }}
+              className="bg-white rounded-2xl p-6 shadow-sm perspective-card"
+            >
               <div className="text-demargo-blue mb-2">{s.icon}</div>
               <h3 className="font-semibold">{s.title}</h3>
               <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
-            </article>
+            </motion.article>
           ))}
         </div>
 
         {/* Remaining grid */}
-        <div className="mt-6 grid md:grid-cols-3 gap-6">
+        <div className="mt-6 grid md:grid-cols-3 gap-6 card-perspective-container">
           {allServices.slice(2, 8).map((s, i) => (
-            <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+            <motion.article 
+              key={i} 
+              initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (i % 3) * 0.15 }}
+              style={{ transformOrigin: 'bottom center' }}
+              className="bg-white rounded-2xl p-6 shadow-sm perspective-card"
+            >
               <div className="text-demargo-blue mb-2">{s.icon}</div>
               <h3 className="font-semibold">{s.title}</h3>
               <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
-            </article>
+            </motion.article>
           ))}
         </div>
 
         {/* Cleaning full width (anchors feature video below) */}
         <div className="mt-6">
           {allServices.slice(8, 9).map((s, i) => (
-            <article key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+            <motion.article 
+              key={i} 
+              initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 5 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              style={{ transformOrigin: 'bottom center' }}
+              className="bg-white rounded-2xl p-6 shadow-sm"
+            >
               <div className="text-demargo-blue mb-2">{s.icon}</div>
               <h3 className="font-semibold">{s.title}</h3>
               <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
-            </article>
+            </motion.article>
           ))}
         </div>
       </section>
@@ -731,7 +771,7 @@ function Fabrics() {
         <span className="text-demargo-orange">Fabric</span> <span className="text-demargo-blue">Display</span>
       </h1>
       <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">Browse a curated selection of premium fabrics. Tap any tile to preview in a larger view.</p>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 card-perspective-container">
         {[
           { file: '1.png', code: 'MILAN-7' },
           { file: '2.png', code: '8021-04' },
@@ -740,7 +780,15 @@ function Fabrics() {
           { file: '5.png', code: 'MILAN-10' },
           { file: '6.png', code: '8021-09' }
         ].map((f, i) => (
-          <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100">
+          <motion.figure
+            key={i}
+            initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (i % 3) * 0.1 }}
+            style={{ transformOrigin: 'bottom center' }}
+            className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 perspective-card"
+          >
             <button className="relative w-full block" onClick={() => openLightbox(`/assets/${f.file}`)}>
               <img src={`/assets/${f.file}`} alt={`Fabric ${f.code}`} className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
             </button>
@@ -748,7 +796,7 @@ function Fabrics() {
               <span className="font-medium">Fabric Code</span>
               <span className="px-2 py-1 rounded bg-orange-50 text-demargo-orange text-xs">{f.code}</span>
             </figcaption>
-          </figure>
+          </motion.figure>
         ))}
       </div>
       <div className="text-center mt-8">
@@ -824,12 +872,20 @@ function Clientele() {
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
           <span className="text-demargo-orange">Government</span> <span className="text-demargo-blue">Projects</span>
         </h2>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6 card-perspective-container">
           {governmentProjects.map((c, i) => (
-            <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5">
+            <motion.figure
+              key={i}
+              initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (i % 3) * 0.1 }}
+              style={{ transformOrigin: 'bottom center' }}
+              className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5 perspective-card"
+            >
               <img src={c.img} alt={c.name} className="w-full aspect-[4/3] object-cover" />
               <figcaption className="px-4 py-3 text-sm text-gray-800 font-medium text-center bg-slate-50 border-t">{c.name}</figcaption>
-            </figure>
+            </motion.figure>
           ))}
         </div>
       </div>
@@ -839,12 +895,20 @@ function Clientele() {
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
           <span className="text-demargo-orange">Residential</span> <span className="text-demargo-blue">Projects</span>
         </h2>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6 card-perspective-container">
           {residentialProjects.map((c, i) => (
-            <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5">
+            <motion.figure
+              key={i}
+              initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (i % 3) * 0.1 }}
+              style={{ transformOrigin: 'bottom center' }}
+              className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5 perspective-card"
+            >
               <img src={c.img} alt={c.name} className="w-full aspect-[4/3] object-cover" />
               <figcaption className="px-4 py-3 text-sm text-gray-800 font-medium text-center bg-slate-50 border-t">{c.name}</figcaption>
-            </figure>
+            </motion.figure>
           ))}
         </div>
       </div>
@@ -854,12 +918,20 @@ function Clientele() {
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
           <span className="text-demargo-orange">Commercial</span> <span className="text-demargo-blue">Projects</span>
         </h2>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6 card-perspective-container">
           {commercialProjects.map((c, i) => (
-            <figure key={i} className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5">
+            <motion.figure
+              key={i}
+              initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (i % 3) * 0.1 }}
+              style={{ transformOrigin: 'bottom center' }}
+              className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 hover:-translate-y-0.5 perspective-card"
+            >
               <img src={c.img} alt={c.name} className="w-full aspect-[4/3] object-cover" />
               <figcaption className="px-4 py-3 text-sm text-gray-800 font-medium text-center bg-slate-50 border-t">{c.name}</figcaption>
-            </figure>
+            </motion.figure>
           ))}
         </div>
       </div>
@@ -902,36 +974,42 @@ function About() {
 
       <div className="mt-12">
         <h2 className="text-2xl font-bold text-center mb-6">Leadership</h2>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 card-perspective-container">
           {[
             { name: 'Mr Jeffery Ofosuhene Apenteng', role: 'Chief Executive Officer', img: '/assets/Mr%20Jeffery%20Ofosu-Hene%20Appenteng.jpg' },
             { name: 'Mrs Barbara Apenteng', role: 'Chief Operating Officer', img: '/assets/Mrs%20Babara%20Ofusu-Hene%20Appenteng.jpg' },
-            { name: 'Blessing Kesinornu', role: 'Managing Director', img: '/assets/Kessy.jpg' },
             { name: 'George Nettey', role: 'Head of Media', img: '/assets/George.jpg' },
             { name: 'Micheal Martey', role: 'Head of Installation', img: '/assets/MDK.jpg' },
             { name: 'Samuel Nettey', role: 'Head of Measurements', img: '/assets/Omar.jpg' }
           ].map((m, i) => (
-            <figure key={i} className="rounded-xl overflow-hidden bg-white text-center shadow-sm">
+            <motion.figure
+              key={i}
+              initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (i % 3) * 0.1 }}
+              style={{ transformOrigin: 'bottom center' }}
+              className="rounded-xl overflow-hidden bg-white text-center shadow-sm perspective-card"
+            >
               <img
                 src={m.img}
                 alt={m.name}
                 className={`w-full h-60 md:h-52 bg-slate-100 ${i === 0 ? 'object-contain md:object-cover' :
-                  i === 5 ? 'object-contain' :
+                  i === 4 ? 'object-contain' :
                     'object-cover'
                   }`}
                 style={
-                  i === 0 || i === 5 ? {} :
+                  i === 0 || i === 4 ? {} :
                     i === 1 ? { objectPosition: 'center 20%' } : // Mrs Babara
-                      i === 2 ? { objectPosition: 'center 25%' } : // Blessing
-                        i === 3 ? { objectPosition: 'center 30%' } : // George
-                          { objectPosition: 'center 25%' } // Micheal
+                      i === 2 ? { objectPosition: 'center 30%' } : // George
+                        { objectPosition: 'center 25%' } // Micheal
                 }
               />
               <figcaption className="px-3 py-2">
                 <div className="font-semibold">{m.name}</div>
                 <div className="text-sm text-gray-600">{m.role}</div>
               </figcaption>
-            </figure>
+            </motion.figure>
           ))}
         </div>
       </div>
@@ -1086,7 +1164,7 @@ function Testimonials() {
       </h1>
       <p className="text-center text-gray-600 mb-10 max-w-3xl mx-auto">Don't just take our word for it. Here's what our satisfied clients have to say about their Demargo experience.</p>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 card-perspective-container">
         {[
           {
             name: "Adom Bright",
@@ -1143,7 +1221,15 @@ function Testimonials() {
             quote: "Our experience with Demargo was nothing short of phenomenal. They approached our project with creativity, expertise, and a deep understanding of our industry needs."
           }
         ].map((testimonial, i) => (
-          <div key={i} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (i % 3) * 0.1 }}
+            style={{ transformOrigin: 'bottom center' }}
+            className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow perspective-card"
+          >
             <div className="flex items-center mb-4">
               {[...Array(testimonial.rating)].map((_, j) => (
                 <svg key={j} className="w-5 h-5 text-demargo-orange" fill="currentColor" viewBox="0 0 20 20">
@@ -1156,7 +1242,7 @@ function Testimonials() {
               <div className="font-semibold text-gray-900">{testimonial.name}</div>
               <div className="text-sm text-gray-600">{testimonial.role}</div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
@@ -1265,7 +1351,7 @@ function BackToTop() {
     <button
       onClick={scrollTop}
       aria-label="Back to top"
-      className={`fixed bottom-24 right-6 sm:bottom-6 z-50 rounded-full bg-gradient-to-tr from-demargo-blue to-demargo-orange text-white shadow-xl w-12 h-12 flex items-center justify-center hover:opacity-95 active:scale-95 transition-all duration-300 ease-out transform ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3 pointer-events-none'}`}
+      className={`fixed bottom-24 right-6 sm:bottom-6 z-50 chatbot-icon border-2 border-demargo-orange text-demargo-orange bg-transparent shadow-lg w-12 h-12 flex items-center justify-center hover:text-demargo-blue hover:border-demargo-blue hover:bg-slate-100/30 backdrop-blur-xs active:scale-95 transition-all duration-300 ease-out transform ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3 pointer-events-none'}`}
     >
       <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></svg>
     </button>
@@ -1384,7 +1470,7 @@ function ChatBot() {
   }, [messages, typing, open])
 
   return (
-    <div className="fixed z-50 right-4 sm:right-6 bottom-4 sm:bottom-20 left-4 sm:left-auto pointer-events-none">
+    <div className="fixed z-50 right-4 sm:right-6 bottom-4 sm:bottom-20 left-4 sm:left-auto pointer-events-none flex flex-col items-end">
       {open && (
         <div className="mb-3 w-[min(92vw,360px)] rounded-2xl bg-white shadow-2xl border overflow-hidden transition-all duration-300 ease-out transform origin-bottom-right pointer-events-auto">
           <div className="px-4 py-3 bg-gradient-to-r from-demargo-orange/90 to-demargo-blue/90 text-white flex items-center justify-between">
@@ -1432,9 +1518,35 @@ function ChatBot() {
           </div>
         </div>
       )}
-      <button onClick={() => setOpen(v => !v)} className="pointer-events-auto chatbot-icon w-12 h-12 shadow-xl bg-gradient-to-tr from-demargo-orange to-demargo-blue text-white flex items-center justify-center transition-transform duration-300 ease-out hover:scale-105 ml-auto block">
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 00-9 9 9 9 0 009 9h6l3 3v-6a9 9 0 00-9-15z" /></svg>
-      </button>
+      <div className="relative pointer-events-auto flex flex-col items-end">
+        {!open && (
+          <button
+            onClick={() => setOpen(true)}
+            className="mb-3 bg-white text-slate-800 text-xs font-semibold px-3 py-1.5 shadow-lg flex items-center gap-2 whitespace-nowrap chatbot-talk-bubble border border-slate-100 hover:border-slate-200 transition-all cursor-pointer pointer-events-auto select-none animate-bounce-slow"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 chatbot-icon"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 chatbot-icon"></span>
+            </span>
+            <span>Talk to me</span>
+            {/* Speech bubble arrow/tail pointing down to the logo */}
+            <div className="absolute bottom-[-5px] right-6 w-2.5 h-2.5 bg-white border-r border-b border-slate-100 rotate-45"></div>
+          </button>
+        )}
+        <button
+          onClick={() => setOpen(v => !v)}
+          className="chatbot-3d-button w-14 h-14 relative block"
+          aria-label="Toggle Chat"
+        >
+          <img
+            src="/assets/Demargo%20Logo.jpg"
+            alt="Demargo Chatbot"
+            className="w-full h-full object-cover rounded-full"
+          />
+          {/* 3D Glossy reflection layer */}
+          <div className="absolute inset-0 rounded-full chatbot-icon bg-gradient-to-tr from-transparent via-white/5 to-white/30 pointer-events-none" />
+        </button>
+      </div>
     </div>
   )
 }
@@ -1879,7 +1991,7 @@ function Portfolio() {
       <p className="text-center text-gray-600 mt-3 max-w-3xl mx-auto">A curated selection of interiors we’ve crafted — curtains, lighting systems and bespoke styling across living, dining and bedroom spaces.</p>
 
       {/* Portfolio grid - shuffled for variety */}
-      <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6 card-perspective-container">
         {[
           '/assets/Aesthetical%20living%20space.mp4', '/assets/video.mp4', '/assets/Contemporary%20living%20suite.jpg', '/assets/Living%20Space.mp4',
           '/assets/Serene%20Master%20Retreat.jpg', '/assets/v1.mp4', '/assets/Modern%20Dining%20Experience.jpg',
@@ -1905,7 +2017,15 @@ function Portfolio() {
             description: 'Premium interior design project showcasing our expertise and craftsmanship'
           }
           return (
-            <article key={`itm-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover">
+            <motion.article
+              key={`itm-${i}`}
+              initial={{ opacity: 0, y: 45, scale: 0.96, rotateX: 6 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: (i % 3) * 0.08 }}
+              style={{ transformOrigin: 'bottom center' }}
+              className="group relative rounded-2xl overflow-hidden bg-white card-glow card-hover perspective-card"
+            >
               <button className="relative w-full text-left" onClick={() => openLightbox(src, src.endsWith('.mp4') ? 'video' : 'image')}>
                 {src.endsWith('.mp4') ? (
                   <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
@@ -1921,7 +2041,7 @@ function Portfolio() {
                   </div>
                 </div>
               </button>
-            </article>
+            </motion.article>
           )
         })}
       </div>

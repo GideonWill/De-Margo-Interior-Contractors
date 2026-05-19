@@ -116,3 +116,64 @@ body {
 .chatbot-icon {
     border-radius: 9999px !important;
 }
+
+/* Chatbot 3D Button and Talk Bubble */
+.chatbot-3d-button {
+    border-radius: 9999px !important;
+    border: 3px solid #ffffff !important;
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.15), 
+        0 6px 6px rgba(0, 0, 0, 0.1),
+        inset 0 -3px 8px rgba(0, 0, 0, 0.2), 
+        inset 0 3px 8px rgba(255, 255, 255, 0.6) !important;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    overflow: hidden;
+}
+
+.chatbot-3d-button:hover {
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.2), 
+        0 10px 10px rgba(0, 0, 0, 0.15),
+        inset 0 -4px 10px rgba(0, 0, 0, 0.25), 
+        inset 0 4px 10px rgba(255, 255, 255, 0.7) !important;
+}
+
+.chatbot-3d-button:active {
+    transform: translateY(2px) scale(0.95) !important;
+    box-shadow: 
+        0 5px 10px rgba(0, 0, 0, 0.15), 
+        inset 0 -2px 5px rgba(0, 0, 0, 0.2), 
+        inset 0 2px 5px rgba(255, 255, 255, 0.5) !important;
+}
+
+.chatbot-3d-button img {
+    border-radius: 9999px !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.chatbot-talk-bubble {
+    border-radius: 20px !important; /* Fully pill-shaped round bubble */
+    box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.1), 
+        0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    animation: chatbotBubbleFloat 2.5s infinite ease-in-out !important;
+}
+
+@keyframes chatbotBubbleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* Card Perspective and 3D Rotation Animation Helpers */
+.card-perspective-container {
+    perspective: 1200px;
+}
+
+.perspective-card {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
