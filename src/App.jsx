@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import Lenis from 'lenis'
+import 'lenis/dist/lenis.css'
 import { Helmet } from 'react-helmet'
 // import TransportPayment from './pages/TransportPayment'
 
@@ -334,7 +336,13 @@ function Home() {
       </section>
 
       {/* AWARD HERO - Classy spotlight section (moved below main hero) */}
-      <section ref={el => revealRefs.current[5] = el} className="reveal relative h-[76vh] md:h-[88vh] flex items-center overflow-hidden">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, margin: "-100px" }} 
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative h-[76vh] md:h-[88vh] flex items-center overflow-hidden"
+      >
         <img
           src="/assets/award.jpg"
           alt="Award Certificate - Ghana Armed Forces Staff College"
@@ -376,10 +384,16 @@ function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ABOUT SNAPSHOT SECTION (second screenshot) */}
-      <section ref={el => revealRefs.current[0] = el} className="reveal max-w-6xl mx-auto px-4 py-16">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, margin: "-100px" }} 
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="max-w-6xl mx-auto px-4 py-16"
+      >
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <div className="text-demargo-orange font-semibold tracking-wide">ABOUT DEMARGO</div>
@@ -405,10 +419,16 @@ function Home() {
             <img src="/assets/hero%201.jpg" alt="About Demargo" className="aspect-video rounded-2xl w-full h-auto object-cover overflow-hidden" />
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* SERVICES PREVIEW (third screenshot tone) */}
-      <section ref={el => revealRefs.current[1] = el} className="reveal max-w-6xl mx-auto px-4 py-16">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, margin: "-100px" }} 
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="max-w-6xl mx-auto px-4 py-16"
+      >
         <div className="text-demargo-orange font-semibold text-center">OUR SERVICES</div>
         <h2 className="text-4xl md:text-5xl font-extrabold text-center mt-2">Comprehensive Interior Solutions</h2>
         <p className="text-center text-gray-600 mt-3 max-w-3xl mx-auto">From custom curtains to sophisticated lighting, we offer complete interior design services that transform your space into a masterpiece of luxury and functionality.</p>
@@ -434,7 +454,7 @@ function Home() {
             </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* HOME FULL-WIDTH VIDEO SECTION (hero-sized) */}
       <section className="relative h-[70vh] md:h-[85vh] flex items-center overflow-hidden mt-4">
@@ -449,7 +469,13 @@ function Home() {
 
 
       {/* PORTFOLIO SHOWCASE (three blocks) */}
-      <section ref={el => revealRefs.current[2] = el} className="reveal max-w-6xl mx-auto px-4 py-16">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, margin: "-100px" }} 
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="max-w-6xl mx-auto px-4 py-16"
+      >
         <div className="flex items-center justify-center gap-2 text-demargo-orange">
           <span>👁️</span>
           <span className="font-semibold">PORTFOLIO SHOWCASE</span>
@@ -501,7 +527,7 @@ function Home() {
             </div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* VIDEO HERO SECTION */}
       <section className="relative h-[70vh] md:h-[85vh] flex items-center overflow-hidden mt-4">
@@ -514,7 +540,13 @@ function Home() {
       </section>
 
       {/* TESTIMONIALS DARK SECTION */}
-      <section ref={el => revealRefs.current[3] = el} className="reveal bg-slate-900 text-white">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, margin: "-100px" }} 
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="bg-slate-900 text-white"
+      >
         <div className="max-w-6xl mx-auto px-4 py-16">
           <h2 className="text-center text-4xl md:text-5xl font-extrabold">What Our Clients Say</h2>
           <p className="text-center text-white/80 mt-3 max-w-3xl mx-auto">Don't just take our word for it. Here's what our satisfied clients have to say about their Demargo experience.</p>
@@ -536,10 +568,16 @@ function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA */}
-      <section ref={el => revealRefs.current[4] = el} className="reveal max-w-6xl mx-auto px-4 pb-16">
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, margin: "-100px" }} 
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="max-w-6xl mx-auto px-4 pb-16"
+      >
         <div className="cta-card">
           <div>
             <h3 className="text-xl md:text-2xl font-semibold">Ready to Transform Your Space?</h3>
@@ -547,7 +585,7 @@ function Home() {
           </div>
           <Link to="/contact" className="btn-primary">Get Started</Link>
         </div>
-      </section>
+      </motion.section>
     </main>
   )
 }
@@ -1575,10 +1613,83 @@ function InstagramHero() {
   )
 }
 
+function SplashScreen({ onComplete }) {
+  return (
+    <motion.div
+      key="splash"
+      initial={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: "-100%" }}
+      transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black overflow-hidden"
+    >
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ opacity: 0, scale: 15 }}
+        transition={{ duration: 1.2, ease: "easeInOut" }}
+        className="flex flex-col justify-center items-center w-full"
+        onAnimationComplete={() => {
+          // Additional exit wait can be done via App's timer, but this ensures it plays
+        }}
+      >
+        <img 
+          src="/assets/Demargo%20Logo.jpg" 
+          alt="Demargo Logo" 
+          className="w-40 md:w-56 mb-12 md:mb-16 object-contain mix-blend-screen bg-transparent"
+        />
+        <h1 
+          className="font-extrabold text-white leading-none tracking-tight flex items-center justify-center whitespace-nowrap"
+          style={{ 
+            fontSize: 'min(11vw, 140px)', 
+            transform: 'scaleY(2.8)',
+            fontFamily: '"Impact", "Bebas Neue", "Oswald", sans-serif'
+          }}
+        >
+          BE <span className="text-demargo-orange ml-[2vw]">DIFFERENT</span>
+        </h1>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+      infinite: false,
+    })
+
+    function raf(time) {
+      lenis.raf(time)
+      requestAnimationFrame(raf)
+    }
+
+    requestAnimationFrame(raf)
+
+    return () => lenis.destroy()
+  }, [])
+
+  useEffect(() => {
+    // Hide splash after a short delay to allow the intro to play out
+    const timer = setTimeout(() => setShowSplash(false), 2800);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <Router>
       <ScrollToTop />
+      <AnimatePresence>
+        {showSplash && <SplashScreen />}
+      </AnimatePresence>
       <div className="min-h-screen bg-slate-50 text-gray-900 overflow-x-hidden">
         <Navbar />
         <AnimatedRoutes />
