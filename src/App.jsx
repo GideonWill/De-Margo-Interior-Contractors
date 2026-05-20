@@ -1389,7 +1389,7 @@ function BackToTop() {
     <button
       onClick={scrollTop}
       aria-label="Back to top"
-      className={`fixed bottom-24 right-6 sm:bottom-6 z-50 chatbot-icon border-2 border-demargo-orange text-demargo-orange bg-transparent shadow-lg w-12 h-12 flex items-center justify-center hover:text-demargo-blue hover:border-demargo-blue hover:bg-slate-100/30 backdrop-blur-xs active:scale-95 transition-all duration-300 ease-out transform ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3 pointer-events-none'}`}
+      className={`fixed bottom-6 left-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 chatbot-icon border-2 border-demargo-orange text-demargo-orange bg-transparent shadow-lg w-12 h-12 flex items-center justify-center hover:text-demargo-blue hover:border-demargo-blue hover:bg-slate-100/30 backdrop-blur-xs active:scale-95 transition-all duration-300 ease-out transform ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3 pointer-events-none'}`}
     >
       <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></svg>
     </button>
@@ -1729,20 +1729,20 @@ export default function App() {
             <div>
               <div className="font-semibold mb-3">Follow</div>
               <div className="flex gap-4 text-white/90 text-xl">
-                <a href="https://www.facebook.com/share/1Jui7wFk7G/?mibextid=wwXIfr" target="_blank" rel="noreferrer" aria-label="Facebook" title="Facebook">
+                <motion.a whileHover={{ y: -5, scale: 1.15, color: '#f97316' }} transition={{ type: "spring", stiffness: 300 }} href="https://www.facebook.com/share/1Jui7wFk7G/?mibextid=wwXIfr" target="_blank" rel="noreferrer" aria-label="Facebook" title="Facebook">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 10-11.5 9.9v-7H8v-3h2.5V9.5c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12H17l-.5 3h-2.3v7A10 10 0 0022 12z" /></svg>
-                </a>
-                <a href="https://instagram.com/demargo_blinds_curtains" target="_blank" rel="noreferrer" aria-label="Instagram" title="Instagram">
+                </motion.a>
+                <motion.a whileHover={{ y: -5, scale: 1.15, color: '#f97316' }} transition={{ type: "spring", stiffness: 300 }} href="https://instagram.com/demargo_blinds_curtains" target="_blank" rel="noreferrer" aria-label="Instagram" title="Instagram">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-1a1 1 0 100 2 1 1 0 000-2z" /></svg>
-                </a>
-                <a href="https://www.tiktok.com/@demargo_blinds?_t=ZM-90QcyZHzNTE&_r=1" target="_blank" rel="noreferrer" aria-label="TikTok" title="TikTok">
+                </motion.a>
+                <motion.a whileHover={{ y: -5, scale: 1.15, color: '#f97316' }} transition={{ type: "spring", stiffness: 300 }} href="https://www.tiktok.com/@demargo_blinds?_t=ZM-90QcyZHzNTE&_r=1" target="_blank" rel="noreferrer" aria-label="TikTok" title="TikTok">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 7a5 5 0 015-5h1c.2 2.1 1.6 3.9 3.6 4.6A7 7 0 0021 7v3a9 9 0 01-4.5-1.3v6.2A6.9 6.9 0 019.5 22 5.5 5.5 0 019 11.1V13a3.5 3.5 0 103.5 3.5V2H14a3 3 0 00-3 3v2H9z" />
                   </svg>
-                </a>
-                <a href="https://www.linkedin.com/in/de-margo-interior-contractors-5a6153262?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
+                </motion.a>
+                <motion.a whileHover={{ y: -5, scale: 1.15, color: '#f97316' }} transition={{ type: "spring", stiffness: 300 }} href="https://www.linkedin.com/in/de-margo-interior-contractors-5a6153262?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7.5 0h3.8v2.2h.1c.5-.9 1.8-2.2 3.7-2.2 4 0 4.7 2.6 4.7 6V24h-4v-7.1c0-1.7 0-3.9-2.4-3.9-2.4 0-2.8 1.8-2.8 3.8V24h-4V8z" /></svg>
-                </a>
+                </motion.a>
               </div>
             </div>
           </div>
