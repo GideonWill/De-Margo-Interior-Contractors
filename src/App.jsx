@@ -591,29 +591,37 @@ function Home() {
 }
 
 function Services() {
-  const heroImg = '/assets/bedroom%20styling.jpg'
   // uses shared allServices defined above
 
   return (
     <>
-      <section className="max-w-6xl mx-auto px-4 py-16">
-        <Seo title="Services" description="Detailed list of Demargo services including curtains, renovations, woodwork and smart home systems." />
+      <Seo title="Services" description="Detailed list of Demargo services including curtains, renovations, woodwork and smart home systems." />
 
-        {/* Top hero row */}
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div className="bg-orange-50 rounded-2xl p-6 md:p-10">
-            <div className="text-sm text-gray-600">Demargo Services</div>
-            <h1 className="text-3xl md:text-5xl font-extrabold mt-2 leading-tight">
-              <span className="text-demargo-orange">Interior Design</span>
-              <span className="text-gray-800">, </span>
-              <span className="text-demargo-blue">Renovation & More in Ghana</span>
+      {/* Large Video Hero Section */}
+      <section className="relative h-[60vh] md:h-[75vh] flex items-center overflow-hidden bg-slate-900 w-full">
+        <video
+          src="/assets/new%20hero.MOV"
+          muted
+          playsInline
+          loop
+          autoPlay
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 w-full">
+          <div className="text-white max-w-2xl animate-fade-in">
+            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
+              Our <span className="text-demargo-orange">Services</span>
             </h1>
-          </div>
-          <div className="rounded-2xl overflow-hidden shadow-sm">
-            <img src={heroImg} alt="Services hero" className="w-full h-64 md:h-72 object-cover" />
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Link to="/contact" className="btn-primary">Book a Consultation</Link>
+              <Link to="/portfolio" className="btn-ghost text-white border-white hover:bg-white hover:text-slate-900">View Portfolio</Link>
+            </div>
           </div>
         </div>
+      </section>
 
+      <section className="max-w-6xl mx-auto px-4 py-16">
         {/* Intro and first row */}
         <div className="mt-10 grid md:grid-cols-3 gap-6 items-start card-perspective-container">
           <motion.article 
