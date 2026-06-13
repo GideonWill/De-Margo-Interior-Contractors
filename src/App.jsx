@@ -340,10 +340,10 @@ function Home() {
       </section>
 
       {/* AWARD HERO - Classy spotlight section (moved below main hero) */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }} 
-        whileInView={{ opacity: 1, y: 0 }} 
-        viewport={{ once: true, margin: "-100px" }} 
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative h-[76vh] md:h-[88vh] flex items-center overflow-hidden"
       >
@@ -391,10 +391,10 @@ function Home() {
       </motion.section>
 
       {/* ABOUT SNAPSHOT SECTION (second screenshot) */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }} 
-        whileInView={{ opacity: 1, y: 0 }} 
-        viewport={{ once: true, margin: "-100px" }} 
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="max-w-6xl mx-auto px-4 py-16"
       >
@@ -426,10 +426,10 @@ function Home() {
       </motion.section>
 
       {/* SERVICES PREVIEW (third screenshot tone) */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }} 
-        whileInView={{ opacity: 1, y: 0 }} 
-        viewport={{ once: true, margin: "-100px" }} 
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="max-w-6xl mx-auto px-4 py-16"
       >
@@ -473,10 +473,10 @@ function Home() {
 
 
       {/* PORTFOLIO SHOWCASE (three blocks) */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }} 
-        whileInView={{ opacity: 1, y: 0 }} 
-        viewport={{ once: true, margin: "-100px" }} 
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="max-w-6xl mx-auto px-4 py-16"
       >
@@ -544,10 +544,10 @@ function Home() {
       </section>
 
       {/* TESTIMONIALS DARK SECTION */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }} 
-        whileInView={{ opacity: 1, y: 0 }} 
-        viewport={{ once: true, margin: "-100px" }} 
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="bg-slate-900 text-white"
       >
@@ -575,10 +575,10 @@ function Home() {
       </motion.section>
 
       {/* CTA */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }} 
-        whileInView={{ opacity: 1, y: 0 }} 
-        viewport={{ once: true, margin: "-100px" }} 
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="max-w-6xl mx-auto px-4 pb-16"
       >
@@ -601,34 +601,27 @@ function Services() {
     <>
       <Seo title="Services" description="Detailed list of Demargo services including curtains, renovations, woodwork and smart home systems." />
 
-      {/* Large Video Hero Section */}
-      <section className="relative h-[60vh] md:h-[75vh] flex items-center overflow-hidden bg-slate-900 w-full">
-        <video
-          src="/assets/service-hero-section.MOV"
-          muted
-          playsInline
-          loop
-          autoPlay
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/45" />
-        <div className="relative z-10 max-w-6xl mx-auto px-4 w-full">
-          <div className="text-white max-w-2xl animate-fade-in">
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
-              Our <span className="text-demargo-orange">Services</span>
-            </h1>
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <Link to="/contact" className="btn-primary">Book a Consultation</Link>
-              <Link to="/portfolio" className="btn-ghost text-white border-white hover:bg-white hover:text-slate-900">View Portfolio</Link>
-            </div>
+      {/* Top hero row */}
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="bg-orange-50 rounded-2xl p-6 md:p-10">
+          <div className="text-sm text-gray-600">Demargo Services</div>
+          <h1 className="text-3xl md:text-5xl font-extrabold mt-2 leading-tight">
+            <span className="text-demargo-orange">Interior Design</span>
+            <span className="text-gray-800">, </span>
+            <span className="text-demargo-blue">Renovation & More in Ghana</span>
+          </h1>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <Link to="/contact" className="btn-primary">Book a Consultation</Link>
+            <Link to="/portfolio" className="btn-ghost text-white border-white hover:bg-white hover:text-slate-900">View Portfolio</Link>
           </div>
         </div>
-      </section>
+      </div>
+    </section >
 
       <section className="max-w-6xl mx-auto px-4 py-16">
         {/* Intro and first row */}
         <div className="mt-10 grid md:grid-cols-3 gap-6 items-start card-perspective-container">
-          <motion.article 
+          <motion.article
             initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
             whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
             viewport={{ once: true, margin: "-50px" }}
@@ -641,8 +634,8 @@ function Services() {
             <p className="text-gray-700 mt-3">We provide expert interior design and renovation services across Ghana. From homes to offices, we create beautiful, functional spaces with style and precision — serving Accra, Kumasi, Tema, Takoradi, Cape Coast, and beyond.</p>
           </motion.article>
           {allServices.slice(0, 2).map((s, i) => (
-            <motion.article 
-              key={i} 
+            <motion.article
+              key={i}
               initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
               whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               viewport={{ once: true, margin: "-50px" }}
@@ -660,8 +653,8 @@ function Services() {
         {/* Remaining grid */}
         <div className="mt-6 grid md:grid-cols-3 gap-6 card-perspective-container">
           {allServices.slice(2, 8).map((s, i) => (
-            <motion.article 
-              key={i} 
+            <motion.article
+              key={i}
               initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
               whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               viewport={{ once: true, margin: "-50px" }}
@@ -679,8 +672,8 @@ function Services() {
         {/* Cleaning full width (anchors feature video below) */}
         <div className="mt-6">
           {allServices.slice(8, 9).map((s, i) => (
-            <motion.article 
-              key={i} 
+            <motion.article
+              key={i}
               initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 5 }}
               whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               viewport={{ once: true, margin: "-50px" }}
@@ -696,20 +689,20 @@ function Services() {
         </div>
       </section>
 
-      {/* Hero video highlight - full width */}
-      <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] mt-10 overflow-hidden">
-        <VideoReveal src="/assets/v19.mp4" className="w-full h-[60vh] md:h-[75vh] object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        <div className="absolute inset-0 flex items-end md:items-center">
-          <div className="max-w-6xl mx-auto px-4 md:px-6 w-full">
-            <div className="px-6 py-8 md:py-12 md:px-10 text-white max-w-2xl space-y-3">
-              <div className="badge-glass">Feature Project</div>
-              <h3 className="text-3xl md:text-4xl font-extrabold leading-tight">Double-height curtain showcase</h3>
-              <p className="text-white/85 text-lg">Tailored charcoal panels and sheer layering framing a statement chandelier — a glimpse of our craftsmanship in motion.</p>
-            </div>
-          </div>
+  {/* Hero video highlight - full width */ }
+  <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] mt-10 overflow-hidden">
+    <VideoReveal src="/assets/v19.mp4" className="w-full h-[60vh] md:h-[75vh] object-cover" />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+    <div className="absolute inset-0 flex items-end md:items-center">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 w-full">
+        <div className="px-6 py-8 md:py-12 md:px-10 text-white max-w-2xl space-y-3">
+          <div className="badge-glass">Feature Project</div>
+          <h3 className="text-3xl md:text-4xl font-extrabold leading-tight">Double-height curtain showcase</h3>
+          <p className="text-white/85 text-lg">Tailored charcoal panels and sheer layering framing a statement chandelier — a glimpse of our craftsmanship in motion.</p>
         </div>
-      </section>
+      </div>
+    </div>
+  </section>
     </>
   )
 }
@@ -1634,7 +1627,7 @@ function SplashScreen({ onComplete }) {
       transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black overflow-hidden"
     >
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ opacity: 0, scale: 15 }}
@@ -1644,15 +1637,15 @@ function SplashScreen({ onComplete }) {
           // Additional exit wait can be done via App's timer, but this ensures it plays
         }}
       >
-        <img 
-          src="/assets/Demargo%20Logo.jpg" 
-          alt="Demargo Logo" 
+        <img
+          src="/assets/Demargo%20Logo.jpg"
+          alt="Demargo Logo"
           className="w-40 md:w-56 mb-12 md:mb-16 object-contain mix-blend-screen bg-transparent"
         />
-        <h1 
+        <h1
           className="font-extrabold text-white leading-none tracking-tight flex items-center justify-center whitespace-nowrap"
-          style={{ 
-            fontSize: 'min(11vw, 140px)', 
+          style={{
+            fontSize: 'min(11vw, 140px)',
             transform: 'scaleY(2.8)',
             fontFamily: '"Impact", "Bebas Neue", "Oswald", sans-serif'
           }}
