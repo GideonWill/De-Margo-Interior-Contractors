@@ -601,6 +601,7 @@ function Services() {
     <>
       <Seo title="Services" description="Detailed list of Demargo services including curtains, renovations, woodwork and smart home systems." />
 
+<<<<<<< HEAD
       {/* Top hero row */}
       <div className="grid md:grid-cols-2 gap-8 items-center">
         <div className="bg-orange-50 rounded-2xl p-6 md:p-10">
@@ -613,6 +614,28 @@ function Services() {
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <Link to="/contact" className="btn-primary">Book a Consultation</Link>
             <Link to="/portfolio" className="btn-ghost text-white border-white hover:bg-white hover:text-slate-900">View Portfolio</Link>
+=======
+      {/* Large Video Hero Section */}
+      <section className="relative h-[60vh] md:h-[75vh] flex items-center overflow-hidden bg-slate-900 w-full">
+        <video
+          src="/assets/service-hero-section.MOV"
+          muted
+          playsInline
+          loop
+          autoPlay
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 w-full">
+          <div className="text-white max-w-2xl animate-fade-in">
+            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
+              Our <span className="text-demargo-orange">Services</span>
+            </h1>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Link to="/contact" className="btn-primary">Book a Consultation</Link>
+              <Link to="/portfolio" className="btn-ghost text-white border-white hover:bg-white hover:text-slate-900">View Portfolio</Link>
+            </div>
+>>>>>>> 82d6ff9 (feat: initialize App component with SEO configuration and service definitions, and add hero section video assets)
           </div>
         </div>
       </div>
