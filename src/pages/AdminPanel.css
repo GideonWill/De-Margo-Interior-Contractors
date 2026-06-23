@@ -1,0 +1,60 @@
+/* AdminPanel.css – Light theme overrides */
+
+/* Page background – off‑white for a softer look */
+.admin-panel {
+  background-color: #f8f8f8 !important;
+  color: #000000 !important;
+}
+
+/* Background overrides for containers */
+.admin-panel .bg-slate-950,
+.admin-panel .bg-slate-900,
+.admin-panel .bg-slate-800,
+.admin-panel .bg-slate-850 {
+  background-color: #ffffff !important;
+}
+
+/* Text color overrides */
+.admin-panel .text-slate-100,
+.admin-panel .text-slate-500,
+.admin-panel .text-slate-400,
+.admin-panel .text-slate-300,
+.admin-panel .text-slate-200,
+.admin-panel .text-slate-600,
+.admin-panel .text-slate-700 {
+  color: #000000 !important;
+}
+
+/* Form controls – off‑white background and black text */
+.admin-panel input,
+.admin-panel textarea,
+.admin-panel select {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  border-color: #dddddd !important;
+}
+
+/* Placeholder text – darker for visibility */
+.admin-panel ::placeholder {
+  color: #555555 !important;
+}
+
+/* Border color overrides */
+.admin-panel .border-slate-800,
+.admin-panel .border-slate-850,
+.admin-panel .border-slate-700 {
+  border-color: #dddddd !important;
+}
+
+/* Ensure hover states also use light colors */
+.admin-panel .hover\:bg-slate-900:hover,
+.admin-panel .hover\:bg-slate-800:hover,
+.admin-panel .hover\:bg-slate-950:hover {
+  background-color: #f0f0f0 !important;
+}
+
+
+/* Force all text in admin panel to black */
+.admin-panel * {
+  color: #000000 !important;
+}

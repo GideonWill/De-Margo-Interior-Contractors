@@ -1,0 +1,17 @@
+/* ProjectTracker theme overrides */
+/* Force white background for any slate background classes */
+.bg-slate-800, .bg-slate-900, .bg-slate-950 {
+  background-color: #ffffff !important;
+}
+/* Override slate text colors with blue-black (approx #0A0A0A) */
+.text-slate-500, .text-slate-300, .text-slate-600, .text-slate-400, .text-slate-200, .text-slate-500, .text-slate-700 {
+  color: #0a0a0a !important; /* blue-black */
+}
+/* Override placeholder slate colors */
+.placeholder-slate-750, .placeholder-slate-500 {
+  color: #0a0a0a !important;
+}
+/* Override border slate colors */
+.border-slate-200, .border-slate-500, .border-slate-700, .border-slate-800 {
+  border-color: #d1d5db !important; /* light gray */
+}

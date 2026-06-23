@@ -5,6 +5,8 @@ import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import { Helmet } from 'react-helmet'
 // import TransportPayment from './pages/TransportPayment'
+import ProjectTracker from './pages/ProjectTracker'
+import AdminPanel from './pages/AdminPanel'
 
 function Seo({ title, description, image, type }) {
   const loc = window.location.pathname
@@ -151,6 +153,7 @@ function Navbar() {
           <li><NavLink to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
           <li><NavLink to="/awards" className={linkClass}>Awards</NavLink></li>
           <li><NavLink to="/about" className={linkClass}>About</NavLink></li>
+          <li><NavLink to="/track" className={linkClass}>Track Project</NavLink></li>
           {/* <li><NavLink to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li> */}
           <li><NavLink to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white transition-colors ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
         </ul>
@@ -167,6 +170,7 @@ function Navbar() {
               <li><NavLink onClick={() => setOpen(false)} to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/awards" className={linkClass}>Awards</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/about" className={linkClass}>About</NavLink></li>
+              <li><NavLink onClick={() => setOpen(false)} to="/track" className={linkClass}>Track Project</NavLink></li>
               {/* <li><NavLink onClick={() => setOpen(false)} to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li> */}
               <li><NavLink onClick={() => setOpen(false)} to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white inline-block ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
             </ul>
@@ -1704,64 +1708,38 @@ export default function App() {
         <BackToTop />
         <ChatBot />
         <InstagramHero />
-        <footer className="mt-0 bg-slate-900 text-white">
-          <div className="max-w-6xl mx-auto px-4 py-14 grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="text-2xl font-extrabold text-demargo-orange">Demargo</div>
-              <p className="mt-3 text-white/80">Transforming spaces with premium interior design services since 2018. Curtains, blinds, lighting and full-room makeovers.</p>
-              <div className="mt-4 text-sm text-white/70 space-y-1">
-                <div>Tel: 0546478040</div>
-                <div>Email: demargo1987@gmail.com</div>
-                <div>Mon–Fri 8AM–5PM, Sat 8AM–4PM</div>
-              </div>
+        <footer className="bg-slate-900 text-white py-16">
+          <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-demargo-orange">Demargo</h3>
+              <p className="text-sm text-slate-400">Transforming spaces with premium interior design services since 2018.</p>
             </div>
-            <div>
-              <div className="font-semibold mb-3">Services</div>
-              <ul className="space-y-2 text-white/80 text-sm">
-                {allServices.map((s, i) => (
-                  <li key={`fs-${i}`}>{s.title}</li>
-                ))}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-lg">Services</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                {allServices.slice(0, 5).map((s, i) => <li key={i}>{s.title}</li>)}
               </ul>
             </div>
-            <div>
-              <div className="font-semibold mb-3">Company</div>
-              <ul className="space-y-2 text-white/80 text-sm">
+            <div className="space-y-4">
+              <h4 className="font-semibold text-lg">Connect</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
                 <li><Link to="/about">About Us</Link></li>
-                <li><Link to="/fabrics">Fabric Library</Link></li>
-                <li><Link to="/clientele">Our Clientele</Link></li>
-                <li><Link to="/testimonials">Testimonials</Link></li>
-                <li><Link to="/awards">Awards</Link></li>
                 <li><Link to="/contact">Contact</Link></li>
+                <li><Link to="/track">Track Project</Link></li>
               </ul>
             </div>
-            <div>
-              <div className="font-semibold mb-3">Follow</div>
-              <div className="flex gap-4 text-white/90 text-xl">
-                <motion.a whileHover={{ y: -5, scale: 1.15, color: '#f97316' }} transition={{ type: "spring", stiffness: 300 }} href="https://www.facebook.com/share/1Jui7wFk7G/?mibextid=wwXIfr" target="_blank" rel="noreferrer" aria-label="Facebook" title="Facebook">
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 10-11.5 9.9v-7H8v-3h2.5V9.5c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12H17l-.5 3h-2.3v7A10 10 0 0022 12z" /></svg>
-                </motion.a>
-                <motion.a whileHover={{ y: -5, scale: 1.15, color: '#f97316' }} transition={{ type: "spring", stiffness: 300 }} href="https://instagram.com/demargo_blinds_curtains" target="_blank" rel="noreferrer" aria-label="Instagram" title="Instagram">
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-1a1 1 0 100 2 1 1 0 000-2z" /></svg>
-                </motion.a>
-                <motion.a whileHover={{ y: -5, scale: 1.15, color: '#f97316' }} transition={{ type: "spring", stiffness: 300 }} href="https://www.tiktok.com/@demargo_blinds?_t=ZM-90QcyZHzNTE&_r=1" target="_blank" rel="noreferrer" aria-label="TikTok" title="TikTok">
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 7a5 5 0 015-5h1c.2 2.1 1.6 3.9 3.6 4.6A7 7 0 0021 7v3a9 9 0 01-4.5-1.3v6.2A6.9 6.9 0 019.5 22 5.5 5.5 0 019 11.1V13a3.5 3.5 0 103.5 3.5V2H14a3 3 0 00-3 3v2H9z" />
-                  </svg>
-                </motion.a>
-                <motion.a whileHover={{ y: -5, scale: 1.15, color: '#f97316' }} transition={{ type: "spring", stiffness: 300 }} href="https://www.linkedin.com/in/de-margo-interior-contractors-5a6153262?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7.5 0h3.8v2.2h.1c.5-.9 1.8-2.2 3.7-2.2 4 0 4.7 2.6 4.7 6V24h-4v-7.1c0-1.7 0-3.9-2.4-3.9-2.4 0-2.8 1.8-2.8 3.8V24h-4V8z" /></svg>
-                </motion.a>
+            <div className="space-y-4">
+              <h4 className="font-semibold text-lg">Contact Info</h4>
+              <div className="text-sm text-slate-400 space-y-2">
+                <p>Tel: 0546478040</p>
+                <p>Email: demargo1987@gmail.com</p>
               </div>
             </div>
           </div>
-          <div className="border-t border-white/10">
-            <div className="max-w-6xl mx-auto px-4 py-4 text-xs text-white/70 flex justify-between">
-              <span>© {new Date().getFullYear()} Demargo Interior Contractors</span>
-              <span>All rights reserved</span>
-            </div>
+          <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500">
+            © {new Date().getFullYear()} Demargo Interior Contractors. All rights reserved.
           </div>
         </footer>
-
       </div>
     </Router>
   )
@@ -1788,6 +1766,8 @@ function AnimatedRoutes() {
         <Route path="/awards" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Awards /></motion.div>} />
         <Route path="/about" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><About /></motion.div>} />
         {/* <Route path="/transport-payment" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><TransportPayment /></motion.div>} /> */}
+        <Route path="/track" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><ProjectTracker /></motion.div>} />
+        <Route path="/admin" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><AdminPanel /></motion.div>} />
         <Route path="/contact" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Contact /></motion.div>} />
       </Routes>
     </AnimatePresence>
