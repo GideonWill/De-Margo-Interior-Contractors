@@ -42,6 +42,16 @@ function AdminPanel() {
     const [projectPayments, setProjectPayments] = useState([])
     const [loadingPayments, setLoadingPayments] = useState(false)
 
+    // Delete confirmation & toast
+    const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null, name: '' })
+    const [deleting, setDeleting] = useState(false)
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type })
+        setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000)
+    }
+
     // Create Project Form
     const [newProjData, setNewProjData] = useState({
         clientName: '',
@@ -283,19 +293,26 @@ function AdminPanel() {
         }
     }
 
-    // Delete project
-    const handleDeleteProject = async (id) => {
-        if (!window.confirm('Are you absolutely sure you want to permanently delete this project? This action is irreversible.')) {
-            return
-        }
+    // Delete project (non-blocking)
+    const requestDeleteProject = (id, name) => {
+        setDeleteConfirm({ show: true, id, name })
+    }
+
+    const confirmDeleteProject = async () => {
+        const id = deleteConfirm.id
+        setDeleting(true)
         try {
             await deleteProject(id)
-            alert('Project deleted successfully.')
+            setDeleteConfirm({ show: false, id: null, name: '' })
             setSelectedProject(null)
+            showToast('Project deleted successfully.', 'success')
             fetchData()
         } catch (err) {
             console.error('Delete error:', err)
-            alert('Failed to delete project.')
+            showToast('Failed to delete project.', 'error')
+            setDeleteConfirm({ show: false, id: null, name: '' })
+        } finally {
+            setDeleting(false)
         }
     }
 
@@ -520,7 +537,7 @@ function AdminPanel() {
                                         <p className="text-[10px] text-slate-400 mt-0.5">{selectedProject.projectTitle}</p>
                                     </div>
                                     <button
-                                        onClick={() => handleDeleteProject(selectedProject.id)}
+                                        onClick={() => requestDeleteProject(selectedProject.id, selectedProject.clientName)}
                                         className="px-2.5 py-1.5 bg-red-950/40 text-red-500 border border-red-900/50 hover:bg-red-900/40 hover:text-white transition text-[10px] font-bold uppercase"
                                     >
                                         Delete Record
@@ -901,6 +918,53 @@ function AdminPanel() {
                             </button>
                         </form>
                     </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirm.show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => !deleting && setDeleteConfirm({ show: false, id: null, name: '' })}>
+                    <div className="bg-slate-900 border border-slate-700 p-6 max-w-sm w-full mx-4 rounded-lg shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="text-center">
+                            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-red-950/50 flex items-center justify-center">
+                                <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </div>
+                            <h3 className="text-white font-bold text-sm">Delete Project</h3>
+                            <p className="text-slate-400 text-xs mt-2">Are you sure you want to permanently delete <span className="text-white font-semibold">{deleteConfirm.name}</span>? This action is irreversible.</p>
+                        </div>
+                        <div className="flex gap-3 mt-5">
+                            <button
+                                onClick={() => setDeleteConfirm({ show: false, id: null, name: '' })}
+                                disabled={deleting}
+                                className="flex-1 py-2.5 bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition text-xs font-bold uppercase rounded disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDeleteProject}
+                                disabled={deleting}
+                                className="flex-1 py-2.5 bg-red-600 text-white hover:bg-red-700 transition text-xs font-bold uppercase rounded disabled:opacity-50"
+                            >
+                                {deleting ? 'Deleting...' : 'Yes, Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Toast Notification */}
+            {toast.show && (
+                <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 animate-fade-in ${
+                    toast.type === 'success' ? 'bg-emerald-900/90 text-emerald-300 border border-emerald-700' : 'bg-red-900/90 text-red-300 border border-red-700'
+                }`}>
+                    {toast.type === 'success' ? (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    )}
+                    {toast.message}
                 </div>
             )}
         </main>
