@@ -154,6 +154,7 @@ function Navbar() {
           <li><NavLink to="/awards" className={linkClass}>Awards</NavLink></li>
           <li><NavLink to="/about" className={linkClass}>About</NavLink></li>
           <li><NavLink to="/track" className={linkClass}>Track Project</NavLink></li>
+<li><NavLink to="/admin" className={linkClass}>Admin</NavLink></li>
           {/* <li><NavLink to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li> */}
           <li><NavLink to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white transition-colors ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
         </ul>
