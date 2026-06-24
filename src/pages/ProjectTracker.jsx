@@ -26,6 +26,14 @@ function ProjectTracker() {
     // Estimate approval state
     const [approvingEstimate, setApprovingEstimate] = useState(false)
 
+    // Toast state
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type })
+        setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000)
+    }
+
     // Handle search by phone number
     const handleSearch = async (e) => {
         if (e) e.preventDefault()
@@ -78,10 +86,10 @@ function ProjectTracker() {
             })
             // Reload project
             await handleSelectProject(selectedProject.id)
-            alert('Estimate approved successfully! You can now proceed to fabric selection.')
+            showToast('Estimate approved successfully! You can now proceed to fabric selection.', 'success')
         } catch (err) {
             console.error('Approval error:', err)
-            alert('Failed to approve estimate. Please try again or contact support.')
+            showToast('Failed to approve estimate. Please try again or contact support.', 'error')
         } finally {
             setApprovingEstimate(false)
         }
@@ -550,6 +558,19 @@ function ProjectTracker() {
 
             {/* Paystack Payment Modal Wrapper */}
             
+            {/* Toast Notification */}
+            {toast.show && (
+                <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 animate-fade-in ${
+                    toast.type === 'success' ? 'bg-emerald-900/90 text-emerald-300 border border-emerald-700' : 'bg-red-900/90 text-red-300 border border-red-700'
+                }`}>
+                    {toast.type === 'success' ? (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    )}
+                    {toast.message}
+                </div>
+            )}
         </main>
     )
 }

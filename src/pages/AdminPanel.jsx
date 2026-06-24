@@ -188,7 +188,7 @@ function AdminPanel() {
                 totalAmount: amount,
                 status: 'measurement'
             })
-            alert('Project created successfully!')
+            showToast('Project created successfully.', 'success')
             setShowCreateModal(false)
             setNewProjData({
                 clientName: '',
@@ -202,7 +202,7 @@ function AdminPanel() {
             fetchData()
         } catch (err) {
             console.error('Create error:', err)
-            alert('Failed to create project. Please try again.')
+            showToast('Failed to create project. Please try again.', 'error')
         }
     }
 
@@ -232,7 +232,7 @@ function AdminPanel() {
             }
             
             await updateProject(selectedProject.id, updatePayload)
-            alert('Project details updated successfully!')
+            showToast('Project details updated successfully.', 'success')
             
             // Reload all data & select refreshed project
             const freshList = await getAllProjects()
@@ -243,7 +243,7 @@ function AdminPanel() {
             }
         } catch (err) {
             console.error('Update error:', err)
-            alert('Failed to save project updates.')
+            showToast('Failed to save project updates.', 'error')
         }
     }
 
@@ -253,7 +253,7 @@ function AdminPanel() {
         if (!selectedProject) return
         const amountNum = parseFloat(manualPayment.amount)
         if (isNaN(amountNum) || amountNum <= 0) {
-            alert('Please enter a valid amount')
+            showToast('Please enter a valid amount.', 'error')
             return
         }
 
@@ -276,7 +276,7 @@ function AdminPanel() {
 
             // Update balance
             await updateProjectPayment(selectedProject.id, amountNum)
-            alert(`Logged manual payment of GHS ${amountNum} successfully!`)
+            showToast(`Logged manual payment of GHS ${amountNum} successfully.`, 'success')
 
             // Refresh project view
             const freshList = await getAllProjects()
@@ -287,7 +287,7 @@ function AdminPanel() {
             }
         } catch (err) {
             console.error('Payment logging error:', err)
-            alert('Failed to log payment.')
+            showToast('Failed to log payment.', 'error')
         } finally {
             setLoggingPayment(false)
         }
