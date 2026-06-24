@@ -152,9 +152,7 @@ function Navbar() {
           <li><NavLink to="/clientele" className={linkClass}>Clientele</NavLink></li>
           <li><NavLink to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
           <li><NavLink to="/awards" className={linkClass}>Awards</NavLink></li>
-          <li><NavLink to="/about" className={linkClass}>About</NavLink></li>
           <li><NavLink to="/track" className={linkClass}>Track Project</NavLink></li>
-<li><NavLink to="/admin" className={linkClass}>Admin</NavLink></li>
           {/* <li><NavLink to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li> */}
           <li><NavLink to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white transition-colors ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
         </ul>
@@ -602,20 +600,6 @@ function Services() {
     <>
       <Seo title="Services" description="Detailed list of Demargo services including curtains, renovations, woodwork and smart home systems." />
 
-<<<<<<< HEAD
-      {/* Top hero row */}
-      <div className="grid md:grid-cols-2 gap-8 items-center">
-        <div className="bg-orange-50 rounded-2xl p-6 md:p-10">
-          <div className="text-sm text-gray-600">Demargo Services</div>
-          <h1 className="text-3xl md:text-5xl font-extrabold mt-2 leading-tight">
-            <span className="text-demargo-orange">Interior Design</span>
-            <span className="text-gray-800">, </span>
-            <span className="text-demargo-blue">Renovation & More in Ghana</span>
-          </h1>
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <Link to="/contact" className="btn-primary">Book a Consultation</Link>
-            <Link to="/portfolio" className="btn-ghost text-white border-white hover:bg-white hover:text-slate-900">View Portfolio</Link>
-=======
       {/* Large Video Hero Section */}
       <section className="relative h-[60vh] md:h-[75vh] flex items-center overflow-hidden bg-slate-900 w-full">
         <video
@@ -636,11 +620,9 @@ function Services() {
               <Link to="/contact" className="btn-primary">Book a Consultation</Link>
               <Link to="/portfolio" className="btn-ghost text-white border-white hover:bg-white hover:text-slate-900">View Portfolio</Link>
             </div>
->>>>>>> 82d6ff9 (feat: initialize App component with SEO configuration and service definitions, and add hero section video assets)
           </div>
         </div>
-      </div>
-    </section >
+      </section>
 
       <section className="max-w-6xl mx-auto px-4 py-16">
         {/* Intro and first row */}
