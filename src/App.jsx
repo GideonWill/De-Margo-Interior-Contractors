@@ -124,16 +124,27 @@ function Navbar() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
+    const scrollableEl = document.querySelector('.min-h-screen.overflow-x-hidden') || document.querySelector('main') || document.scrollingElement || document.documentElement || document.body
     const onResize = () => { if (window.innerWidth >= 768) setOpen(false) }
+    const onScroll = () => {
+      const top = scrollableEl?.scrollTop || window.scrollY || window.pageYOffset || 0
+      setScrolled(top > 12)
+    }
+    onScroll()
+
     window.addEventListener('resize', onResize)
-    const onScroll = () => setScrolled(window.scrollY > 12)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('resize', onResize)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    scrollableEl?.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('scroll', onScroll)
+      scrollableEl?.removeEventListener('scroll', onScroll)
+    }
   }, [])
   const linkClass = ({ isActive }) =>
     `px-2 py-1 rounded transition-colors ${isActive ? 'text-demargo-orange' : 'hover:text-demargo-orange'}`
   return (
-    <header className={`w-full sticky top-0 z-40 transition ${scrolled ? 'bg-white/90 backdrop-blur shadow' : 'bg-white/70 backdrop-blur'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur shadow' : 'bg-transparent'}`}>
       <nav className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <img src="/assets/Demargo%20Logo.jpg" alt="Demargo" className="h-8 w-auto" />
@@ -176,7 +187,7 @@ function Navbar() {
           </div>
         </div>
       )}
-    </header>
+      </header>
   )
 }
 
@@ -1704,7 +1715,7 @@ export default function App() {
       <AnimatePresence>
         {showSplash && <SplashScreen />}
       </AnimatePresence>
-      <div className="min-h-screen bg-slate-50 text-gray-900 overflow-x-hidden">
+      <div className="min-h-screen bg-slate-50 text-gray-900 overflow-x-hidden pt-16">
         <Navbar />
         <AnimatedRoutes />
         <BackToTop />
@@ -1714,17 +1725,17 @@ export default function App() {
           <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">
             <div className="space-y-4">
               <h3 className="text-2xl font-bold text-demargo-orange">Demargo</h3>
-              <p className="text-sm text-slate-400">Transforming spaces with premium interior design services since 2018.</p>
+              <p className="text-sm text-white/80">Transforming spaces with premium interior design services since 2018.</p>
             </div>
             <div className="space-y-4">
               <h4 className="font-semibold text-lg">Services</h4>
-              <ul className="space-y-2 text-sm text-slate-400">
+              <ul className="space-y-2 text-sm text-white/80">
                 {allServices.slice(0, 5).map((s, i) => <li key={i}>{s.title}</li>)}
               </ul>
             </div>
             <div className="space-y-4">
               <h4 className="font-semibold text-lg">Connect</h4>
-              <ul className="space-y-2 text-sm text-slate-400">
+              <ul className="space-y-2 text-sm text-white/80">
                 <li><Link to="/about">About Us</Link></li>
                 <li><Link to="/contact">Contact</Link></li>
                 <li><Link to="/track">Track Project</Link></li>
@@ -1732,14 +1743,17 @@ export default function App() {
             </div>
             <div className="space-y-4">
               <h4 className="font-semibold text-lg">Contact Info</h4>
-              <div className="text-sm text-slate-400 space-y-2">
+              <div className="text-sm text-white/80 space-y-2">
                 <p>Tel: 0546478040</p>
                 <p>Email: demargo1987@gmail.com</p>
               </div>
             </div>
           </div>
-          <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500">
+          <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-slate-800 text-center text-xs text-white/70">
             © {new Date().getFullYear()} Demargo Interior Contractors. All rights reserved.
+            <div className="mt-2">
+              Made by <a href="http://myportfolioworks.vercel.app/" target="_blank" rel="noreferrer" className="text-white font-semibold underline">GOLDENBOY DESIGNS</a>
+            </div>
           </div>
         </footer>
       </div>
