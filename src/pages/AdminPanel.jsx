@@ -409,12 +409,12 @@ function AdminPanel() {
                 </div>
 
                 {/* Metric Summary Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div className="bg-slate-900 border border-slate-850 p-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="bg-slate-900 border border-slate-850 p-4 rounded-3xl shadow-sm">
                         <span className="text-[10px] text-slate-500 uppercase block">Total Database Entries</span>
                         <span className="text-2xl font-black text-white block mt-1">{projects.length}</span>
                     </div>
-                    <div className="bg-slate-900 border border-slate-850 p-4">
+                    <div className="bg-slate-900 border border-slate-850 p-4 rounded-3xl shadow-sm">
                         <span className="text-[10px] text-slate-500 uppercase block">Active Projects</span>
                         <span className="text-2xl font-black text-demargo-blue block mt-1">{activeProjects.length}</span>
                     </div>
@@ -426,7 +426,7 @@ function AdminPanel() {
                         <span className="text-[10px] text-slate-500 uppercase block">In Sewing (Tailoring)</span>
                         <span className="text-2xl font-black text-demargo-orange block mt-1">{inSewingCount}</span>
                     </div>
-                    <div className="bg-slate-900 border border-slate-850 p-4 col-span-2 md:col-span-1">
+                    <div className="bg-slate-900 border border-slate-850 p-4 rounded-3xl shadow-sm sm:col-span-2 md:col-span-1">
                         <span className="text-[10px] text-slate-500 uppercase block">Total Payments Logged</span>
                         <span className="text-xl font-black text-green-500 block mt-1">GHS {totalCollected.toLocaleString('en-GH')}</span>
                     </div>
@@ -435,7 +435,7 @@ function AdminPanel() {
                 {/* Primary Workspace: Projects List and Project Details */}
                 <div className="grid lg:grid-cols-12 gap-8">
                     {/* Left Column: Projects Table (7 Cols) */}
-                    <div className="lg:col-span-7 bg-slate-900 border border-slate-850 p-6 space-y-6">
+                    <div className="lg:col-span-7 bg-slate-900 border border-slate-850 p-6 space-y-6 rounded-3xl shadow-2xl">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <h2 className="font-extrabold text-white text-md uppercase tracking-wider">Project Records Directory</h2>
                             <button
@@ -447,7 +447,7 @@ function AdminPanel() {
                         </div>
 
                         {/* Search and Filters */}
-                        <div className="grid sm:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <input
                                 type="text"
                                 placeholder="Search by name, phone, title..."
@@ -469,7 +469,7 @@ function AdminPanel() {
 
                         {/* Projects Table */}
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse text-xs">
+                            <table className="w-full min-w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr className="border-b border-slate-800 text-slate-500 uppercase tracking-wider">
                                         <th className="py-3 px-2">Client Details</th>
@@ -494,9 +494,9 @@ function AdminPanel() {
                                                     <div className="font-bold text-white">{p.clientName}</div>
                                                     <div className="text-[10px] text-slate-500 mt-0.5">{p.clientPhone}</div>
                                                 </td>
-                                                <td className="py-3 px-2 max-w-[180px] truncate">
-                                                    <div className="font-semibold text-slate-200">{p.projectTitle}</div>
-                                                    <div className="text-[10px] text-slate-500 mt-0.5">{p.serviceAddress}</div>
+                                                <td className="py-3 px-2 max-w-[220px] min-w-0 break-words">
+                                                    <div className="font-semibold text-slate-200 break-words">{p.projectTitle}</div>
+                                                    <div className="text-[10px] text-slate-500 mt-0.5 break-words">{p.serviceAddress}</div>
                                                 </td>
                                                 <td className="py-3 px-2">
                                                     <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${
@@ -521,9 +521,9 @@ function AdminPanel() {
                     </div>
 
                     {/* Right Column: Manage Details Panel (5 Cols) */}
-                    <div className="lg:col-span-5 bg-slate-900 border border-slate-850 p-6 space-y-6">
+                    <div className="lg:col-span-5 bg-slate-900 border border-slate-850 p-6 space-y-6 rounded-3xl shadow-2xl">
                         {!selectedProject ? (
-                            <div className="h-96 flex flex-col justify-center items-center text-center p-6 border border-dashed border-slate-800 text-slate-500">
+                            <div className="min-h-[18rem] sm:h-96 flex flex-col justify-center items-center text-center p-6 border border-dashed border-slate-800 text-slate-500">
                                 <span className="text-2xl block mb-2">📋</span>
                                 <h3 className="font-bold text-white uppercase text-xs tracking-wider">No Project Selected</h3>
                                 <p className="text-[11px] text-slate-500 mt-1 max-w-[220px]">Click a row in the project records directory to manage stages, set measurements, fabrics and log manual payments.</p>
@@ -813,7 +813,7 @@ function AdminPanel() {
             {/* CREATE PROJECT MODAL */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-slate-900 border border-slate-800 rounded-none max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
                         <div className="absolute top-0 left-0 w-2 h-full bg-demargo-orange" />
                         <div className="flex justify-between items-center pb-2 border-b border-slate-800">
                             <h3 className="font-black text-white uppercase text-sm tracking-wider">Create New Client Project</h3>
