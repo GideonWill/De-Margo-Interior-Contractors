@@ -47,6 +47,7 @@ function AdminPanel() {
     // Delete confirmation & toast
     const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null, name: '' })
     const [deleting, setDeleting] = useState(false)
+    const [creatingProject, setCreatingProject] = useState(false)
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
 
     const showToast = (message, type = 'success') => {
@@ -189,6 +190,7 @@ function AdminPanel() {
     // Create new project
     const handleCreateProject = async (e) => {
         e.preventDefault()
+        setCreatingProject(true)
         try {
             const amount = parseFloat(newProjData.totalAmount) || 0
             const projectId = await createProject({
@@ -202,8 +204,7 @@ function AdminPanel() {
                 messages: [],
                 status: 'measurement'
             })
-            showToast('Project created successfully.', 'success')
-            setShowCreateModal(false)
+            await fetchData()
             setNewProjData({
                 clientName: '',
                 clientEmail: '',
@@ -213,10 +214,14 @@ function AdminPanel() {
                 serviceAddress: '',
                 totalAmount: '0'
             })
-            fetchData()
+            setShowCreateModal(false)
+            showToast('Project created successfully.', 'success')
         } catch (err) {
             console.error('Create error:', err)
-            showToast('Failed to create project. Please try again.', 'error')
+            const message = err?.message || 'Please check Firebase rules or network connectivity.'
+            showToast(`Failed to create project: ${message}`, 'error')
+        } finally {
+            setCreatingProject(false)
         }
     }
 
@@ -995,9 +1000,10 @@ function AdminPanel() {
 
                             <button
                                 type="submit"
-                                className="w-full py-3 bg-demargo-orange text-white font-bold hover:opacity-90 transition-opacity uppercase tracking-wider text-xs"
+                                disabled={creatingProject}
+                                className="w-full py-3 bg-demargo-orange text-white font-bold hover:opacity-90 transition-opacity uppercase tracking-wider text-xs disabled:opacity-50"
                             >
-                                Create Project Record
+                                {creatingProject ? 'Creating project...' : 'Create Project Record'}
                             </button>
                         </form>
                     </div>
