@@ -1314,7 +1314,7 @@ function Testimonials() {
         <p className="text-gray-600 mb-8 max-w-2xl mx-auto">Join our growing list of satisfied clients and transform your space with Demargo's premium interior design services.</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/contact" className="btn-primary">Get Started Today</Link>
-          <Link to="/portfolio" className="btn-ghost">View Our Work</Link>
+          <Link to="/portfolio" className="btn-ghost-light">View Our Work</Link>
         </div>
       </div>
     </section>

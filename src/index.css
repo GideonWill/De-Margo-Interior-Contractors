@@ -35,6 +35,14 @@ body {
     box-shadow: 0 14px 36px rgba(255,255,255,.12), 0 0 0 2px rgba(255,255,255,.14) inset; 
 }
 
+.btn-ghost-light {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-900 transition;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+}
+.btn-ghost-light:hover {
+    box-shadow: 0 14px 36px rgba(15, 23, 42, .14), 0 0 0 2px rgba(148, 163, 184, .2) inset;
+}
+
 .btn-elevate { 
     transition: transform .2s ease, box-shadow .2s ease; 
     box-shadow: 0 6px 16px rgba(2,6,23,.08); 
