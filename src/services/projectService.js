@@ -10,7 +10,8 @@ import {
     where,
     orderBy,
     serverTimestamp,
-    Timestamp
+    Timestamp,
+    arrayUnion
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
@@ -46,7 +47,9 @@ const defaultProjects = [
         measurementDate: '2026-06-25T10:00',
         measurementNotes: 'Awaiting site visit to measure 4 living room windows (double height) and 3 bedroom windows.',
         createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+        updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        satisfaction: '',
+        messages: []
     },
     {
         id: 'mock-proj-2',
@@ -65,7 +68,9 @@ const defaultProjects = [
         estimateDetails: 'Living Room: GHS 5,500 (3 sets of heavy drapery + 3 sheers + tracks).\nStudy Room: GHS 3,000 (2 wooden zebra blinds + installation fee).',
         estimateApproved: false,
         createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        satisfaction: '',
+        messages: []
     },
     {
         id: 'mock-proj-3',
@@ -86,7 +91,9 @@ const defaultProjects = [
         selectedFabrics: 'Boardroom: Grey Blackout Blinds.\nDivider: Premium Beige Soundproof Wool.',
         fabricSelectionNotes: 'Client selected fabrics on 2026-06-22. Sewing requires 60% deposit (GHS 7,200). Paid GHS 3,000 so far.',
         createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        satisfaction: '',
+        messages: []
     },
     {
         id: 'mock-proj-4',
@@ -107,7 +114,10 @@ const defaultProjects = [
         selectedFabrics: 'Master: Royal Blue Velvet (Code: BL-V-02).\nDining: Off-White Linen (Code: LN-OW-09).',
         fabricSelectionNotes: 'Approved fabrics. Client paid 60%+ deposit of GHS 14,000.',
         createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        satisfaction: '',
+        feedbackRemarks: '',
+        messages: []
     },
     {
         id: 'mock-proj-5',
@@ -129,6 +139,8 @@ const defaultProjects = [
         fabricSelectionNotes: 'All materials purchased and sewn.',
         installationDate: '2026-06-26T09:00',
         installationNotes: 'Drapery sewn and packed. Installation team scheduled for Friday morning.',
+        satisfaction: '',
+        messages: [],
         createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
         updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
     }
@@ -192,6 +204,9 @@ const mockCreateProject = async (projectData) => {
         status: projectData.status || 'measurement',
         amountPaid: 0,
         balance: Number(projectData.totalAmount) || 0,
+        satisfaction: projectData.satisfaction || '',
+        feedbackRemarks: projectData.feedbackRemarks || '',
+        messages: projectData.messages || [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     }
@@ -290,6 +305,21 @@ const mockUpdateProject = async (projectId, updatedData) => {
     saveMockData('demargo_mock_projects', projects)
 }
 
+const mockAddProjectMessage = async (projectId, message) => {
+    const projects = getMockData('demargo_mock_projects', defaultProjects)
+    const idx = projects.findIndex(p => p.id === projectId)
+    if (idx === -1) throw new Error('Project not found')
+
+    const project = projects[idx]
+    const newMessages = [...(project.messages || []), message]
+    projects[idx] = {
+        ...project,
+        messages: newMessages,
+        updatedAt: new Date().toISOString()
+    }
+    saveMockData('demargo_mock_projects', projects)
+}
+
 const mockDeleteProject = async (projectId) => {
     const projects = getMockData('demargo_mock_projects', defaultProjects)
     const filtered = projects.filter(p => p.id !== projectId)
@@ -316,6 +346,9 @@ export const createProject = async (projectData) => {
             status: projectData.status || 'measurement',
             amountPaid: 0,
             balance: Number(projectData.totalAmount) || 0,
+            satisfaction: projectData.satisfaction || '',
+            feedbackRemarks: projectData.feedbackRemarks || '',
+            messages: projectData.messages || [],
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         })
@@ -551,6 +584,22 @@ export const updateProject = async (projectId, updatedData) => {
  * @param {string} projectId - Project ID
  * @returns {Promise<void>}
  */
+export const addProjectMessage = async (projectId, message) => {
+    if (!isFirebaseConfigured) {
+        return mockAddProjectMessage(projectId, message)
+    }
+    try {
+        const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
+        await updateDoc(projectRef, {
+            messages: arrayUnion(message),
+            updatedAt: serverTimestamp()
+        })
+    } catch (error) {
+        console.error('Error adding project message:', error)
+        throw error
+    }
+}
+
 export const deleteProject = async (projectId) => {
     if (!isFirebaseConfigured) {
         return mockDeleteProject(projectId)

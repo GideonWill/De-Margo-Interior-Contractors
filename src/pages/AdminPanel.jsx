@@ -4,6 +4,7 @@ import {
     getAllProjects,
     createProject,
     updateProject,
+    addProjectMessage,
     deleteProject,
     recordPayment,
     updateProjectPayment,
@@ -82,6 +83,9 @@ function AdminPanel() {
         installationDate: '',
         installationNotes: ''
     })
+
+    const [replyInput, setReplyInput] = useState('')
+    const [sendingReply, setSendingReply] = useState(false)
 
     // Manual Payment Logger Form
     const [manualPayment, setManualPayment] = useState({
@@ -186,6 +190,7 @@ function AdminPanel() {
                 projectDescription: newProjData.projectDescription.trim(),
                 serviceAddress: newProjData.serviceAddress.trim(),
                 totalAmount: amount,
+                messages: [],
                 status: 'measurement'
             })
             showToast('Project created successfully.', 'success')
@@ -244,6 +249,28 @@ function AdminPanel() {
         } catch (err) {
             console.error('Update error:', err)
             showToast('Failed to save project updates.', 'error')
+        }
+    }
+
+    const handleSendReply = async () => {
+        if (!selectedProject || !replyInput.trim()) return
+        setSendingReply(true)
+        try {
+            const message = {
+                id: `msg-${Date.now()}`,
+                sender: 'admin',
+                body: replyInput.trim(),
+                createdAt: new Date().toISOString()
+            }
+            await addProjectMessage(selectedProject.id, message)
+            await handleSelectProject(selectedProject.id)
+            setReplyInput('')
+            showToast('Reply sent successfully.', 'success')
+        } catch (err) {
+            console.error('Reply send error:', err)
+            showToast('Could not send reply. Please try again.', 'error')
+        } finally {
+            setSendingReply(false)
         }
     }
 
@@ -535,6 +562,42 @@ function AdminPanel() {
                                         <span className="text-[10px] text-slate-500 uppercase">Selected Project</span>
                                         <h3 className="text-base font-bold text-white mt-0.5">{selectedProject.clientName}</h3>
                                         <p className="text-[10px] text-slate-400 mt-0.5">{selectedProject.projectTitle}</p>
+                                        <div className="mt-4 bg-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Project Conversation</span>
+                                                <span className="text-[10px] text-slate-400">{(selectedProject.messages || []).length} messages</span>
+                                            </div>
+                                            <div className="space-y-3 max-h-72 overflow-y-auto pr-2">
+                                                {(selectedProject.messages || []).length === 0 ? (
+                                                    <div className="text-slate-500 italic text-[11px]">No conversation yet. Reply to start the chat.</div>
+                                                ) : (
+                                                    selectedProject.messages.map((msg) => (
+                                                        <div key={msg.id} className={`rounded-3xl p-3 ${msg.sender === 'admin' ? 'bg-slate-800 border border-slate-700 self-start' : 'bg-slate-100 border border-slate-200 self-end'}`}>
+                                                            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-1">{msg.sender === 'admin' ? 'Admin' : 'Client'}</div>
+                                                            <div className="text-sm leading-relaxed text-slate-100 whitespace-pre-line">{msg.body}</div>
+                                                            <div className="text-[10px] text-slate-400 mt-2">{new Date(msg.createdAt).toLocaleString('en-GH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                            <div className="mt-4 space-y-2">
+                                                <textarea
+                                                    rows="3"
+                                                    value={replyInput}
+                                                    onChange={(e) => setReplyInput(e.target.value)}
+                                                    placeholder="Write your admin reply to the client..."
+                                                    className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2 focus:outline-none"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleSendReply}
+                                                    disabled={sendingReply || !replyInput.trim()}
+                                                    className="w-full py-3 bg-demargo-orange text-blue-900 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition disabled:opacity-50"
+                                                >
+                                                    {sendingReply ? 'Sending reply...' : 'Send Reply'}
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                     <button
                                         onClick={() => requestDeleteProject(selectedProject.id, selectedProject.clientName)}

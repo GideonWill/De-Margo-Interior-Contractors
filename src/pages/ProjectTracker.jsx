@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet'
-import { getProjectsByPhone, getProjectById, updateProject, updateProjectPayment, recordPayment } from '../services/projectService'
+import { getProjectsByPhone, getProjectById, updateProject, updateProjectPayment, recordPayment, addProjectMessage } from '../services/projectService'
 
 import './ProjectTracker.css';
 const STAGES = [
@@ -19,6 +19,8 @@ function ProjectTracker() {
     const [projects, setProjects] = useState([])
     const [selectedProject, setSelectedProject] = useState(null)
     const [loadingProject, setLoadingProject] = useState(false)
+    const [messageInput, setMessageInput] = useState('')
+    const [sendingMessage, setSendingMessage] = useState(false)
     
     // Payment states
     
@@ -92,6 +94,28 @@ function ProjectTracker() {
             showToast('Failed to approve estimate. Please try again or contact support.', 'error')
         } finally {
             setApprovingEstimate(false)
+        }
+    }
+
+    const handleSendMessage = async () => {
+        if (!selectedProject || !messageInput.trim()) return
+        setSendingMessage(true)
+        try {
+            const message = {
+                id: `msg-${Date.now()}`,
+                sender: 'client',
+                body: messageInput.trim(),
+                createdAt: new Date().toISOString()
+            }
+            await addProjectMessage(selectedProject.id, message)
+            await handleSelectProject(selectedProject.id)
+            setMessageInput('')
+            showToast('Message sent. Our team will respond shortly.', 'success')
+        } catch (err) {
+            console.error('Message send error:', err)
+            showToast('Could not send your message. Please try again.', 'error')
+        } finally {
+            setSendingMessage(false)
         }
     }
 
@@ -520,6 +544,44 @@ function ProjectTracker() {
                                         <div className="bg-white p-4 border border-gray-200">
                                             <span className="text-slate-500 uppercase block mb-1">Measurement Details</span>
                                             <span className="text-slate-200 whitespace-pre-line">{selectedProject.measurementNotes || 'No measurements details recorded yet.'}</span>
+                                        </div>
+                                        <div className="bg-white p-4 border border-gray-200">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <span className="text-slate-500 uppercase tracking-widest text-[10px] font-bold">Project Conversation</span>
+                                                <span className="text-[10px] text-slate-400">{(selectedProject.messages || []).length} messages</span>
+                                            </div>
+                                            <div className="space-y-3">
+                                                {(selectedProject.messages || []).length > 0 ? (
+                                                    <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                                                        {selectedProject.messages.map((msg) => (
+                                                            <div key={msg.id} className={`rounded-2xl p-3 ${msg.sender === 'admin' ? 'bg-slate-100 text-blue-900 self-start' : 'bg-demargo-orange/10 text-blue-900 self-end'} ${msg.sender === 'admin' ? 'border border-slate-200' : 'border border-demargo-orange/40'}`}>
+                                                                <div className="text-[11px] uppercase tracking-[0.2em] text-slate-500 mb-1">{msg.sender === 'admin' ? 'Admin' : 'You'}</div>
+                                                                <div className="whitespace-pre-line text-sm text-blue-900">{msg.body}</div>
+                                                                <div className="text-[10px] text-slate-400 mt-2">{new Date(msg.createdAt).toLocaleString('en-GH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-slate-500 italic text-sm">No messages yet. Send a note to the admin about your project.</div>
+                                                )}
+                                            </div>
+                                            <div className="mt-4 space-y-3">
+                                                <textarea
+                                                    rows="3"
+                                                    value={messageInput}
+                                                    onChange={(e) => setMessageInput(e.target.value)}
+                                                    placeholder="Send a message about your project or ask a question..."
+                                                    className="w-full resize-none bg-white border border-gray-300 text-blue-900 px-3 py-2 focus:outline-none"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleSendMessage}
+                                                    disabled={sendingMessage || !messageInput.trim()}
+                                                    className="w-full py-3 bg-demargo-orange text-blue-900 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition disabled:opacity-50"
+                                                >
+                                                    {sendingMessage ? 'Sending message...' : 'Send Message'}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
