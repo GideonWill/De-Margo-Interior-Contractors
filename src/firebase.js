@@ -4,6 +4,7 @@
 
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth'
 
 const firebaseConfig = {
     apiKey: "AIzaSyC09_b_uWspKRQPEyuaPk5JZwwDTH68zpw",
@@ -18,9 +19,35 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
-
-// Initialize Firestore
 export const db = getFirestore(app)
+export const auth = getAuth(app)
 export const isFirebaseConfigured = true
+
+let authInitialized = false
+export const initFirebaseAuth = async () => {
+    if (authInitialized) return auth.currentUser
+    authInitialized = true
+
+    if (auth.currentUser) {
+        return auth.currentUser
+    }
+
+    try {
+        await signInAnonymously(auth)
+    } catch (error) {
+        console.warn('Firebase anonymous auth failed:', error)
+        // If anonymous auth is not allowed, we still allow the app to continue and let Firestore rules report the actual error.
+    }
+
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe()
+            resolve(user)
+        }, (error) => {
+            unsubscribe()
+            reject(error)
+        })
+    })
+}
 
 export default app

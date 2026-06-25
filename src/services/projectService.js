@@ -14,7 +14,7 @@ import {
     arrayUnion,
     onSnapshot
 } from 'firebase/firestore'
-import { db, isFirebaseConfigured } from '../firebase'
+import { db, isFirebaseConfigured, initFirebaseAuth } from '../firebase'
 
 const PROJECTS_COLLECTION = 'projects'
 const PAYMENTS_COLLECTION = 'payments'
@@ -358,6 +358,9 @@ export const createProject = async (projectData) => {
     if (!isFirebaseConfigured) {
         return mockCreateProject(projectData)
     }
+
+    await initFirebaseAuth()
+
     try {
         const docRef = await addDoc(collection(db, PROJECTS_COLLECTION), {
             ...projectData,
@@ -386,6 +389,7 @@ export const getProjectById = async (projectId) => {
     if (!isFirebaseConfigured) {
         return mockGetProjectById(projectId)
     }
+    await initFirebaseAuth()
     try {
         const docRef = doc(db, PROJECTS_COLLECTION, projectId)
         const docSnap = await getDoc(docRef)
@@ -438,6 +442,7 @@ export const getProjectsByEmail = async (email) => {
     if (!isFirebaseConfigured) {
         return mockGetProjectsByEmail(email)
     }
+    await initFirebaseAuth()
     try {
         const q = query(
             collection(db, PROJECTS_COLLECTION),
@@ -464,6 +469,7 @@ export const getProjectsByPhone = async (phone) => {
     if (!isFirebaseConfigured) {
         return mockGetProjectsByPhone(phone)
     }
+    await initFirebaseAuth()
     try {
         const q = query(
             collection(db, PROJECTS_COLLECTION),
@@ -491,6 +497,7 @@ export const updateProjectPayment = async (projectId, paymentAmount) => {
     if (!isFirebaseConfigured) {
         return mockUpdateProjectPayment(projectId, paymentAmount)
     }
+    await initFirebaseAuth()
     try {
         const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
         const projectSnap = await getDoc(projectRef)
@@ -530,6 +537,7 @@ export const recordPayment = async (paymentData) => {
     if (!isFirebaseConfigured) {
         return mockRecordPayment(paymentData)
     }
+    await initFirebaseAuth()
     try {
         const docRef = await addDoc(collection(db, PAYMENTS_COLLECTION), {
             ...paymentData,
@@ -551,6 +559,7 @@ export const getProjectPayments = async (projectId) => {
     if (!isFirebaseConfigured) {
         return mockGetProjectPayments(projectId)
     }
+    await initFirebaseAuth()
     try {
         const q = query(
             collection(db, PAYMENTS_COLLECTION),
@@ -576,6 +585,7 @@ export const getAllProjects = async () => {
     if (!isFirebaseConfigured) {
         return mockGetAllProjects()
     }
+    await initFirebaseAuth()
     try {
         const q = query(collection(db, PROJECTS_COLLECTION), orderBy('createdAt', 'desc'))
         const querySnapshot = await getDocs(q)
@@ -600,6 +610,7 @@ export const updateProject = async (projectId, updatedData) => {
     if (!isFirebaseConfigured) {
         return mockUpdateProject(projectId, updatedData)
     }
+    await initFirebaseAuth()
     try {
         const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
         const projectSnap = await getDoc(projectRef)
@@ -635,6 +646,7 @@ export const addProjectMessage = async (projectId, message) => {
     if (!isFirebaseConfigured) {
         return mockAddProjectMessage(projectId, normalizedMessage)
     }
+    await initFirebaseAuth()
     try {
         const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
         await updateDoc(projectRef, {
@@ -651,6 +663,7 @@ export const updateProjectMessages = async (projectId, messages) => {
     if (!isFirebaseConfigured) {
         return mockUpdateProjectMessages(projectId, messages)
     }
+    await initFirebaseAuth()
     try {
         const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
         await updateDoc(projectRef, {
@@ -671,6 +684,7 @@ export const deleteProject = async (projectId) => {
     if (!isFirebaseConfigured) {
         return mockDeleteProject(projectId)
     }
+    await initFirebaseAuth()
     try {
         const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
         await deleteDoc(projectRef)
