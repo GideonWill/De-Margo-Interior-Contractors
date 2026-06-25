@@ -11,7 +11,8 @@ import {
     orderBy,
     serverTimestamp,
     Timestamp,
-    arrayUnion
+    arrayUnion,
+    onSnapshot
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
@@ -19,7 +20,7 @@ const PROJECTS_COLLECTION = 'projects'
 const PAYMENTS_COLLECTION = 'payments'
 
 // Check if Firebase is properly configured
-const isFirebaseConfigured = !!import.meta.env.VITE_FIREBASE_API_KEY && 
+export const isFirebaseConfigured = !!import.meta.env.VITE_FIREBASE_API_KEY && 
                              import.meta.env.VITE_FIREBASE_API_KEY !== 'your_api_key_here' &&
                              import.meta.env.VITE_FIREBASE_API_KEY !== '';
 
@@ -305,16 +306,38 @@ const mockUpdateProject = async (projectId, updatedData) => {
     saveMockData('demargo_mock_projects', projects)
 }
 
+const normalizeMessage = (message) => ({
+    ...message,
+    readByClient: message.sender === 'admin' ? false : true,
+    readByAdmin: message.sender === 'client' ? false : true
+})
+
 const mockAddProjectMessage = async (projectId, message) => {
     const projects = getMockData('demargo_mock_projects', defaultProjects)
     const idx = projects.findIndex(p => p.id === projectId)
     if (idx === -1) throw new Error('Project not found')
 
     const project = projects[idx]
-    const newMessages = [...(project.messages || []), message]
+    const newMessages = [...(project.messages || []), normalizeMessage(message)]
     projects[idx] = {
         ...project,
         messages: newMessages,
+        updatedAt: new Date().toISOString()
+    }
+    saveMockData('demargo_mock_projects', projects)
+}
+
+const mockUpdateProjectMessages = async (projectId, messages) => {
+    const projects = getMockData('demargo_mock_projects', defaultProjects)
+    const idx = projects.findIndex(p => p.id === projectId)
+    if (idx === -1) throw new Error('Project not found')
+    projects[idx] = {
+        ...projects[idx],
+        messages: messages.map((msg) => ({
+            ...msg,
+            readByClient: msg.sender === 'admin' ? Boolean(msg.readByClient) : true,
+            readByAdmin: msg.sender === 'client' ? Boolean(msg.readByAdmin) : true
+        })),
         updatedAt: new Date().toISOString()
     }
     saveMockData('demargo_mock_projects', projects)
@@ -381,6 +404,34 @@ export const getProjectById = async (projectId) => {
         console.error('Error getting project:', error)
         throw error
     }
+}
+
+export const subscribeToProject = (projectId, onProjectUpdate) => {
+    if (!isFirebaseConfigured) {
+        const storageListener = (event) => {
+            if (event.key !== 'demargo_mock_projects' || !event.newValue) return
+            try {
+                const projects = JSON.parse(event.newValue)
+                const project = projects.find(p => p.id === projectId)
+                if (project) {
+                    onProjectUpdate({ ...project })
+                }
+            } catch (err) {
+                console.error('Error parsing mock project storage update:', err)
+            }
+        }
+        window.addEventListener('storage', storageListener)
+        return () => window.removeEventListener('storage', storageListener)
+    }
+
+    const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
+    const unsubscribe = onSnapshot(projectRef, (snapshot) => {
+        if (!snapshot.exists()) return
+        onProjectUpdate({ id: snapshot.id, ...snapshot.data() })
+    }, (err) => {
+        console.error('Error subscribing to project snapshot:', err)
+    })
+    return unsubscribe
 }
 
 /**
@@ -585,17 +636,38 @@ export const updateProject = async (projectId, updatedData) => {
  * @returns {Promise<void>}
  */
 export const addProjectMessage = async (projectId, message) => {
+    const normalizedMessage = normalizeMessage(message)
     if (!isFirebaseConfigured) {
-        return mockAddProjectMessage(projectId, message)
+        return mockAddProjectMessage(projectId, normalizedMessage)
     }
     try {
         const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
         await updateDoc(projectRef, {
-            messages: arrayUnion(message),
+            messages: arrayUnion(normalizedMessage),
             updatedAt: serverTimestamp()
         })
     } catch (error) {
         console.error('Error adding project message:', error)
+        throw error
+    }
+}
+
+export const updateProjectMessages = async (projectId, messages) => {
+    if (!isFirebaseConfigured) {
+        return mockUpdateProjectMessages(projectId, messages)
+    }
+    try {
+        const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
+        await updateDoc(projectRef, {
+            messages: messages.map((msg) => ({
+                ...msg,
+                readByClient: msg.sender === 'admin' ? Boolean(msg.readByClient) : true,
+                readByAdmin: msg.sender === 'client' ? Boolean(msg.readByAdmin) : true
+            })),
+            updatedAt: serverTimestamp()
+        })
+    } catch (error) {
+        console.error('Error updating project messages:', error)
         throw error
     }
 }

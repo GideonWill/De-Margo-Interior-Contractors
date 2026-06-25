@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet'
-import { getProjectsByPhone, getProjectById, updateProject, updateProjectPayment, recordPayment, addProjectMessage } from '../services/projectService'
+import { TrophyIcon } from '@heroicons/react/24/outline'
+import { getProjectsByPhone, getProjectById, updateProject, updateProjectPayment, recordPayment, addProjectMessage, updateProjectMessages, subscribeToProject } from '../services/projectService'
 
 import './ProjectTracker.css';
 const STAGES = [
@@ -21,6 +22,9 @@ function ProjectTracker() {
     const [loadingProject, setLoadingProject] = useState(false)
     const [messageInput, setMessageInput] = useState('')
     const [sendingMessage, setSendingMessage] = useState(false)
+    const [hasNewAdminMessage, setHasNewAdminMessage] = useState(false)
+    const projectSubscriptionRef = useRef(null)
+    const messagesListRef = useRef(null)
     
     // Payment states
     
@@ -77,6 +81,51 @@ function ProjectTracker() {
         }
     }
 
+    React.useEffect(() => {
+        if (!selectedProject?.id) return
+
+        if (projectSubscriptionRef.current) {
+            projectSubscriptionRef.current()
+            projectSubscriptionRef.current = null
+        }
+
+        projectSubscriptionRef.current = subscribeToProject(selectedProject.id, (updatedProject) => {
+            setSelectedProject(prev => {
+                if (!prev || prev.id !== updatedProject.id) return updatedProject
+                return { ...prev, ...updatedProject }
+            })
+        })
+
+        return () => {
+            if (projectSubscriptionRef.current) {
+                projectSubscriptionRef.current()
+                projectSubscriptionRef.current = null
+            }
+        }
+    }, [selectedProject?.id])
+
+    React.useEffect(() => {
+        if (!selectedProject) return
+        const unread = (selectedProject.messages || []).some(msg => msg.sender === 'admin' && !msg.readByClient)
+        setHasNewAdminMessage(unread)
+
+        if (!unread) return
+
+        const updatedMessages = (selectedProject.messages || []).map(msg =>
+            msg.sender === 'admin' ? { ...msg, readByClient: true } : msg
+        )
+
+        setSelectedProject(prev => prev ? { ...prev, messages: updatedMessages } : prev)
+        updateProjectMessages(selectedProject.id, updatedMessages).catch(err => {
+            console.error('Could not mark admin messages read:', err)
+        })
+    }, [selectedProject?.messages])
+
+    React.useEffect(() => {
+        if (!messagesListRef.current) return
+        messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight
+    }, [selectedProject?.messages?.length])
+
     // Approve the estimate (moves stage from 'estimate' to 'fabric')
     const handleApproveEstimate = async () => {
         if (!selectedProject) return
@@ -100,16 +149,20 @@ function ProjectTracker() {
     const handleSendMessage = async () => {
         if (!selectedProject || !messageInput.trim()) return
         setSendingMessage(true)
+        const message = {
+            id: `msg-${Date.now()}`,
+            sender: 'client',
+            body: messageInput.trim(),
+            createdAt: new Date().toISOString(),
+            readByAdmin: false,
+            readByClient: true
+        }
+        setSelectedProject(prev => prev ? { ...prev, messages: [...(prev.messages || []), message] } : prev)
+        setMessageInput('')
+
         try {
-            const message = {
-                id: `msg-${Date.now()}`,
-                sender: 'client',
-                body: messageInput.trim(),
-                createdAt: new Date().toISOString()
-            }
             await addProjectMessage(selectedProject.id, message)
             await handleSelectProject(selectedProject.id)
-            setMessageInput('')
             showToast('Message sent. Our team will respond shortly.', 'success')
         } catch (err) {
             console.error('Message send error:', err)
@@ -524,9 +577,12 @@ function ProjectTracker() {
                                     )}
 
                                     {selectedProject.status === 'completed' && (
-                                        <div className="bg-green-950/20 border border-green-900/30 p-5 text-green-300 space-y-2">
-                                            <div className="text-2xl font-bold flex items-center gap-2">🏆 Project Complete</div>
-                                            <p className="text-sm text-slate-300 leading-relaxed">
+                                        <div className="bg-emerald-900/10 border border-emerald-600/30 p-6 rounded-3xl text-emerald-100 space-y-3">
+                                            <div className="flex items-center gap-3 text-2xl font-bold text-emerald-900">
+                                                <TrophyIcon className="h-8 w-8 text-amber-300" />
+                                                <span>Project Complete</span>
+                                            </div>
+                                            <p className="text-sm text-slate-200 leading-relaxed">
                                                 Your curtains and blinds have been installed neatly! The final balances are cleared. Thank you for partnering with Demargo Interior Contractors. We look forward to working with you again.
                                             </p>
                                         </div>
@@ -550,9 +606,18 @@ function ProjectTracker() {
                                                 <span className="text-slate-500 uppercase tracking-widest text-[10px] font-bold">Project Conversation</span>
                                                 <span className="text-[10px] text-slate-400">{(selectedProject.messages || []).length} messages</span>
                                             </div>
+                                            {hasNewAdminMessage && (
+                                                <div className="mb-4 rounded-2xl border border-emerald-600/40 bg-emerald-950/10 p-3 text-emerald-100 flex items-start gap-3 animate-pulse">
+                                                    <span className="mt-1 inline-flex h-3 w-3 rounded-full bg-emerald-400 animate-ping" />
+                                                    <div>
+                                                        <div className="text-sm font-semibold">New admin reply waiting</div>
+                                                        <div className="text-[11px] text-emerald-200/80">Scroll down to view the latest response from our team.</div>
+                                                    </div>
+                                                </div>
+                                            )}
                                             <div className="space-y-3">
                                                 {(selectedProject.messages || []).length > 0 ? (
-                                                    <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                                                    <div ref={messagesListRef} className="space-y-3 max-h-64 overflow-y-auto pr-2" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
                                                         {selectedProject.messages.map((msg) => (
                                                             <div key={msg.id} className={`rounded-2xl p-3 ${msg.sender === 'admin' ? 'bg-slate-100 text-blue-900 self-start' : 'bg-demargo-orange/10 text-blue-900 self-end'} ${msg.sender === 'admin' ? 'border border-slate-200' : 'border border-demargo-orange/40'}`}>
                                                                 <div className="text-[11px] uppercase tracking-[0.2em] text-slate-500 mb-1">{msg.sender === 'admin' ? 'Admin' : 'You'}</div>

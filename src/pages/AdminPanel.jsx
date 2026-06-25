@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 import {
     getAllProjects,
+    getProjectById,
     createProject,
     updateProject,
     addProjectMessage,
@@ -86,6 +87,8 @@ function AdminPanel() {
 
     const [replyInput, setReplyInput] = useState('')
     const [sendingReply, setSendingReply] = useState(false)
+    const messagesListRef = useRef(null)
+    const selectedProjectRef = useRef(null)
 
     // Manual Payment Logger Form
     const [manualPayment, setManualPayment] = useState({
@@ -140,7 +143,8 @@ function AdminPanel() {
     }
 
     // Select project and load details
-    const handleSelectProject = async (proj) => {
+    const handleSelectProject = async (projOrId) => {
+        const proj = typeof projOrId === 'string' ? await getProjectById(projOrId) : projOrId
         setSelectedProject(proj)
         setEditProjData({
             status: proj.status || 'measurement',
@@ -176,6 +180,11 @@ function AdminPanel() {
             setLoadingPayments(false)
         }
     }
+
+    React.useEffect(() => {
+        if (!selectedProject || !selectedProjectRef.current) return
+        selectedProjectRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, [selectedProject?.id])
 
     // Create new project
     const handleCreateProject = async (e) => {
@@ -255,16 +264,20 @@ function AdminPanel() {
     const handleSendReply = async () => {
         if (!selectedProject || !replyInput.trim()) return
         setSendingReply(true)
+        const message = {
+            id: `msg-${Date.now()}`,
+            sender: 'admin',
+            body: replyInput.trim(),
+            createdAt: new Date().toISOString(),
+            readByClient: false,
+            readByAdmin: true
+        }
+        setSelectedProject(prev => prev ? { ...prev, messages: [...(prev.messages || []), message] } : prev)
+        setReplyInput('')
+
         try {
-            const message = {
-                id: `msg-${Date.now()}`,
-                sender: 'admin',
-                body: replyInput.trim(),
-                createdAt: new Date().toISOString()
-            }
             await addProjectMessage(selectedProject.id, message)
             await handleSelectProject(selectedProject.id)
-            setReplyInput('')
             showToast('Reply sent successfully.', 'success')
         } catch (err) {
             console.error('Reply send error:', err)
@@ -273,6 +286,11 @@ function AdminPanel() {
             setSendingReply(false)
         }
     }
+
+    React.useEffect(() => {
+        if (!messagesListRef.current) return
+        messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight
+    }, [selectedProject?.messages?.length])
 
     // Log offline manual payment
     const handleLogPayment = async (e) => {
@@ -556,7 +574,7 @@ function AdminPanel() {
                                 <p className="text-[11px] text-slate-500 mt-1 max-w-[220px]">Click a row in the project records directory to manage stages, set measurements, fabrics and log manual payments.</p>
                             </div>
                         ) : (
-                            <div className="space-y-6">
+                            <div ref={selectedProjectRef} className="space-y-6">
                                 <div className="flex justify-between items-start border-b border-slate-850 pb-4">
                                     <div>
                                         <span className="text-[10px] text-slate-500 uppercase">Selected Project</span>
@@ -567,7 +585,7 @@ function AdminPanel() {
                                                 <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Project Conversation</span>
                                                 <span className="text-[10px] text-slate-400">{(selectedProject.messages || []).length} messages</span>
                                             </div>
-                                            <div className="space-y-3 max-h-72 overflow-y-auto pr-2">
+                                            <div ref={messagesListRef} className="space-y-3 max-h-72 overflow-y-auto pr-2" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', overscrollBehavior: 'contain', scrollBehavior: 'smooth' }}>
                                                 {(selectedProject.messages || []).length === 0 ? (
                                                     <div className="text-slate-500 italic text-[11px]">No conversation yet. Reply to start the chat.</div>
                                                 ) : (
