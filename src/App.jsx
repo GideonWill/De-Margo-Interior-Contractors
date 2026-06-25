@@ -603,7 +603,7 @@ function Services() {
       {/* Large Video Hero Section */}
       <section className="relative h-[60vh] md:h-[75vh] flex items-center overflow-hidden bg-slate-900 w-full">
         <video
-          src="/assets/service-hero-section.MOV"
+          src="/assets/reel.MOV"
           muted
           playsInline
           loop
