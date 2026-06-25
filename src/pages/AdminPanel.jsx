@@ -561,7 +561,7 @@ function AdminPanel() {
                                     </div>
 
                                     {/* Client Details Row */}
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div>
                                             <label className="block text-slate-500 font-bold mb-1 uppercase">Client Name</label>
                                             <input
@@ -582,7 +582,7 @@ function AdminPanel() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div>
                                             <label className="block text-slate-500 font-bold mb-1 uppercase">Client Email</label>
                                             <input
@@ -616,7 +616,7 @@ function AdminPanel() {
                                     {/* 1. Measurement Settings */}
                                     <div className="border-t border-slate-850 pt-4 space-y-3">
                                         <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">1. Measurements Information</span>
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             <div>
                                                 <label className="block text-slate-500 font-semibold mb-1">Measurement Date</label>
                                                 <input
@@ -669,7 +669,7 @@ function AdminPanel() {
                                     {/* 3. Fabric selection */}
                                     <div className="border-t border-slate-850 pt-4 space-y-3">
                                         <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">3. Fabric Selections</span>
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             <div>
                                                 <label className="block text-slate-500 font-semibold mb-1">Selected Fabric Codes</label>
                                                 <input
@@ -696,7 +696,7 @@ function AdminPanel() {
                                     {/* 4. Installation scheduling */}
                                     <div className="border-t border-slate-850 pt-4 space-y-3">
                                         <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">4. Installation Information</span>
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             <div>
                                                 <label className="block text-slate-500 font-semibold mb-1">Installation Date</label>
                                                 <input
@@ -733,8 +733,8 @@ function AdminPanel() {
                                     <div className="border-t border-slate-850 pt-6 space-y-4">
                                         <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">5. Log Manual/Offline Payment</span>
                                         <form onSubmit={handleLogPayment} className="space-y-3 text-xs">
-                                            <div className="grid grid-cols-3 gap-2">
-                                                <div className="col-span-2">
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                <div className="sm:col-span-2">
                                                     <label className="block text-slate-500 mb-1">Payment Amount (GHS)</label>
                                                     <input
                                                         type="number"

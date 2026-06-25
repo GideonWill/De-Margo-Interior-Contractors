@@ -1,6 +1,6 @@
 /* ProjectTracker theme overrides */
-/* Force white background for any slate background classes */
-.bg-slate-800, .bg-slate-900, .bg-slate-950 {
+/* Keep ProjectTracker styling local and avoid global slate background overrides */
+.project-tracker-theme .bg-slate-800, .project-tracker-theme .bg-slate-900, .project-tracker-theme .bg-slate-950 {
   background-color: #ffffff !important;
 }
 /* Override slate text colors with blue-black (approx #0A0A0A) */

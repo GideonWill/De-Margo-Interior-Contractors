@@ -106,7 +106,7 @@ function ProjectTracker() {
         : 0
 
     return (
-        <main className="min-h-screen bg-white text-blue-900 py-16 px-4">
+        <main className="project-tracker-theme min-h-screen bg-white text-blue-900 py-16 px-4">
             <Helmet>
                 <title>Track Your Project • Demargo Interior Contractors</title>
                 <meta name="description" content="Track the real-time progress of your custom interior design, curtain sewing, and installation projects." />
