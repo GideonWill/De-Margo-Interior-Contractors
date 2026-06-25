@@ -14,15 +14,10 @@ import {
     arrayUnion,
     onSnapshot
 } from 'firebase/firestore'
-import { db } from '../firebase'
+import { db, isFirebaseConfigured } from '../firebase'
 
 const PROJECTS_COLLECTION = 'projects'
 const PAYMENTS_COLLECTION = 'payments'
-
-// Check if Firebase is properly configured
-export const isFirebaseConfigured = !!import.meta.env.VITE_FIREBASE_API_KEY && 
-                             import.meta.env.VITE_FIREBASE_API_KEY !== 'your_api_key_here' &&
-                             import.meta.env.VITE_FIREBASE_API_KEY !== '';
 
 if (!isFirebaseConfigured) {
     console.warn('Firebase API key missing or set to placeholder. Running in Local Storage Mock mode.')

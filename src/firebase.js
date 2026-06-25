@@ -1,17 +1,19 @@
 // Firebase configuration
-// Replace these values with your actual Firebase project credentials
-// Get these from: Firebase Console > Project Settings > General > Your apps > Web app
+// Using the real Firebase project credentials for Demargo ERMS
+// This app will now use Firestore instead of localStorage mock mode.
 
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID
+    apiKey: "AIzaSyC09_b_uWspKRQPEyuaPk5JZwwDTH68zpw",
+    authDomain: "demargo-erms.firebaseapp.com",
+    databaseURL: "https://demargo-erms-default-rtdb.firebaseio.com",
+    projectId: "demargo-erms",
+    storageBucket: "demargo-erms.firebasestorage.app",
+    messagingSenderId: "132903868292",
+    appId: "1:132903868292:web:480df39d05d885517cefd1",
+    measurementId: "G-39Y9DSKP29"
 }
 
 // Initialize Firebase
@@ -19,5 +21,6 @@ const app = initializeApp(firebaseConfig)
 
 // Initialize Firestore
 export const db = getFirestore(app)
+export const isFirebaseConfigured = true
 
 export default app
