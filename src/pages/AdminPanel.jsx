@@ -591,7 +591,9 @@ function AdminPanel() {
                                                 ) : (
                                                     selectedProject.messages.map((msg) => (
                                                         <div key={msg.id} className={`rounded-3xl p-3 ${msg.sender === 'admin' ? 'bg-slate-800 border border-slate-700 self-start' : 'bg-slate-100 border border-slate-200 self-end'}`}>
-                                                            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-1">{msg.sender === 'admin' ? 'Admin' : 'Client'}</div>
+                                                            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-1">
+                                                                {msg.sender === 'admin' ? 'Admin' : selectedProject.clientName || 'Client'}
+                                                            </div>
                                                             <div className="text-sm leading-relaxed text-slate-100 whitespace-pre-line">{msg.body}</div>
                                                             <div className="text-[10px] text-slate-400 mt-2">{new Date(msg.createdAt).toLocaleString('en-GH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
                                                         </div>
