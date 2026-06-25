@@ -603,13 +603,16 @@ function Services() {
       {/* Large Video Hero Section */}
       <section className="relative h-[60vh] md:h-[75vh] flex items-center overflow-hidden bg-slate-900 w-full">
         <video
-          src="/assets/reel.MOV"
           muted
           playsInline
           loop
           autoPlay
+          preload="metadata"
           className="absolute inset-0 w-full h-full object-cover"
-        />
+        >
+          <source src="/assets/reel.MOV" type="video/quicktime" />
+          <source src="/assets/video.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-black/45" />
         <div className="relative z-10 max-w-6xl mx-auto px-4 w-full">
           <div className="text-white max-w-2xl animate-fade-in">
