@@ -1425,7 +1425,7 @@ function BackToTop() {
 function ChatBot() {
   const [open, setOpen] = React.useState(false)
   const [messages, setMessages] = React.useState([
-    { role: 'bot', text: 'Hi! I\'m Demargo Assistant. Ask me anything about services, pricing, booking, fabrics, or our design process.' }
+    { role: 'bot', text: 'Hi! I\'m Demargo Assistant. Ask me anything — about our services, design ideas, renovations, or any other question you have.' }
   ])
   const [input, setInput] = React.useState('')
   const [typing, setTyping] = React.useState(false)
@@ -1448,23 +1448,6 @@ function ChatBot() {
     { t: '3D Rendering', a: () => pushBotAction('Opening 3D Rendering…', () => navigate('/3d-rendering')) },
     { t: 'Contact', a: () => pushBotText('Phone: 0546478040 • Email: demargo1987@gmail.com') },
   ]
-
-  const businessFaqs = [
-    { q: /hour|open|close|working|when/i, a: 'We are open Monday–Friday from 8:00 AM to 5:00 PM and Saturday from 8:00 AM to 4:00 PM.' },
-    { q: /address|location|where|gbawe|accra/i, a: 'We are based in Gbawe, Accra, and serve clients across Accra, Kumasi, Tema, Takoradi, Cape Coast, and nearby locations.' },
-    { q: /contact|phone|email|reach|whatsapp|wa\.me/i, a: 'You can reach us on 0546478040, by email at demargo1987@gmail.com, or through WhatsApp at wa.me/233546478040.' },
-    { q: /price|cost|quote|estimate|budget/i, a: 'Pricing depends on the scope of work, materials, size, and design complexity. The best next step is a consultation so we can give you a tailored estimate.' },
-    { q: /service|offer|do you|provide|speciali/i, a: 'Demargo specialises in interior design, home renovation, 3D rendering, curtains and blinds, smart home installation, POP ceilings, painting, tiling, and cleaning services.' },
-    { q: /fabric|samples?|catalog/i, a: 'We offer fabric and material guidance for curtains and blinds, and can share samples during consultations.' },
-    { q: /3d|render|visual/i, a: 'We create 3D renders and visual concepts to help clients preview designs before installation or build.' },
-    { q: /book|booking|consult|site visit|appointment|visit/i, a: 'You can book a consultation with us for design planning, renovations, or project discussions. I can also help you prepare the details before you contact us.' }
-  ]
-
-  function getBusinessReply(message) {
-    const normalized = message.toLowerCase()
-    const match = businessFaqs.find((item) => item.q.test(normalized))
-    return match ? match.a : null
-  }
 
   function pushBotText(text) {
     setMessages(m => [...m, { role: 'bot', text }])
@@ -1510,8 +1493,11 @@ function ChatBot() {
   }
 
   async function getAssistantReply(message, history) {
+    const contactFallback = 'Please call 0546478040 or email demargo1987@gmail.com for help.'
+
+    let response
     try {
-      const response = await fetch('/api/chat', {
+      response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1519,21 +1505,33 @@ function ChatBot() {
           history: history.slice(-8)
         })
       })
-
-      const text = await response.text()
-      if (!text) {
-        return 'The assistant is currently unavailable. Please call 0546478040 or email demargo1987@gmail.com for help.'
-      }
-
-      const data = JSON.parse(text)
-      if (!response.ok) {
-        throw new Error(data?.error || 'The assistant could not respond right now.')
-      }
-
-      return data.reply || 'Thanks! A specialist will follow up. Meanwhile, explore our services, portfolio, or fabrics.'
     } catch (err) {
-      return 'The assistant is currently unavailable. Please call 0546478040 or email demargo1987@gmail.com for help.'
+      setError(err.message || 'Network error')
+      return `I couldn't reach the assistant. ${contactFallback}`
     }
+
+    const text = await response.text()
+    if (!text) {
+      setError(`Empty response from assistant (HTTP ${response.status})`)
+      return `I couldn't get a response from the assistant (HTTP ${response.status}). ${contactFallback}`
+    }
+
+    let data
+    try {
+      data = JSON.parse(text)
+    } catch {
+      setError('Assistant returned invalid JSON')
+      return `The assistant returned an unexpected response. ${contactFallback}`
+    }
+
+    if (data.reply) {
+      setError('')
+      return data.reply
+    }
+
+    const apiError = data?.error || `HTTP ${response.status}`
+    setError(String(apiError))
+    return `The assistant could not respond: ${apiError}. ${contactFallback}`
   }
 
   const onSend = async () => {
@@ -1551,14 +1549,8 @@ function ChatBot() {
       let reply = null
       if (mode !== 'default') {
         reply = handleBookingStep(trimmed)
-      }
-
-      if (!reply) {
-        reply = getBusinessReply(trimmed)
-      }
-
-      if (!reply) {
-        reply = await getAssistantReply(trimmed, nextMessages)
+      } else {
+        reply = await getAssistantReply(trimmed, messages)
       }
 
       if (reply && typeof reply === 'object' && reply.type === 'actions') {
