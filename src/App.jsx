@@ -1421,19 +1421,19 @@ function BackToTop() {
   )
 }
 
-/* Simple on-site FAQ ChatBot (client-only, placeholder for API integration) */
+/* AI-powered chat widget backed by a secure serverless proxy */
 function ChatBot() {
   const [open, setOpen] = React.useState(false)
   const [messages, setMessages] = React.useState([
-    { role: 'bot', text: 'Hi! I\'m Demargo Assistant. Ask about services, pricing, booking, fabrics, or hours.' }
+    { role: 'bot', text: 'Hi! I\'m Demargo Assistant. Ask me anything about services, pricing, booking, fabrics, or our design process.' }
   ])
   const [input, setInput] = React.useState('')
   const [typing, setTyping] = React.useState(false)
   const [mode, setMode] = React.useState('default') // 'default' | 'booking-name' | 'booking-phone' | 'booking-service'
+  const [error, setError] = React.useState('')
   const bookingRef = React.useRef({ name: '', phone: '', service: '' })
   const listRef = React.useRef(null)
 
-  // Listen for global signal to close dialogues (e.g., after successful payment)
   React.useEffect(() => {
     const handleClose = () => setOpen(false)
     window.addEventListener('closeAllDialogs', handleClose)
@@ -1449,21 +1449,27 @@ function ChatBot() {
     { t: 'Contact', a: () => pushBotText('Phone: 0546478040 • Email: demargo1987@gmail.com') },
   ]
 
-  const intents = [
-    { q: /hour|open|close|time|working|when/i, a: () => 'We\'re open Mon–Fri 8AM–5PM, Sat 8AM–4PM.' },
-    { q: /address|location|where/i, a: () => 'Address: Demargo Contractors, HM8Q+XJR, Gbawe. Service areas: Accra, Kumasi, Tema, Takoradi, Cape Coast and more.' },
-    { q: /contact|phone|email|reach/i, a: () => 'Phone: 0546478040 • WhatsApp: wa.me/233546478040 • Email: demargo1987@gmail.com' },
-    { q: /price|cost|how much|quote|estimate/i, a: () => 'Pricing varies by scope. Share your room size and preferred style, and we\'ll provide a tailored estimate. You can also book a free site visit.' },
-    { q: /service|offer|do you|provide/i, a: () => 'We offer interior design, renovations, curtains & blinds, lighting, POP ceilings, smart home, painting, tiling, and cleaning. See /services for details.' },
-    { q: /fabric|material|catalog|samples?/i, a: () => 'Browse our fabric display on the Fabrics page. We also bring samples to site during consultations.' },
-    { q: /3d|render|visual/i, a: () => 'We create photorealistic 3D renders and walkthroughs so you can preview designs, materials, and lighting before build. See /3d-rendering.' },
-    { q: /interior design|design my/i, a: () => 'Yes — full interior design: concept, space planning, lighting, curtains & blinds, styling, and installation. See /interior-design-services.' },
-    { q: /book|booking|consult|site visit|appointment/i, a: () => startBooking() },
+  const businessFaqs = [
+    { q: /hour|open|close|working|when/i, a: 'We are open Monday–Friday from 8:00 AM to 5:00 PM and Saturday from 8:00 AM to 4:00 PM.' },
+    { q: /address|location|where|gbawe|accra/i, a: 'We are based in Gbawe, Accra, and serve clients across Accra, Kumasi, Tema, Takoradi, Cape Coast, and nearby locations.' },
+    { q: /contact|phone|email|reach|whatsapp|wa\.me/i, a: 'You can reach us on 0546478040, by email at demargo1987@gmail.com, or through WhatsApp at wa.me/233546478040.' },
+    { q: /price|cost|quote|estimate|budget/i, a: 'Pricing depends on the scope of work, materials, size, and design complexity. The best next step is a consultation so we can give you a tailored estimate.' },
+    { q: /service|offer|do you|provide|speciali/i, a: 'Demargo specialises in interior design, home renovation, 3D rendering, curtains and blinds, smart home installation, POP ceilings, painting, tiling, and cleaning services.' },
+    { q: /fabric|samples?|catalog/i, a: 'We offer fabric and material guidance for curtains and blinds, and can share samples during consultations.' },
+    { q: /3d|render|visual/i, a: 'We create 3D renders and visual concepts to help clients preview designs before installation or build.' },
+    { q: /book|booking|consult|site visit|appointment|visit/i, a: 'You can book a consultation with us for design planning, renovations, or project discussions. I can also help you prepare the details before you contact us.' }
   ]
+
+  function getBusinessReply(message) {
+    const normalized = message.toLowerCase()
+    const match = businessFaqs.find((item) => item.q.test(normalized))
+    return match ? match.a : null
+  }
 
   function pushBotText(text) {
     setMessages(m => [...m, { role: 'bot', text }])
   }
+
   function pushBotAction(prefix, action) {
     setMessages(m => [...m, { role: 'bot', text: prefix }])
     setTimeout(() => action(), 200)
@@ -1503,28 +1509,69 @@ function ChatBot() {
     return null
   }
 
-  const onSend = () => {
+  async function getAssistantReply(message, history) {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message,
+          history: history.slice(-8)
+        })
+      })
+
+      const text = await response.text()
+      if (!text) {
+        return 'The assistant is currently unavailable. Please call 0546478040 or email demargo1987@gmail.com for help.'
+      }
+
+      const data = JSON.parse(text)
+      if (!response.ok) {
+        throw new Error(data?.error || 'The assistant could not respond right now.')
+      }
+
+      return data.reply || 'Thanks! A specialist will follow up. Meanwhile, explore our services, portfolio, or fabrics.'
+    } catch (err) {
+      return 'The assistant is currently unavailable. Please call 0546478040 or email demargo1987@gmail.com for help.'
+    }
+  }
+
+  const onSend = async () => {
     const trimmed = input.trim()
     if (!trimmed) return
+
     const userMsg = { role: 'user', text: trimmed }
-    setMessages(m => [...m, userMsg])
+    const nextMessages = [...messages, userMsg]
+    setMessages(nextMessages)
     setInput('')
     setTyping(true)
+    setError('')
 
-    setTimeout(() => {
+    try {
       let reply = null
-      if (mode !== 'default') reply = handleBookingStep(trimmed)
-      if (!reply) {
-        const found = intents.find(f => f.q.test(trimmed))
-        reply = found ? (typeof found.a === 'function' ? found.a() : found.a) : 'Thanks! A specialist will follow up. Meanwhile, explore our Services, Portfolio, or Fabrics.'
+      if (mode !== 'default') {
+        reply = handleBookingStep(trimmed)
       }
+
+      if (!reply) {
+        reply = getBusinessReply(trimmed)
+      }
+
+      if (!reply) {
+        reply = await getAssistantReply(trimmed, nextMessages)
+      }
+
       if (reply && typeof reply === 'object' && reply.type === 'actions') {
         setMessages(m => [...m, { role: 'bot', type: 'actions', text: reply.text, buttons: reply.buttons }])
       } else {
         setMessages(m => [...m, { role: 'bot', text: reply }])
       }
+    } catch (err) {
+      setMessages(m => [...m, { role: 'bot', text: 'I’m having trouble reaching the assistant right now. Please call 0546478040 or email demargo1987@gmail.com for immediate help.' }])
+      setError(err.message || 'Unable to get a response right now.')
+    } finally {
       setTyping(false)
-    }, 550)
+    }
   }
 
   React.useEffect(() => {
@@ -1566,6 +1613,7 @@ function ChatBot() {
                 </span>
               </div>
             )}
+            {error && <div className="text-xs text-red-600">{error}</div>}
           </div>
           <div className="p-3 border-t">
             <div className="flex flex-wrap gap-2 mb-2">
@@ -1592,7 +1640,6 @@ function ChatBot() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 chatbot-icon"></span>
             </span>
             <span>Talk to me</span>
-            {/* Speech bubble arrow/tail pointing down to the logo */}
             <div className="absolute bottom-[-5px] right-6 w-2.5 h-2.5 bg-white border-r border-b border-slate-100 rotate-45"></div>
           </button>
         )}
@@ -1606,7 +1653,6 @@ function ChatBot() {
             alt="Demargo Chatbot"
             className="w-full h-full object-cover rounded-full"
           />
-          {/* 3D Glossy reflection layer */}
           <div className="absolute inset-0 rounded-full chatbot-icon bg-gradient-to-tr from-transparent via-white/5 to-white/30 pointer-events-none" />
         </button>
       </div>
