@@ -1525,12 +1525,15 @@ function ChatBot() {
         return 'The assistant is currently unavailable. Please call 0546478040 or email demargo1987@gmail.com for help.'
       }
 
-      const data = JSON.parse(text)
-      if (!response.ok) {
-        throw new Error(data?.error || 'The assistant could not respond right now.')
+      try {
+        const data = JSON.parse(text)
+        if (!response.ok) {
+          return data?.error ? `The assistant could not respond: ${data.error}` : 'The assistant is currently unavailable. Please call 0546478040 or email demargo1987@gmail.com for help.'
+        }
+        return data.reply || 'Thanks! A specialist will follow up. Meanwhile, explore our services, portfolio, or fabrics.'
+      } catch {
+        return `The assistant returned an invalid response: ${text}`
       }
-
-      return data.reply || 'Thanks! A specialist will follow up. Meanwhile, explore our services, portfolio, or fabrics.'
     } catch (err) {
       return 'The assistant is currently unavailable. Please call 0546478040 or email demargo1987@gmail.com for help.'
     }
