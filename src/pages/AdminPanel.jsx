@@ -6,10 +6,13 @@ import {
     createProject,
     updateProject,
     addProjectMessage,
+    updateProjectMessages,
     deleteProject,
     recordPayment,
     updateProjectPayment,
-    getProjectPayments
+    getProjectPayments,
+    uploadFile,
+    approvePayment
 } from '../services/projectService'
 import './AdminPanel.css';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -83,8 +86,11 @@ function AdminPanel() {
         selectedFabrics: '',
         fabricSelectionNotes: '',
         installationDate: '',
-        installationNotes: ''
+        installationNotes: '',
+        measurementPdfUrl: ''
     })
+
+    const [uploadingPdf, setUploadingPdf] = useState(false)
 
     const [replyInput, setReplyInput] = useState('')
     const [sendingReply, setSendingReply] = useState(false)
@@ -98,6 +104,7 @@ function AdminPanel() {
         reference: ''
     })
     const [loggingPayment, setLoggingPayment] = useState(false)
+    const [manualPaymentFile, setManualPaymentFile] = useState(null)
 
     // Check authentication on mount
     useEffect(() => {
@@ -136,6 +143,15 @@ function AdminPanel() {
         try {
             const data = await getAllProjects()
             setProjects(data)
+            // Load all payments to track pending client submissions
+            try {
+                const { getProjectPayments } = await import('../services/projectService')
+                const allPaymentArrays = await Promise.all(data.map(p => getProjectPayments(p.id)))
+                const allPayments = allPaymentArrays.flat()
+                setPayments(allPayments)
+            } catch (payErr) {
+                console.warn('Could not load all payments:', payErr)
+            }
         } catch (err) {
             console.error('Error fetching admin data:', err)
         } finally {
@@ -143,27 +159,45 @@ function AdminPanel() {
         }
     }
 
-    // Select project and load details
     const handleSelectProject = async (projOrId) => {
         const proj = typeof projOrId === 'string' ? await getProjectById(projOrId) : projOrId
-        setSelectedProject(proj)
+        
+        // Recalculate balance to ensure accuracy
+        const recalculatedBalance = Math.max(0, (proj.totalAmount || 0) - (proj.amountPaid || 0))
+        const updatedProj = { ...proj, balance: recalculatedBalance }
+        
+        // Mark all messages as read by admin
+        const unreadAdmin = (updatedProj.messages || []).some(msg => msg.sender === 'client' && !msg.readByAdmin)
+        if (unreadAdmin) {
+            const updatedMessages = (updatedProj.messages || []).map(msg =>
+                msg.sender === 'client' ? { ...msg, readByAdmin: true } : msg
+            )
+            updatedProj.messages = updatedMessages
+            setProjects(prev => prev.map(p => p.id === updatedProj.id ? { ...p, messages: updatedMessages } : p))
+            updateProjectMessages(updatedProj.id, updatedMessages).catch(err => {
+                console.error('Could not mark client messages read:', err)
+            })
+        }
+
+        setSelectedProject(updatedProj)
         setEditProjData({
-            status: proj.status || 'measurement',
-            clientName: proj.clientName || '',
-            clientEmail: proj.clientEmail || '',
-            clientPhone: proj.clientPhone || '',
-            projectTitle: proj.projectTitle || '',
-            projectDescription: proj.projectDescription || '',
-            serviceAddress: proj.serviceAddress || '',
-            totalAmount: proj.totalAmount || 0,
-            measurementDate: proj.measurementDate || '',
-            measurementNotes: proj.measurementNotes || '',
-            estimateDetails: proj.estimateDetails || '',
-            estimateApproved: proj.estimateApproved || false,
-            selectedFabrics: proj.selectedFabrics || '',
-            fabricSelectionNotes: proj.fabricSelectionNotes || '',
-            installationDate: proj.installationDate || '',
-            installationNotes: proj.installationNotes || ''
+            status: updatedProj.status || 'measurement',
+            clientName: updatedProj.clientName || '',
+            clientEmail: updatedProj.clientEmail || '',
+            clientPhone: updatedProj.clientPhone || '',
+            projectTitle: updatedProj.projectTitle || '',
+            projectDescription: updatedProj.projectDescription || '',
+            serviceAddress: updatedProj.serviceAddress || '',
+            totalAmount: updatedProj.totalAmount || 0,
+            measurementDate: updatedProj.measurementDate || '',
+            measurementNotes: updatedProj.measurementNotes || '',
+            estimateDetails: updatedProj.estimateDetails || '',
+            estimateApproved: updatedProj.estimateApproved || false,
+            selectedFabrics: updatedProj.selectedFabrics || '',
+            fabricSelectionNotes: updatedProj.fabricSelectionNotes || '',
+            installationDate: updatedProj.installationDate || '',
+            installationNotes: updatedProj.installationNotes || '',
+            measurementPdfUrl: updatedProj.measurementPdfUrl || ''
         })
         
         // Reset manual payment logger
@@ -247,7 +281,8 @@ function AdminPanel() {
                 selectedFabrics: editProjData.selectedFabrics,
                 fabricSelectionNotes: editProjData.fabricSelectionNotes,
                 installationDate: editProjData.installationDate,
-                installationNotes: editProjData.installationNotes
+                installationNotes: editProjData.installationNotes,
+                measurementPdfUrl: editProjData.measurementPdfUrl
             }
             
             await updateProject(selectedProject.id, updatePayload)
@@ -277,11 +312,19 @@ function AdminPanel() {
             readByClient: false,
             readByAdmin: true
         }
-        setSelectedProject(prev => prev ? { ...prev, messages: [...(prev.messages || []), message] } : prev)
+
+        const updatedMessages = (selectedProject.messages || []).map(msg =>
+            msg.sender === 'client' ? { ...msg, readByAdmin: true } : msg
+        )
+        const finalMessages = [...updatedMessages, message]
+
+        setSelectedProject(prev => prev ? { ...prev, messages: finalMessages } : prev)
         setReplyInput('')
+        setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, messages: finalMessages } : p))
 
         try {
             await addProjectMessage(selectedProject.id, message)
+            await updateProjectMessages(selectedProject.id, updatedMessages)
             await handleSelectProject(selectedProject.id)
             showToast('Reply sent successfully.', 'success')
         } catch (err) {
@@ -306,16 +349,23 @@ function AdminPanel() {
             showToast('Please enter a valid amount.', 'error')
             return
         }
+        if (!manualPaymentFile) {
+            showToast('Please upload a payment receipt file.', 'error')
+            return
+        }
 
         setLoggingPayment(true)
         try {
-            const reference = manualPayment.reference.trim() || `MAN_${Date.now()}`
+            // Upload receipt file
+            const path = `receipts/admin_${selectedProject.id}_${Date.now()}_${manualPaymentFile.name}`
+            const receiptUrl = await uploadFile(path, manualPaymentFile)
             
             // Record payment transaction
             await recordPayment({
                 projectId: selectedProject.id,
                 amount: amountNum,
-                reference: reference,
+                reference: manualPaymentFile.name,
+                receiptUrl: receiptUrl,
                 status: 'success',
                 paymentMethod: manualPayment.method,
                 clientEmail: selectedProject.clientEmail || 'no-email@demargo.com',
@@ -327,6 +377,7 @@ function AdminPanel() {
             // Update balance
             await updateProjectPayment(selectedProject.id, amountNum)
             showToast(`Logged manual payment of GHS ${amountNum} successfully.`, 'success')
+            setManualPaymentFile(null)
 
             // Refresh project view
             const freshList = await getAllProjects()
@@ -340,6 +391,40 @@ function AdminPanel() {
             showToast('Failed to log payment.', 'error')
         } finally {
             setLoggingPayment(false)
+        }
+    }
+
+    const handlePdfUpload = async (e) => {
+        const file = e.target.files[0]
+        if (!file || !selectedProject) return
+        setUploadingPdf(true)
+        try {
+            const path = `measurements/${selectedProject.id}_${Date.now()}_measurement.pdf`
+            const downloadUrl = await uploadFile(path, file)
+            setEditProjData(prev => ({ ...prev, measurementPdfUrl: downloadUrl }))
+            showToast('PDF uploaded successfully. Click "Save All Changes" to save the project details.', 'success')
+        } catch (err) {
+            console.error('PDF upload error:', err)
+            showToast('Failed to upload PDF.', 'error')
+        } finally {
+            setUploadingPdf(false)
+        }
+    }
+
+    const handleVerifyPayment = async (projectId, paymentId, amount) => {
+        try {
+            await approvePayment(projectId, paymentId, amount)
+            showToast(`Approved and verified payment of GHS ${amount} successfully.`, 'success')
+            // Refresh project view
+            const freshList = await getAllProjects()
+            setProjects(freshList)
+            const freshProj = freshList.find(p => p.id === selectedProject.id)
+            if (freshProj) {
+                handleSelectProject(freshProj)
+            }
+        } catch (err) {
+            console.error('Verify payment error:', err)
+            showToast('Failed to verify and approve payment.', 'error')
         }
     }
 
@@ -371,9 +456,20 @@ function AdminPanel() {
     const totalCollected = projects.reduce((acc, p) => acc + (p.amountPaid || 0), 0)
     const inSewingCount = projects.filter(p => p.status === 'production').length
     const awaitingEstimate = projects.filter(p => p.status === 'estimate').length
+    
+    // Projects with pending client payment submissions (from global payments array)
+    const pendingClientPaymentProjectIds = new Set(
+        payments.filter(pay => pay.status === 'pending' && pay.clientSubmitted === true).map(pay => pay.projectId)
+    )
+    
+    // Ensure all projects have correct balance calculated
+    const projectsWithCorrectBalance = projects.map(p => ({
+        ...p,
+        balance: Math.max(0, (p.totalAmount || 0) - (p.amountPaid || 0))
+    }))
 
     // Filter projects
-    const filteredProjects = projects.filter(p => {
+    const filteredProjects = projectsWithCorrectBalance.filter(p => {
         const matchesQuery = p.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                              p.clientPhone.includes(searchQuery) ||
                              p.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())
@@ -457,6 +553,59 @@ function AdminPanel() {
                         [ LOGOUT SYSTEM ]
                     </button>
                 </div>
+
+                {/* Notification Alerts: Unread Client Messages and Pending Payments */}
+                {(() => {
+                    const unreadProjects = projects.filter(p =>
+                        (p.messages || []).some(m => m.sender === 'client' && !m.readByAdmin)
+                    )
+                    const pendingPaymentProjects = projects.filter(p =>
+                        pendingClientPaymentProjectIds.has(p.id)
+                    )
+                    if (unreadProjects.length === 0 && pendingPaymentProjects.length === 0) return null
+                    return (
+                        <div className="space-y-2">
+                            {unreadProjects.length > 0 && (
+                                <div className="border border-yellow-600/30 bg-yellow-950/20 px-4 py-3 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                    <div className="flex items-center gap-2 text-yellow-400 text-xs font-bold uppercase tracking-wider">
+                                        <span className="inline-flex h-2 w-2 rounded-full bg-yellow-400 animate-ping" />
+                                        Unread Client Messages ({unreadProjects.length})
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {unreadProjects.map(p => (
+                                            <button
+                                                key={p.id}
+                                                onClick={() => handleSelectProject(p)}
+                                                className="text-[11px] px-2 py-1 bg-yellow-900/30 text-yellow-300 border border-yellow-800/40 hover:bg-yellow-900/60 transition font-medium"
+                                            >
+                                                {p.clientName || p.projectTitle || p.id}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {pendingPaymentProjects.length > 0 && (
+                                <div className="border border-orange-600/30 bg-orange-950/20 px-4 py-3 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                    <div className="flex items-center gap-2 text-orange-400 text-xs font-bold uppercase tracking-wider">
+                                        <span className="inline-flex h-2 w-2 rounded-full bg-orange-400 animate-ping" />
+                                        Pending Payment Proofs ({pendingPaymentProjects.length})
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {pendingPaymentProjects.map(p => (
+                                            <button
+                                                key={p.id}
+                                                onClick={() => handleSelectProject(p)}
+                                                className="text-[11px] px-2 py-1 bg-orange-900/30 text-orange-300 border border-orange-800/40 hover:bg-orange-900/60 transition font-medium"
+                                            >
+                                                {p.clientName || p.projectTitle || p.id}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )
+                })()}
 
                 {/* Metric Summary Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
@@ -585,314 +734,414 @@ function AdminPanel() {
                                         <span className="text-[10px] text-slate-500 uppercase">Selected Project</span>
                                         <h3 className="text-base font-bold text-white mt-0.5">{selectedProject.clientName}</h3>
                                         <p className="text-[10px] text-slate-400 mt-0.5">{selectedProject.projectTitle}</p>
-                                        <div className="mt-4 bg-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Project Conversation</span>
-                                                <span className="text-[10px] text-slate-400">{(selectedProject.messages || []).length} messages</span>
-                                            </div>
-                                            <div ref={messagesListRef} className="space-y-3 max-h-72 overflow-y-auto pr-2" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', overscrollBehavior: 'contain', scrollBehavior: 'smooth' }}>
-                                                {(selectedProject.messages || []).length === 0 ? (
-                                                    <div className="text-slate-500 italic text-[11px]">No conversation yet. Reply to start the chat.</div>
-                                                ) : (
-                                                    selectedProject.messages.map((msg) => (
-                                                        <div key={msg.id} className={`rounded-3xl p-3 ${msg.sender === 'admin' ? 'bg-slate-800 border border-slate-700 self-start' : 'bg-slate-100 border border-slate-200 self-end'}`}>
-                                                            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-1">
-                                                                {msg.sender === 'admin' ? 'Admin' : selectedProject.clientName || 'Client'}
-                                                            </div>
-                                                            <div className="text-sm leading-relaxed text-slate-100 whitespace-pre-line">{msg.body}</div>
-                                                            <div className="text-[10px] text-slate-400 mt-2">{new Date(msg.createdAt).toLocaleString('en-GH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
-                                                        </div>
-                                                    ))
-                                                )}
-                                            </div>
-                                            <div className="mt-4 space-y-2">
-                                                <textarea
-                                                    rows="3"
-                                                    value={replyInput}
-                                                    onChange={(e) => setReplyInput(e.target.value)}
-                                                    placeholder="Write your admin reply to the client..."
-                                                    className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2 focus:outline-none"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={handleSendReply}
-                                                    disabled={sendingReply || !replyInput.trim()}
-                                                    className="w-full py-3 bg-demargo-orange text-blue-900 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition disabled:opacity-50"
-                                                >
-                                                    {sendingReply ? 'Sending reply...' : 'Send Reply'}
-                                                </button>
-                                            </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-[10px] text-slate-500 uppercase">Payment Status</div>
+                                        <div className="text-lg font-bold text-white mt-1">GHS {selectedProject.amountPaid?.toLocaleString('en-GH') || 0}</div>
+                                        <div className="text-[10px] text-slate-400">of GHS {selectedProject.totalAmount?.toLocaleString('en-GH') || 0}</div>
+                                        <div className={`text-xs font-bold mt-1 ${selectedProject.balance > 0 ? 'text-orange-500' : 'text-green-500'}`}>
+                                            Balance: GHS {selectedProject.balance?.toLocaleString('en-GH') || 0}
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => requestDeleteProject(selectedProject.id, selectedProject.clientName)}
-                                        className="px-2.5 py-1.5 bg-red-950/40 text-red-500 border border-red-900/50 hover:bg-red-900/40 hover:text-white transition text-[10px] font-bold uppercase"
-                                    >
-                                        Delete Record
-                                    </button>
                                 </div>
+                                <div className="mt-4 bg-slate-950 border border-slate-850 rounded-3xl p-5 flex flex-col h-[460px]">
+                                    <div className="flex items-center justify-between pb-3 border-b border-slate-850">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-demargo-orange animate-pulse" />
+                                            <span className="text-[10px] uppercase tracking-wider font-bold text-white">Project Conversation</span>
+                                        </div>
+                                        <span className="text-[9px] text-slate-500 font-semibold bg-slate-900 border border-slate-850 px-2 py-0.5 rounded-full">{(selectedProject.messages || []).length} messages</span>
+                                    </div>
+                                    
+                                    {/* Messages list */}
+                                    <div ref={messagesListRef} className="flex-1 overflow-y-auto space-y-4 my-3 pr-1 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', overscrollBehavior: 'contain' }}>
+                                        {(selectedProject.messages || []).length === 0 ? (
+                                            <div className="h-full flex flex-col justify-center items-center text-center text-slate-500 py-10">
+                                                <span className="text-2xl mb-1">💬</span>
+                                                <p className="text-[11px] italic">No messages yet. Send a note to start the chat.</p>
+                                            </div>
+                                        ) : (
+                                            selectedProject.messages.map((msg) => {
+                                                const isAdmin = msg.sender === 'admin'
+                                                const clientInitial = selectedProject.clientName ? selectedProject.clientName.trim().charAt(0).toUpperCase() : 'C'
+                                                return (
+                                                    <div key={msg.id} className={`flex w-full gap-2.5 ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                                                        {!isAdmin && (
+                                                            <div className="w-7 h-7 rounded-full bg-slate-800 text-slate-200 border border-slate-700 font-black text-xs flex items-center justify-center shrink-0 shadow-sm" title={selectedProject.clientName}>
+                                                                {clientInitial}
+                                                            </div>
+                                                        )}
+                                                        <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm text-xs relative ${
+                                                            isAdmin 
+                                                                ? 'bg-demargo-orange text-blue-950 font-semibold rounded-tr-none' 
+                                                                : 'bg-slate-900 text-slate-100 border border-slate-800 rounded-tl-none'
+                                                        }`}>
+                                                            <p className="whitespace-pre-line leading-relaxed">{msg.body}</p>
+                                                            {isAdmin ? (
+                                                                <div className="flex items-center justify-end gap-1 text-[8px] mt-1.5 text-blue-950/60">
+                                                                    <span>{new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                    {msg.readByClient ? (
+                                                                        <span className="text-white font-black text-[9px] leading-none" title="Read by Client">✓✓</span>
+                                                                    ) : (
+                                                                        <span className="text-blue-950/40 font-black text-[9px] leading-none" title="Sent">✓</span>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <span className="block text-[8px] mt-1.5 text-right text-slate-500">
+                                                                    {new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {isAdmin && (
+                                                            <div className="w-7 h-7 rounded-full bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-blue-950" title="Admin">
+                                                                A
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )
+                                            })
+                                        )}
+                                    </div>
+                                    
+                                    {/* Inline reply bar */}
+                                    <div className="flex gap-2 items-center bg-slate-900 border border-slate-850 rounded-full px-4 py-2 focus-within:border-demargo-orange focus-within:ring-1 focus-within:ring-demargo-orange/20 transition">
+                                        <input
+                                            type="text"
+                                            value={replyInput}
+                                            onChange={(e) => setReplyInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && replyInput.trim() && !sendingReply) {
+                                                    handleSendReply()
+                                                }
+                                            }}
+                                            placeholder="Write your admin reply..."
+                                            className="flex-1 bg-transparent text-xs text-white placeholder-slate-650 focus:outline-none border-none outline-none"
+                                            disabled={sendingReply}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleSendReply}
+                                            disabled={sendingReply || !replyInput.trim()}
+                                            className="p-1 text-demargo-orange hover:text-orange-400 disabled:opacity-30 transition shrink-0"
+                                        >
+                                            <svg className="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => requestDeleteProject(selectedProject.id, selectedProject.clientName)}
+                                    className="px-2.5 py-1.5 bg-red-950/40 text-red-500 border border-red-900/50 hover:bg-red-900/40 hover:text-white transition text-[10px] font-bold uppercase"
+                                >
+                                    Delete Record
+                                </button>
 
                                 {/* Form for Updates */}
                                 <form onSubmit={handleUpdateProject} className="space-y-4 text-xs">
-                                    {/* Status Selector */}
+                                {/* Status Selector */}
+                                <div>
+                                    <label className="block text-slate-400 font-bold mb-1 uppercase tracking-wider">Current Lifecycle Stage</label>
+                                    <select
+                                        value={editProjData.status}
+                                        onChange={(e) => setEditProjData(p => ({ ...p, status: e.target.value }))}
+                                        className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none focus:border-demargo-orange"
+                                    >
+                                        {STAGES.map(s => (
+                                            <option key={s.key} value={s.key}>{s.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Client Details Row */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-slate-400 font-bold mb-1 uppercase tracking-wider">Current Lifecycle Stage</label>
-                                        <select
-                                            value={editProjData.status}
-                                            onChange={(e) => setEditProjData(p => ({ ...p, status: e.target.value }))}
-                                            className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none focus:border-demargo-orange"
-                                        >
-                                            {STAGES.map(s => (
-                                                <option key={s.key} value={s.key}>{s.label}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {/* Client Details Row */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-slate-500 font-bold mb-1 uppercase">Client Name</label>
-                                            <input
-                                                type="text"
-                                                value={editProjData.clientName}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, clientName: e.target.value }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-slate-500 font-bold mb-1 uppercase">Client Phone</label>
-                                            <input
-                                                type="text"
-                                                value={editProjData.clientPhone}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, clientPhone: e.target.value }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-slate-500 font-bold mb-1 uppercase">Client Email</label>
-                                            <input
-                                                type="email"
-                                                value={editProjData.clientEmail}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, clientEmail: e.target.value }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-slate-500 font-bold mb-1 uppercase">Total Estimate (GHS)</label>
-                                            <input
-                                                type="number"
-                                                value={editProjData.totalAmount}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, totalAmount: parseFloat(e.target.value) || 0 }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-slate-500 font-bold mb-1 uppercase">Site Address</label>
+                                        <label className="block text-slate-500 font-bold mb-1 uppercase">Client Name</label>
                                         <input
                                             type="text"
-                                            value={editProjData.serviceAddress}
-                                            onChange={(e) => setEditProjData(p => ({ ...p, serviceAddress: e.target.value }))}
+                                            value={editProjData.clientName}
+                                            onChange={(e) => setEditProjData(p => ({ ...p, clientName: e.target.value }))}
                                             className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
                                         />
                                     </div>
+                                    <div>
+                                        <label className="block text-slate-500 font-bold mb-1 uppercase">Client Phone</label>
+                                        <input
+                                            type="text"
+                                            value={editProjData.clientPhone}
+                                            onChange={(e) => setEditProjData(p => ({ ...p, clientPhone: e.target.value }))}
+                                            className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                        />
+                                    </div>
+                                </div>
 
-                                    {/* 1. Measurement Settings */}
-                                    <div className="border-t border-slate-850 pt-4 space-y-3">
-                                        <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">1. Measurements Information</span>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-slate-500 font-semibold mb-1">Measurement Date</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    value={editProjData.measurementDate}
-                                                    onChange={(e) => setEditProjData(p => ({ ...p, measurementDate: e.target.value }))}
-                                                    className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-slate-500 font-semibold mb-1">Measurement Details</label>
-                                                <textarea
-                                                    rows="2"
-                                                    value={editProjData.measurementNotes}
-                                                    onChange={(e) => setEditProjData(p => ({ ...p, measurementNotes: e.target.value }))}
-                                                    className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                    placeholder="Windows dimensions..."
-                                                />
-                                            </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-slate-500 font-bold mb-1 uppercase">Client Email</label>
+                                        <input
+                                            type="email"
+                                            value={editProjData.clientEmail}
+                                            onChange={(e) => setEditProjData(p => ({ ...p, clientEmail: e.target.value }))}
+                                            className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-slate-500 font-bold mb-1 uppercase">Total Estimate (GHS)</label>
+                                        <input
+                                            type="number"
+                                            value={editProjData.totalAmount}
+                                            onChange={(e) => setEditProjData(p => ({ ...p, totalAmount: parseFloat(e.target.value) || 0 }))}
+                                            className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-slate-500 font-bold mb-1 uppercase">Site Address</label>
+                                    <input
+                                        type="text"
+                                        value={editProjData.serviceAddress}
+                                        onChange={(e) => setEditProjData(p => ({ ...p, serviceAddress: e.target.value }))}
+                                        className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                    />
+                                </div>
+
+                                {/* 1. Measurement Settings */}
+                                <div className="border-t border-slate-850 pt-4 space-y-3">
+                                    <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">1. Measurements Information</span>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-slate-500 font-semibold mb-1">Measurement Date</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={editProjData.measurementDate}
+                                                onChange={(e) => setEditProjData(p => ({ ...p, measurementDate: e.target.value }))}
+                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                            />
                                         </div>
                                     </div>
+                                    {/* PDF Upload */}
+                                    <div className="space-y-2">
+                                        <label className="block text-slate-500 font-semibold">Site Measurement PDF</label>
+                                        <div className="flex flex-col sm:flex-row gap-2 items-start">
+                                            <label className={`cursor-pointer px-3 py-2 text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition ${uploadingPdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                {uploadingPdf ? 'Uploading...' : '📎 Upload Measurement PDF'}
+                                                <input 
+                                                    type="file" 
+                                                    accept=".pdf"
+                                                    className="hidden"
+                                                    disabled={uploadingPdf}
+                                                    onChange={handlePdfUpload}
+                                                />
+                                            </label>
+                                            {editProjData.measurementPdfUrl && (
+                                                <a 
+                                                    href={editProjData.measurementPdfUrl} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="text-xs text-demargo-orange hover:underline font-semibold flex items-center gap-1 mt-2 sm:mt-0"
+                                                >
+                                                    📄 View Uploaded PDF
+                                                </a>
+                                            )}
+                                        </div>
+                                        {editProjData.measurementPdfUrl && (
+                                            <p className="text-[10px] text-slate-500 truncate">{editProjData.measurementPdfUrl.substring(0, 60)}...</p>
+                                        )}
+                                    </div>
+                                </div>
 
-                                    {/* 2. Estimate Information */}
-                                    <div className="border-t border-slate-850 pt-4 space-y-3">
-                                        <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">2. Estimate Approval Settings</span>
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    id="estApprovedCheck"
-                                                    checked={editProjData.estimateApproved}
-                                                    onChange={(e) => setEditProjData(p => ({ ...p, estimateApproved: e.target.checked }))}
-                                                    className="w-4 h-4 bg-slate-950 border border-slate-850 accent-demargo-orange focus:outline-none"
-                                                />
-                                                <label htmlFor="estApprovedCheck" className="text-slate-300 font-bold uppercase text-[10px]">Estimate Approved by Client</label>
-                                            </div>
-                                            <div>
-                                                <label className="block text-slate-500 font-semibold mb-1">Itemized Pricing details</label>
-                                                <textarea
-                                                    rows="2"
-                                                    value={editProjData.estimateDetails}
-                                                    onChange={(e) => setEditProjData(p => ({ ...p, estimateDetails: e.target.value }))}
-                                                    className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none font-mono"
-                                                    placeholder="E.g. Living room: GHS 5,000"
-                                                />
-                                            </div>
+                                {/* 2. Estimate Information */}
+                                <div className="border-t border-slate-850 pt-4 space-y-3">
+                                    <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">2. Estimate Approval Settings</span>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                id="estApprovedCheck"
+                                                checked={editProjData.estimateApproved}
+                                                onChange={(e) => setEditProjData(p => ({ ...p, estimateApproved: e.target.checked }))}
+                                                className="w-4 h-4 bg-slate-950 border border-slate-850 accent-demargo-orange focus:outline-none"
+                                            />
+                                            <label htmlFor="estApprovedCheck" className="text-slate-300 font-bold uppercase text-[10px]">Estimate Approved by Client</label>
+                                        </div>
+                                        <div>
+                                            <label className="block text-slate-500 font-semibold mb-1">Itemized Pricing details</label>
+                                            <textarea
+                                                rows="2"
+                                                value={editProjData.estimateDetails}
+                                                onChange={(e) => setEditProjData(p => ({ ...p, estimateDetails: e.target.value }))}
+                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none font-mono"
+                                                placeholder="E.g. Living room: GHS 5,000"
+                                            />
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* 3. Fabric selection */}
-                                    <div className="border-t border-slate-850 pt-4 space-y-3">
-                                        <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">3. Fabric Selections</span>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-slate-500 font-semibold mb-1">Selected Fabric Codes</label>
-                                                <input
-                                                    type="text"
-                                                    value={editProjData.selectedFabrics}
-                                                    onChange={(e) => setEditProjData(p => ({ ...p, selectedFabrics: e.target.value }))}
-                                                    className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                    placeholder="E.g Velvet blue (Code: BL-03)"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-slate-500 font-semibold mb-1">Fabric choice notes</label>
-                                                <textarea
-                                                    rows="2"
-                                                    value={editProjData.fabricSelectionNotes}
-                                                    onChange={(e) => setEditProjData(p => ({ ...p, fabricSelectionNotes: e.target.value }))}
-                                                    className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                    placeholder="Details on textures, linings..."
-                                                />
-                                            </div>
+                                {/* 3. Fabric selection */}
+                                <div className="border-t border-slate-850 pt-4 space-y-3">
+                                    <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">3. Fabric Selections</span>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-slate-500 font-semibold mb-1">Selected Fabric Codes</label>
+                                            <input
+                                                type="text"
+                                                value={editProjData.selectedFabrics}
+                                                onChange={(e) => setEditProjData(p => ({ ...p, selectedFabrics: e.target.value }))}
+                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                                placeholder="E.g Velvet blue (Code: BL-03)"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-slate-500 font-semibold mb-1">Fabric choice notes</label>
+                                            <textarea
+                                                rows="2"
+                                                value={editProjData.fabricSelectionNotes}
+                                                onChange={(e) => setEditProjData(p => ({ ...p, fabricSelectionNotes: e.target.value }))}
+                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                                placeholder="Details on textures, linings..."
+                                            />
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* 4. Installation scheduling */}
-                                    <div className="border-t border-slate-850 pt-4 space-y-3">
-                                        <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">4. Installation Information</span>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-slate-500 font-semibold mb-1">Installation Date</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    value={editProjData.installationDate}
-                                                    onChange={(e) => setEditProjData(p => ({ ...p, installationDate: e.target.value }))}
-                                                    className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-slate-500 font-semibold mb-1">Installation Notes</label>
-                                                <textarea
-                                                    rows="2"
-                                                    value={editProjData.installationNotes}
-                                                    onChange={(e) => setEditProjData(p => ({ ...p, installationNotes: e.target.value }))}
-                                                    className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                    placeholder="Track fittings details, special heights..."
-                                                />
-                                            </div>
+                                {/* 4. Installation scheduling */}
+                                <div className="border-t border-slate-850 pt-4 space-y-3">
+                                    <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">4. Installation Information</span>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-slate-500 font-semibold mb-1">Installation Date</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={editProjData.installationDate}
+                                                onChange={(e) => setEditProjData(p => ({ ...p, installationDate: e.target.value }))}
+                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-slate-500 font-semibold mb-1">Installation Notes</label>
+                                            <textarea
+                                                rows="2"
+                                                value={editProjData.installationNotes}
+                                                onChange={(e) => setEditProjData(p => ({ ...p, installationNotes: e.target.value }))}
+                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                                placeholder="Track fittings details, special heights..."
+                                            />
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Save Button */}
+                                {/* Save Button */}
+                                <button
+                                    type="submit"
+                                    className="w-full py-3 bg-demargo-blue hover:opacity-90 text-white font-bold transition uppercase tracking-wider text-xs"
+                                >
+                                    Save All Changes
+                                </button>
+                            </form>
+
+                            {/* Ledger / Logging offline manual payments */}
+                            <div className="border-t border-slate-850 pt-6 space-y-4">
+                                <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">5. Log Manual/Offline Payment</span>
+                                <form onSubmit={handleLogPayment} className="space-y-3 text-xs">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                        <div className="sm:col-span-2">
+                                            <label className="block text-slate-500 mb-1">Payment Amount (GHS)</label>
+                                            <input
+                                                type="number"
+                                                required
+                                                placeholder="0.00"
+                                                value={manualPayment.amount}
+                                                onChange={(e) => setManualPayment(p => ({ ...p, amount: e.target.value }))}
+                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-slate-500 mb-1">Method</label>
+                                            <select
+                                                value={manualPayment.method}
+                                                onChange={(e) => setManualPayment(p => ({ ...p, method: e.target.value }))}
+                                                className="w-full bg-slate-950 border border-slate-850 text-white px-2 py-2 focus:outline-none"
+                                            >
+                                                <option value="cash">Cash</option>
+                                                <option value="bank_transfer">Bank Trans</option>
+                                                <option value="mobile_money">MoMo</option>
+                                                <option value="cheque">Cheque</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-slate-500 mb-1">Upload Receipt (PDF or DOCX) *</label>
+                                        <input
+                                            type="file"
+                                            required
+                                            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                            onChange={(e) => setManualPaymentFile(e.target.files[0])}
+                                            className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 text-xs focus:outline-none"
+                                        />
+                                    </div>
                                     <button
                                         type="submit"
-                                        className="w-full py-3 bg-demargo-blue hover:opacity-90 text-white font-bold transition uppercase tracking-wider text-xs"
+                                        disabled={loggingPayment}
+                                        className="w-full py-2 bg-emerald-700 hover:bg-emerald-650 text-white font-bold transition uppercase tracking-wider text-[10px]"
                                     >
-                                        Save All Changes
+                                        {loggingPayment ? 'Logging...' : 'Log Offline Payment'}
                                     </button>
                                 </form>
+                            </div>
 
-                                {/* Ledger / Logging offline manual payments */}
-                                {selectedProject.balance > 0 && (
-                                    <div className="border-t border-slate-850 pt-6 space-y-4">
-                                        <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">5. Log Manual/Offline Payment</span>
-                                        <form onSubmit={handleLogPayment} className="space-y-3 text-xs">
-                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                                <div className="sm:col-span-2">
-                                                    <label className="block text-slate-500 mb-1">Payment Amount (GHS)</label>
-                                                    <input
-                                                        type="number"
-                                                        required
-                                                        placeholder="0.00"
-                                                        value={manualPayment.amount}
-                                                        onChange={(e) => setManualPayment(p => ({ ...p, amount: e.target.value }))}
-                                                        className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                    />
+                            {/* Payments List for Selected Project */}
+                            <div className="border-t border-slate-850 pt-6">
+                                <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block mb-3">Project Ledger</span>
+                                {loadingPayments ? (
+                                    <p className="text-[10px] text-slate-500 italic">Syncing payment ledgers...</p>
+                                ) : projectPayments.length === 0 ? (
+                                    <p className="text-[10px] text-slate-500 italic">No payments logged under this project.</p>
+                                ) : (
+                                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                                        {projectPayments.map(p => (
+                                            <div key={p.id} className="p-3 bg-slate-950 border border-slate-850 text-[10px] space-y-1.5">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-bold text-slate-200">GHS {p.amount.toLocaleString('en-GH')}</span>
+                                                    {p.status === 'pending' ? (
+                                                        <span className="px-1.5 py-0.5 text-[8px] font-black bg-orange-900/30 border border-orange-700/50 text-orange-400 uppercase animate-pulse">PENDING VERIFY</span>
+                                                    ) : (
+                                                        <span className="px-1.5 py-0.5 text-[8px] font-black bg-green-900/30 border border-green-700/50 text-green-400 uppercase">VERIFIED</span>
+                                                    )}
                                                 </div>
-                                                <div>
-                                                    <label className="block text-slate-500 mb-1">Method</label>
-                                                    <select
-                                                        value={manualPayment.method}
-                                                        onChange={(e) => setManualPayment(p => ({ ...p, method: e.target.value }))}
-                                                        className="w-full bg-slate-950 border border-slate-850 text-white px-2 py-2 focus:outline-none"
-                                                    >
-                                                        <option value="cash">Cash</option>
-                                                        <option value="bank_transfer">Bank Trans</option>
-                                                        <option value="mobile_money">MoMo</option>
-                                                        <option value="cheque">Cheque</option>
-                                                    </select>
+                                                <div className="flex justify-between text-slate-500">
+                                                    <span>Ref: {p.reference?.substring(0, 18)}</span>
+                                                    <span className="capitalize">{p.paymentMethod?.replace('_', ' ')}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-slate-600">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : ''}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        {p.receiptUrl && (
+                                                            <a
+                                                                href={p.receiptUrl}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-demargo-orange hover:underline text-[9px] font-bold"
+                                                            >
+                                                                📄 Receipt
+                                                            </a>
+                                                        )}
+                                                        {p.status === 'pending' && (
+                                                            <button
+                                                                onClick={() => handleVerifyPayment(selectedProject.id, p.id, p.amount)}
+                                                                className="px-2 py-0.5 bg-emerald-800 hover:bg-emerald-700 text-emerald-200 text-[8px] font-bold uppercase transition"
+                                                            >
+                                                                ✓ Approve
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div>
-                                                <label className="block text-slate-500 mb-1">Receipt Reference (Optional)</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Receipt number or notes..."
-                                                    value={manualPayment.reference}
-                                                    onChange={(e) => setManualPayment(p => ({ ...p, reference: e.target.value }))}
-                                                    className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                />
-                                            </div>
-                                            <button
-                                                type="submit"
-                                                disabled={loggingPayment}
-                                                className="w-full py-2 bg-emerald-700 hover:bg-emerald-650 text-white font-bold transition uppercase tracking-wider text-[10px]"
-                                            >
-                                                {loggingPayment ? 'Logging...' : 'Log Offline Payment'}
-                                            </button>
-                                        </form>
+                                        ))}
                                     </div>
                                 )}
-
-                                {/* Payments List for Selected Project */}
-                                <div className="border-t border-slate-850 pt-6">
-                                    <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block mb-3">Project Ledger</span>
-                                    {loadingPayments ? (
-                                        <p className="text-[10px] text-slate-500 italic">Syncing payment ledgers...</p>
-                                    ) : projectPayments.length === 0 ? (
-                                        <p className="text-[10px] text-slate-500 italic">No payments logged under this project.</p>
-                                    ) : (
-                                        <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                                            {projectPayments.map(p => (
-                                                <div key={p.id} className="p-2.5 bg-slate-950 border border-slate-850 text-[10px] flex justify-between items-center">
-                                                    <div>
-                                                        <div className="font-bold text-slate-200">GHS {p.amount.toLocaleString('en-GH')}</div>
-                                                        <div className="text-[9px] text-slate-500 mt-0.5">Ref: {p.reference?.substring(0, 15)}</div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <span className="px-1 text-[8px] font-bold bg-slate-900 border border-slate-850 uppercase text-slate-400 capitalize">{p.paymentMethod?.replace('_', ' ')}</span>
-                                                        <div className="text-[9px] text-slate-500 mt-0.5">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : ''}</div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
                             </div>
+                        </div>
                         )}
                     </div>
                 </div>

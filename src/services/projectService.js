@@ -14,7 +14,8 @@ import {
     arrayUnion,
     onSnapshot
 } from 'firebase/firestore'
-import { db, isFirebaseConfigured, initFirebaseAuth } from '../firebase'
+import { db, storage, isFirebaseConfigured, initFirebaseAuth } from '../firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const PROJECTS_COLLECTION = 'projects'
 const PAYMENTS_COLLECTION = 'payments'
@@ -693,4 +694,69 @@ export const deleteProject = async (projectId) => {
         throw error
     }
 }
+
+/**
+ * Upload a file to Firebase Storage (with local base64 fallback)
+ * @param {string} path - Storage path
+ * @param {File} file - File object to upload
+ * @returns {Promise<string>} - Download URL or base64 data URL
+ */
+export const uploadFile = async (path, file) => {
+    if (!isFirebaseConfigured) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result)
+            reader.onerror = (err) => reject(err)
+            reader.readAsDataURL(file)
+        })
+    }
+    await initFirebaseAuth()
+    try {
+        const storageRef = ref(storage, path)
+        const snapshot = await uploadBytes(storageRef, file)
+        const downloadURL = await getDownloadURL(snapshot.ref)
+        return downloadURL
+    } catch (error) {
+        console.error('Error uploading file:', error)
+        throw error
+    }
+}
+
+/**
+ * Approve a client-submitted pending payment
+ * @param {string} projectId - Project ID
+ * @param {string} paymentId - Payment ID
+ * @param {number} amount - Payment amount
+ * @returns {Promise<void>}
+ */
+export const approvePayment = async (projectId, paymentId, amount) => {
+    if (!isFirebaseConfigured) {
+        // Local storage mock mode
+        const payments = getMockData('demargo_mock_payments', defaultPayments)
+        const pIdx = payments.findIndex(p => p.id === paymentId)
+        if (pIdx !== -1) {
+            payments[pIdx].status = 'success'
+            saveMockData('demargo_mock_payments', payments)
+        }
+        await mockUpdateProjectPayment(projectId, amount)
+        return
+    }
+
+    await initFirebaseAuth()
+    try {
+        // Update payment status to success
+        const paymentRef = doc(db, PAYMENTS_COLLECTION, paymentId)
+        await updateDoc(paymentRef, {
+            status: 'success',
+            updatedAt: serverTimestamp()
+        })
+
+        // Update project amountPaid and balance
+        await updateProjectPayment(projectId, amount)
+    } catch (error) {
+        console.error('Error approving payment:', error)
+        throw error
+    }
+}
+
 

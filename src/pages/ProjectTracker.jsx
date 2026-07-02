@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 import { TrophyIcon } from '@heroicons/react/24/outline'
-import { getProjectsByPhone, getProjectById, updateProject, updateProjectPayment, recordPayment, addProjectMessage, updateProjectMessages, subscribeToProject } from '../services/projectService'
+import { getProjectsByPhone, getProjectById, updateProject, updateProjectPayment, recordPayment, addProjectMessage, updateProjectMessages, subscribeToProject, uploadFile } from '../services/projectService'
 
 import './ProjectTracker.css';
 const STAGES = [
@@ -27,9 +27,13 @@ function ProjectTracker() {
     const messagesListRef = useRef(null)
     
     // Payment states
-    
-    
-    // Estimate approval state
+    const [clientPaymentData, setClientPaymentData] = useState({
+        amount: '',
+        method: 'mobile_money',
+        reference: ''
+    })
+    const [clientPaymentFile, setClientPaymentFile] = useState(null)
+    const [submittingPaymentProof, setSubmittingPaymentProof] = useState(false)
     const [approvingEstimate, setApprovingEstimate] = useState(false)
 
     // Toast state
@@ -169,6 +173,68 @@ function ProjectTracker() {
             showToast('Could not send your message. Please try again.', 'error')
         } finally {
             setSendingMessage(false)
+        }
+    }
+
+    const handleManualPaymentSubmit = async (e) => {
+        e.preventDefault()
+        if (!selectedProject) return
+        const amountNum = parseFloat(clientPaymentData.amount)
+        if (isNaN(amountNum) || amountNum <= 0) {
+            showToast('Please enter a valid amount.', 'error')
+            return
+        }
+        if (!clientPaymentFile) {
+            showToast('Please upload your receipt file.', 'error')
+            return
+        }
+
+        setSubmittingPaymentProof(true)
+        try {
+            // Upload receipt file
+            const receiptPath = `payments/${selectedProject.id}_${Date.now()}_receipt`
+            const receiptUrl = await uploadFile(receiptPath, clientPaymentFile)
+
+            // Record payment as pending
+            await recordPayment({
+                projectId: selectedProject.id,
+                amount: amountNum,
+                reference: clientPaymentData.reference.trim(),
+                status: 'pending',
+                paymentMethod: clientPaymentData.method,
+                clientEmail: selectedProject.clientEmail || 'no-email@demargo.com',
+                clientName: selectedProject.clientName,
+                receiptUrl: receiptUrl,
+                clientSubmitted: true,
+                paidAt: new Date().toISOString()
+            })
+
+            // Add client message notifying admin
+            const notificationMsg = {
+                id: `msg-${Date.now()}`,
+                sender: 'client',
+                body: `[PAYMENT PROOF SUBMITTED] I have uploaded a payment proof of GHS ${amountNum.toLocaleString('en-GH')} (Method: ${clientPaymentData.method.replace('_', ' ')}). Reference: ${clientPaymentData.reference.trim()}`,
+                createdAt: new Date().toISOString(),
+                readByAdmin: false,
+                readByClient: true
+            }
+            await addProjectMessage(selectedProject.id, notificationMsg)
+
+            // Reset form
+            setClientPaymentData({ amount: '', method: 'mobile_money', reference: '' })
+            setClientPaymentFile(null)
+            
+            // Reset form element
+            e.target.reset()
+
+            showToast('Payment proof submitted successfully! Admin will verify and update the status.', 'success')
+            // Refresh project view
+            await handleSelectProject(selectedProject.id)
+        } catch (err) {
+            console.error('Error submitting payment proof:', err)
+            showToast('Failed to upload receipt or record payment.', 'error')
+        } finally {
+            setSubmittingPaymentProof(false)
         }
     }
 
@@ -377,6 +443,19 @@ function ProjectTracker() {
                             </div>
                         </div>
 
+                        {/* Thank You Completed Banner */}
+                        {selectedProject.status === 'completed' && (
+                            <div className="bg-emerald-50 border border-emerald-200 p-6 md:p-8 rounded-lg relative overflow-hidden flex flex-col md:flex-row items-center gap-6 shadow-md">
+                                <div className="text-4xl">🎉</div>
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-bold text-emerald-950 mb-1">Thank You for Partnering with Us!</h3>
+                                    <p className="text-sm text-emerald-800 leading-relaxed">
+                                        We sincerely appreciate your business and trust in <strong>Demargo Interior Contractors</strong>. It has been our absolute pleasure to bring your vision to life and complete this project with you. We hope your new space brings you joy and great ambience!
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* STEPPER PROGRESS */}
                         <div className="bg-white border border-gray-200 p-6 md:p-8">
                             <h3 className="font-bold text-blue-900 text-lg mb-8 uppercase tracking-wider">Project Lifecycle Progress</h3>
@@ -387,7 +466,7 @@ function ProjectTracker() {
                                     {/* Connection Line */}
                                     <div className="absolute top-5 left-[8%] right-[8%] h-[2px] bg-slate-800 z-0">
                                         <div 
-                                            className="h-full bg-demargo-orange transition-all duration-500" 
+                                            className={`h-full transition-all duration-500 ${selectedProject.status === 'completed' ? 'bg-emerald-500' : 'bg-demargo-orange'}`} 
                                             style={{ width: `${(Math.max(0, currentStageIdx) / (STAGES.length - 1)) * 100}%` }}
                                         />
                                     </div>
@@ -396,21 +475,26 @@ function ProjectTracker() {
                                         const isCompleted = idx < currentStageIdx
                                         const isActive = idx === currentStageIdx
                                         const isUpcoming = idx > currentStageIdx
+                                        const isFinalCompleted = s.key === 'completed' && selectedProject.status === 'completed'
                                         
                                         return (
                                             <div key={s.key} className="flex-1 flex flex-col items-center text-center px-2 z-10 relative">
                                                 {/* Node Circle */}
                                                 <div 
                                                     className={`w-10 h-10 flex items-center justify-center font-bold text-sm border-2 transition-colors duration-300 ${
+                                                        isFinalCompleted ? 'bg-emerald-500 border-emerald-500 text-white ring-4 ring-emerald-500/20' :
                                                         isCompleted ? 'bg-demargo-orange border-demargo-orange text-blue-900' :
                                                         isActive ? 'bg-white border-demargo-orange text-demargo-orange ring-4 ring-demargo-orange/20' :
                                                         'bg-white border-gray-200 text-slate-600'
                                                     }`}
                                                 >
-                                                    {isCompleted ? '✓' : idx + 1}
+                                                    {isFinalCompleted || isCompleted ? '✓' : idx + 1}
                                                 </div>
 
-                                                <span className={`text-sm font-bold mt-4 transition-colors ${isActive ? 'text-demargo-orange' : isUpcoming ? 'text-blue-700' : 'text-blue-900'}`}>
+                                                <span className={`text-sm font-bold mt-4 transition-colors ${
+                                                    isFinalCompleted ? 'text-emerald-600' : 
+                                                    isActive ? 'text-demargo-orange' : isUpcoming ? 'text-blue-700' : 'text-blue-900'
+                                                }`}>
                                                     {s.label}
                                                 </span>
                                                 <span className="text-[10px] text-blue-700 mt-1 max-w-[140px] leading-relaxed">
@@ -425,29 +509,34 @@ function ProjectTracker() {
                                 <div className="md:hidden space-y-6 relative pl-6 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-800">
                                     {/* Mobile Connection Line indicator */}
                                     <div 
-                                        className="absolute left-[11px] top-2 w-[2px] bg-demargo-orange transition-all duration-500"
+                                        className={`absolute left-[11px] top-2 w-[2px] transition-all duration-500 ${selectedProject.status === 'completed' ? 'bg-emerald-500' : 'bg-demargo-orange'}`}
                                         style={{ height: `${(Math.max(0, currentStageIdx) / (STAGES.length - 1)) * 90}%` }}
                                     />
                                     
                                     {STAGES.map((s, idx) => {
                                         const isCompleted = idx < currentStageIdx
                                         const isActive = idx === currentStageIdx
+                                        const isFinalCompleted = s.key === 'completed' && selectedProject.status === 'completed'
                                         
                                         return (
                                             <div key={s.key} className="flex gap-4 relative">
                                                 {/* Left Bullet */}
                                                 <div 
                                                     className={`w-6 h-6 flex items-center justify-center font-bold text-[10px] border-2 z-10 relative shrink-0 ${
+                                                        isFinalCompleted ? 'bg-emerald-500 border-emerald-500 text-white ring-2 ring-emerald-500/20' :
                                                         isCompleted ? 'bg-demargo-orange border-demargo-orange text-blue-900' :
                                                         isActive ? 'bg-white border-demargo-orange text-demargo-orange ring-2 ring-demargo-orange/20' :
                                                         'bg-white border-gray-200 text-slate-600'
                                                     }`}
                                                 >
-                                                    {isCompleted ? '✓' : idx + 1}
+                                                    {isFinalCompleted || isCompleted ? '✓' : idx + 1}
                                                 </div>
                                                 {/* Text Content */}
                                                 <div>
-                                                    <div className={`text-sm font-bold ${isActive ? 'text-demargo-orange' : isCompleted ? 'text-blue-900' : 'text-slate-600'}`}>
+                                                    <div className={`text-sm font-bold ${
+                                                        isFinalCompleted ? 'text-emerald-600' :
+                                                        isActive ? 'text-demargo-orange' : isCompleted ? 'text-blue-900' : 'text-slate-600'
+                                                    }`}>
                                                         {s.label} ({s.title})
                                                     </div>
                                                     <p className="text-xs text-blue-700 mt-0.5">{s.desc}</p>
@@ -469,31 +558,43 @@ function ProjectTracker() {
                                     <h3 className="text-xl font-bold text-blue-900 mb-4">
                                         Current Phase: {STAGES[currentStageIdx]?.title}
                                     </h3>
-                                    
-                                    {/* Action Box based on Status */}
+                                                      {/* Action Box based on Status */}
                                     {selectedProject.status === 'measurement' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-3">
-                                            <p className="text-sm text-slate-300 leading-relaxed">
+                                            <p className="text-sm text-blue-900 leading-relaxed">
                                                 Our team is scheduled to visit your site. This allows us to take accurate window dimensions, inspect wall structures, and evaluate track fittings.
                                             </p>
-                                            {selectedProject.measurementDate ? (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs text-slate-300">
+                                            {selectedProject.measurementDate && (
+                                                <div className="bg-white p-4 border border-gray-200 text-xs text-blue-900">
                                                     <strong className="text-blue-900 block mb-1">Scheduled Site Visit Date:</strong>
                                                     {new Date(selectedProject.measurementDate).toLocaleString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </div>
-                                            ) : (
-                                                <p className="text-xs text-blue-700 italic">Site measurement date will be set shortly by the admin.</p>
+                                            )}
+                                            {selectedProject.measurementPdfUrl && (
+                                                <div className="mt-2">
+                                                    <a 
+                                                        href={selectedProject.measurementPdfUrl} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-demargo-orange hover:opacity-90 text-blue-900 font-bold text-xs transition"
+                                                    >
+                                                        📄 View Site Measurements PDF
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {!selectedProject.measurementDate && !selectedProject.measurementPdfUrl && (
+                                                <p className="text-xs text-blue-700 italic">Site measurement details/date will be set shortly by the admin.</p>
                                             )}
                                         </div>
                                     )}
 
                                     {selectedProject.status === 'estimate' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-4">
-                                            <p className="text-sm text-slate-300">
-                                                The measurements are completed. We have generated an estimate. Please review and provide your approval below.
+                                            <p className="text-sm text-blue-900 leading-relaxed">
+                                                Your site measurements are completed and an estimate has been prepared. Please review the breakdown below. Once you make the required deposit/payment manually, the admin team will update your project to the next stage (Fabric Selection).
                                             </p>
                                             {selectedProject.estimateDetails ? (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs whitespace-pre-line text-slate-300 font-mono">
+                                                <div className="bg-white p-4 border border-gray-200 text-xs whitespace-pre-line text-blue-900 font-mono">
                                                     <strong className="text-blue-900 font-sans block mb-2 text-sm">Estimate Breakdown:</strong>
                                                     {selectedProject.estimateDetails}
                                                 </div>
@@ -506,25 +607,21 @@ function ProjectTracker() {
                                                     <span className="text-xs text-blue-700 uppercase block">Total Estimate Price</span>
                                                     <span className="text-xl font-black text-demargo-orange">GHS {selectedProject.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</span>
                                                 </div>
-                                                <button
-                                                    onClick={handleApproveEstimate}
-                                                    disabled={approvingEstimate}
-                                                    className="px-6 py-3 bg-demargo-orange hover:opacity-90 text-blue-900 font-bold text-sm transition disabled:opacity-50"
-                                                >
-                                                    {approvingEstimate ? 'Approving Estimate...' : 'Approve Estimate & Proceed'}
-                                                </button>
+                                                <div className="text-xs text-blue-700 font-medium italic">
+                                                    Awaiting manual payment/deposit to proceed.
+                                                </div>
                                             </div>
                                         </div>
                                     )}
 
                                     {selectedProject.status === 'fabric' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-4">
-                                            <p className="text-sm text-slate-300">
+                                            <p className="text-sm text-blue-900">
                                                 Fabric selection is now in progress. You can consult with our team to choose materials, colors, and textures for your curtains or blinds.
                                             </p>
                                             
                                             {selectedProject.selectedFabrics ? (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs text-slate-300">
+                                                <div className="bg-white p-4 border border-gray-200 text-xs text-blue-900">
                                                     <strong className="text-blue-900 block mb-1">Selections Chosen:</strong>
                                                     {selectedProject.selectedFabrics}
                                                 </div>
@@ -533,12 +630,12 @@ function ProjectTracker() {
                                             )}
 
                                             {percentPaid < 60 ? (
-                                                <div className="bg-orange-950/20 border border-orange-900/40 p-4 text-xs text-orange-400">
+                                                <div className="bg-orange-50 border border-orange-200 p-4 text-xs text-orange-800">
                                                     <strong className="block mb-1">Tailoring Sewing Notice:</strong>
                                                     Client must pay <strong>60% or more</strong> of the estimate (GHS {Math.ceil(selectedProject.totalAmount * 0.6).toLocaleString('en-GH')}) to start sewing. Current payment: {percentPaid}%. Minimum required deposit remaining: <strong>GHS {Math.max(0, Math.ceil(selectedProject.totalAmount * 0.6) - selectedProject.amountPaid).toLocaleString('en-GH')}</strong>.
                                                 </div>
                                             ) : (
-                                                <div className="bg-green-950/20 border border-green-900/40 p-4 text-xs text-green-400">
+                                                <div className="bg-green-50 border border-green-200 p-4 text-xs text-green-800">
                                                     ✓ Deposit requirement of 60% met! Ready for tailoring.
                                                 </div>
                                             )}
@@ -547,10 +644,10 @@ function ProjectTracker() {
 
                                     {selectedProject.status === 'production' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-3">
-                                            <p className="text-sm text-slate-300">
+                                            <p className="text-sm text-blue-900">
                                                 Your fabrics have been selected, and the tailoring team has officially started cutting and sewing. 
                                             </p>
-                                            <div className="bg-white p-4 border border-gray-200 text-xs text-slate-300 flex items-center gap-3">
+                                            <div className="bg-white p-4 border border-gray-200 text-xs text-blue-950 flex items-center gap-3">
                                                 <div className="w-4 h-4 rounded-full border border-demargo-orange border-t-transparent animate-spin shrink-0" />
                                                 <span>Fabric Tailoring / Stitching in progress at production center.</span>
                                             </div>
@@ -559,11 +656,11 @@ function ProjectTracker() {
 
                                     {selectedProject.status === 'installation' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-3">
-                                            <p className="text-sm text-slate-300">
+                                            <p className="text-sm text-blue-900">
                                                 Curtains/blinds have been fully sewn. Our installation team is scheduling or executing the onsite mounting.
                                             </p>
                                             {selectedProject.installationDate && (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs text-slate-300">
+                                                <div className="bg-white p-4 border border-gray-200 text-xs text-blue-900">
                                                     <strong className="text-blue-900 block mb-1">Installation Site Date:</strong>
                                                     {new Date(selectedProject.installationDate).toLocaleString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </div>
@@ -577,12 +674,12 @@ function ProjectTracker() {
                                     )}
 
                                     {selectedProject.status === 'completed' && (
-                                        <div className="bg-emerald-900/10 border border-emerald-600/30 p-6 rounded-3xl text-emerald-100 space-y-3">
+                                        <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-3xl text-emerald-950 space-y-3">
                                             <div className="flex items-center gap-3 text-2xl font-bold text-emerald-900">
-                                                <TrophyIcon className="h-8 w-8 text-amber-300" />
+                                                <TrophyIcon className="h-8 w-8 text-amber-500" />
                                                 <span>Project Complete</span>
                                             </div>
-                                            <p className="text-sm text-slate-200 leading-relaxed">
+                                            <p className="text-sm text-emerald-800 leading-relaxed font-medium">
                                                 Your curtains and blinds have been installed neatly! The final balances are cleared. Thank you for partnering with Demargo Interior Contractors. We look forward to working with you again.
                                             </p>
                                         </div>
@@ -595,56 +692,114 @@ function ProjectTracker() {
                                     <div className="grid sm:grid-cols-2 gap-4 text-xs">
                                         <div className="bg-white p-4 border border-gray-200">
                                             <span className="text-slate-500 uppercase block mb-1">Client Address / Site Location</span>
-                                            <span className="text-slate-200">{selectedProject.serviceAddress || 'No site location registered.'}</span>
+                                            <span className="text-blue-900">{selectedProject.serviceAddress || 'No site location registered.'}</span>
                                         </div>
                                         <div className="bg-white p-4 border border-gray-200">
                                             <span className="text-slate-500 uppercase block mb-1">Measurement Details</span>
-                                            <span className="text-slate-200 whitespace-pre-line">{selectedProject.measurementNotes || 'No measurements details recorded yet.'}</span>
+                                            <span className="text-blue-900 whitespace-pre-line">{selectedProject.measurementNotes || 'No measurements details recorded yet.'}</span>
+                                            {selectedProject.measurementPdfUrl && (
+                                                <div className="mt-3">
+                                                    <a 
+                                                        href={selectedProject.measurementPdfUrl} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-900 border border-blue-200 rounded font-bold text-[11px] hover:bg-blue-100 transition"
+                                                    >
+                                                        📄 View Site Measurement PDF
+                                                    </a>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="bg-white p-4 border border-gray-200">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <span className="text-slate-500 uppercase tracking-widest text-[10px] font-bold">Project Conversation</span>
-                                                <span className="text-[10px] text-slate-400">{(selectedProject.messages || []).length} messages</span>
+                                        <div className="bg-slate-50 border border-gray-200 rounded-3xl p-5 flex flex-col h-[480px]">
+                                            <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                                    <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider">Support Chat (Direct Line)</span>
+                                                </div>
+                                                <span className="text-[9px] text-slate-500 font-semibold bg-white border border-gray-200 px-2 py-0.5 rounded-full">{(selectedProject.messages || []).length} messages</span>
                                             </div>
                                             {hasNewAdminMessage && (
-                                                <div className="mb-4 rounded-2xl border border-emerald-600/40 bg-emerald-950/10 p-3 text-emerald-100 flex items-start gap-3 animate-pulse">
-                                                    <span className="mt-1 inline-flex h-3 w-3 rounded-full bg-emerald-400 animate-ping" />
+                                                <div className="my-2 rounded-lg border border-emerald-200 bg-emerald-50/70 p-2 text-emerald-900 flex items-start gap-2 animate-pulse text-[11px]">
+                                                    <span className="mt-0.5 inline-flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
                                                     <div>
-                                                        <div className="text-sm font-semibold">New admin reply waiting</div>
-                                                        <div className="text-[11px] text-emerald-200/80">Scroll down to view the latest response from our team.</div>
+                                                        <span className="font-bold">New reply from Demargo team!</span>
                                                     </div>
                                                 </div>
                                             )}
-                                            <div className="space-y-3">
+                                            
+                                            {/* Messages Log area */}
+                                            <div ref={messagesListRef} className="flex-1 overflow-y-auto space-y-4 my-4 pr-1 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
                                                 {(selectedProject.messages || []).length > 0 ? (
-                                                    <div ref={messagesListRef} className="space-y-3 max-h-64 overflow-y-auto pr-2" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
-                                                        {selectedProject.messages.map((msg) => (
-                                                            <div key={msg.id} className={`rounded-2xl p-3 ${msg.sender === 'admin' ? 'bg-slate-100 text-blue-900 self-start' : 'bg-demargo-orange/10 text-blue-900 self-end'} ${msg.sender === 'admin' ? 'border border-slate-200' : 'border border-demargo-orange/40'}`}>
-                                                                <div className="text-[11px] uppercase tracking-[0.2em] text-slate-500 mb-1">{msg.sender === 'admin' ? 'Admin' : 'You'}</div>
-                                                                <div className="whitespace-pre-line text-sm text-blue-900">{msg.body}</div>
-                                                                <div className="text-[10px] text-slate-400 mt-2">{new Date(msg.createdAt).toLocaleString('en-GH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                                                    selectedProject.messages.map((msg) => {
+                                                        const isAdmin = msg.sender === 'admin'
+                                                        return (
+                                                            <div key={msg.id} className={`flex w-full gap-2 ${isAdmin ? 'justify-start' : 'justify-end'}`}>
+                                                                {isAdmin && (
+                                                                    <div className="w-8 h-8 rounded-full bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-blue-950 uppercase" title="Admin">
+                                                                        A
+                                                                    </div>
+                                                                )}
+                                                                <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm text-xs relative ${
+                                                                    isAdmin 
+                                                                        ? 'bg-white text-blue-950 border border-gray-200 rounded-tl-none' 
+                                                                        : 'bg-demargo-orange text-blue-950 font-semibold rounded-tr-none'
+                                                                }`}>
+                                                                    <p className="whitespace-pre-line leading-relaxed">{msg.body}</p>
+                                                                    {isAdmin ? (
+                                                                        <span className="block text-[9px] mt-1.5 text-right text-slate-450">
+                                                                            {new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}
+                                                                        </span>
+                                                                    ) : (
+                                                                        <div className="flex items-center justify-end gap-1 text-[9px] mt-1.5 text-blue-900/60">
+                                                                            <span>{new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                            {msg.readByAdmin ? (
+                                                                                <span className="text-white font-black text-[10px] leading-none" title="Read by Admin">✓✓</span>
+                                                                            ) : (
+                                                                                <span className="text-blue-900/40 font-black text-[10px] leading-none" title="Sent">✓</span>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {!isAdmin && (
+                                                                    <div className="w-8 h-8 rounded-full bg-amber-500 text-blue-950 font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-amber-600 uppercase" title="You">
+                                                                        U
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        ))}
-                                                    </div>
+                                                        )
+                                                    })
                                                 ) : (
-                                                    <div className="text-slate-500 italic text-sm">No messages yet. Send a note to the admin about your project.</div>
+                                                    <div className="h-full flex flex-col justify-center items-center text-center text-slate-400 py-10">
+                                                        <span className="text-3xl mb-2">💬</span>
+                                                        <p className="text-xs italic">No messages yet. Ask a question to start the conversation.</p>
+                                                    </div>
                                                 )}
                                             </div>
-                                            <div className="mt-4 space-y-3">
-                                                <textarea
-                                                    rows="3"
+
+                                            {/* Chat Input area */}
+                                            <div className="flex gap-2 items-center bg-white border border-gray-300 rounded-full px-4 py-2 focus-within:border-demargo-orange focus-within:ring-1 focus-within:ring-demargo-orange/20 transition">
+                                                <input
+                                                    type="text"
                                                     value={messageInput}
                                                     onChange={(e) => setMessageInput(e.target.value)}
-                                                    placeholder="Send a message about your project or ask a question..."
-                                                    className="w-full resize-none bg-white border border-gray-300 text-blue-900 px-3 py-2 focus:outline-none"
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && messageInput.trim() && !sendingMessage) {
+                                                            handleSendMessage()
+                                                        }
+                                                    }}
+                                                    placeholder="Type a message..."
+                                                    className="flex-1 bg-transparent text-xs text-blue-900 focus:outline-none border-none outline-none"
+                                                    disabled={sendingMessage}
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={handleSendMessage}
                                                     disabled={sendingMessage || !messageInput.trim()}
-                                                    className="w-full py-3 bg-demargo-orange text-blue-900 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition disabled:opacity-50"
+                                                    className="p-1 text-demargo-orange hover:text-orange-600 disabled:opacity-30 transition shrink-0"
                                                 >
-                                                    {sendingMessage ? 'Sending message...' : 'Send Message'}
+                                                    <svg className="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                                    </svg>
                                                 </button>
                                             </div>
                                         </div>
@@ -670,6 +825,69 @@ function ProjectTracker() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Submit Payment Proof Form */}
+                                {selectedProject.balance > 0 && (
+                                    <div className="bg-white border border-gray-200 p-6 relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500" />
+                                        <h3 className="font-bold text-blue-900 text-sm mb-4 uppercase tracking-wider">Submit Payment Receipt</h3>
+                                        <form onSubmit={handleManualPaymentSubmit} className="space-y-3 text-xs text-blue-900">
+                                            <div>
+                                                <label className="block font-semibold mb-1">Amount Paid (GHS) *</label>
+                                                <input 
+                                                    type="number" 
+                                                    required 
+                                                    min="1"
+                                                    step="0.01"
+                                                    value={clientPaymentData.amount}
+                                                    onChange={(e) => setClientPaymentData(prev => ({ ...prev, amount: e.target.value }))}
+                                                    className="w-full bg-white border border-gray-300 px-3 py-2 text-blue-900 focus:outline-none"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block font-semibold mb-1">Payment Method *</label>
+                                                <select 
+                                                    value={clientPaymentData.method}
+                                                    onChange={(e) => setClientPaymentData(prev => ({ ...prev, method: e.target.value }))}
+                                                    className="w-full bg-white border border-gray-300 px-2 py-2 text-blue-900 focus:outline-none"
+                                                >
+                                                    <option value="mobile_money">MTN MOMO</option>
+                                                    <option value="bank_transfer">Bank Transfer</option>
+                                                    <option value="cash">Cash</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block font-semibold mb-1">Reference / Slip Details *</label>
+                                                <input 
+                                                    type="text" 
+                                                    required 
+                                                    value={clientPaymentData.reference}
+                                                    onChange={(e) => setClientPaymentData(prev => ({ ...prev, reference: e.target.value }))}
+                                                    className="w-full bg-white border border-gray-300 px-3 py-2 text-blue-900 focus:outline-none"
+                                                    placeholder="Transaction ID, reference, etc."
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block font-semibold mb-1">Upload Receipt (PDF/Image) *</label>
+                                                <input 
+                                                    type="file" 
+                                                    required 
+                                                    accept=".pdf,image/*"
+                                                    onChange={(e) => setClientPaymentFile(e.target.files[0])}
+                                                    className="w-full text-blue-900 text-[11px]"
+                                                />
+                                            </div>
+                                            <button 
+                                                type="submit"
+                                                disabled={submittingPaymentProof}
+                                                className="w-full py-2.5 bg-emerald-600 text-white font-bold uppercase tracking-wider text-[10px] hover:bg-emerald-500 transition disabled:opacity-50"
+                                            >
+                                                {submittingPaymentProof ? 'Uploading Receipt...' : 'Submit Payment Proof'}
+                                            </button>
+                                        </form>
+                                    </div>
+                                )}
 
                                 {/* Payments Log */}
                                 <div className="bg-white border border-gray-200 p-6">
@@ -735,17 +953,29 @@ function ProjectPaymentsList({ projectId, triggerReload }) {
                 <div key={p.id} className="p-3 bg-white border border-gray-200 text-[11px] space-y-1">
                     <div className="flex justify-between font-bold text-blue-900">
                         <span>GHS {p.amount.toLocaleString('en-GH')}</span>
-                        <span className="text-green-500 uppercase font-black text-[9px] tracking-widest bg-green-500/10 px-1 border border-green-500/15">Success</span>
+                        {p.status === 'pending' ? (
+                            <span className="text-orange-500 uppercase font-black text-[9px] tracking-widest bg-orange-500/10 px-1 border border-orange-500/15 animate-pulse">Pending</span>
+                        ) : (
+                            <span className="text-green-500 uppercase font-black text-[9px] tracking-widest bg-green-500/10 px-1 border border-green-500/15">Success</span>
+                        )}
                     </div>
                     <div className="flex justify-between text-slate-500">
                         <span>Ref: {p.reference?.substring(0, 14)}</span>
                         <span>{p.paidAt ? new Date(p.paidAt).toLocaleDateString('en-GH') : ''}</span>
                     </div>
-                    {p.paymentMethod && (
-                        <div className="text-[10px] text-blue-700 capitalize">
-                            Method: {p.paymentMethod.replace('_', ' ')}
-                        </div>
-                    )}
+                    <div className="flex justify-between items-center text-[10px] text-blue-700 capitalize">
+                        <span>Method: {p.paymentMethod?.replace('_', ' ')}</span>
+                        {p.receiptUrl && (
+                            <a 
+                                href={p.receiptUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-blue-600 hover:underline font-semibold"
+                            >
+                                📄 View Receipt
+                            </a>
+                        )}
+                    </div>
                 </div>
             ))}
         </div>
