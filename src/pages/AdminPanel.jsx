@@ -398,15 +398,25 @@ function AdminPanel() {
         if (!file || !selectedProject) return
         setUploadingPdf(true)
         try {
-            const path = `measurements/${selectedProject.id}_${Date.now()}_measurement.pdf`
+            const path = `receipts/measurement_${selectedProject.id}_${Date.now()}_measurement.pdf`
             const downloadUrl = await uploadFile(path, file)
+            
+            // Auto-save the PDF URL to the project document immediately
+            await updateProject(selectedProject.id, {
+                measurementPdfUrl: downloadUrl
+            })
+            
             setEditProjData(prev => ({ ...prev, measurementPdfUrl: downloadUrl }))
-            showToast('PDF uploaded successfully. Click "Save All Changes" to save the project details.', 'success')
+            setSelectedProject(prev => prev ? { ...prev, measurementPdfUrl: downloadUrl } : prev)
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, measurementPdfUrl: downloadUrl } : p))
+            
+            showToast('PDF uploaded and saved successfully.', 'success')
         } catch (err) {
             console.error('PDF upload error:', err)
             showToast('Failed to upload PDF.', 'error')
         } finally {
             setUploadingPdf(false)
+            e.target.value = '' // Clear input so the change event triggers next time
         }
     }
 
