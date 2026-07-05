@@ -323,8 +323,7 @@ function AdminPanel() {
         setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, messages: finalMessages } : p))
 
         try {
-            await addProjectMessage(selectedProject.id, message)
-            await updateProjectMessages(selectedProject.id, updatedMessages)
+            await updateProjectMessages(selectedProject.id, finalMessages)
             await handleSelectProject(selectedProject.id)
             showToast('Reply sent successfully.', 'success')
         } catch (err) {
