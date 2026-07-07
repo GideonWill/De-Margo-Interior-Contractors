@@ -13,6 +13,30 @@ const STAGES = [
     { key: 'completed', label: 'Completed', title: 'Project Finished', desc: 'Lifecycle complete and balance cleared' }
 ]
 
+const viewDocument = (url) => {
+    if (!url) return;
+    if (url.startsWith('data:')) {
+        try {
+            const [metadata, base64Data] = url.split(',');
+            const mimeType = metadata.split(';')[0].split(':')[1] || 'application/octet-stream';
+            const binaryString = atob(base64Data);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const blob = new Blob([bytes], { type: mimeType });
+            const blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl, '_blank');
+        } catch (e) {
+            console.error('Failed to parse base64 document:', e);
+            window.open(url, '_blank');
+        }
+    } else {
+        window.open(url, '_blank');
+    }
+};
+
 function ProjectTracker() {
     const [phone, setPhone] = useState('')
     const [searching, setSearching] = useState(false)
@@ -192,7 +216,7 @@ function ProjectTracker() {
         setSubmittingPaymentProof(true)
         try {
             // Upload receipt file
-            const receiptPath = `payments/${selectedProject.id}_${Date.now()}_receipt`
+            const receiptPath = `payments/${selectedProject.id}_${Date.now()}_${clientPaymentFile.name}`
             const receiptUrl = await uploadFile(receiptPath, clientPaymentFile)
 
             // Record payment as pending
@@ -572,14 +596,13 @@ function ProjectTracker() {
                                             )}
                                             {selectedProject.measurementPdfUrl && (
                                                 <div className="mt-2">
-                                                    <a 
-                                                        href={selectedProject.measurementPdfUrl} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => viewDocument(selectedProject.measurementPdfUrl)}
                                                         className="inline-flex items-center gap-1.5 px-4 py-2 bg-demargo-orange hover:opacity-90 text-blue-900 font-bold text-xs transition"
                                                     >
                                                         📄 View Site Measurements PDF
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             )}
                                             {!selectedProject.measurementDate && !selectedProject.measurementPdfUrl && (
@@ -699,14 +722,13 @@ function ProjectTracker() {
                                             <span className="text-blue-900 whitespace-pre-line">{selectedProject.measurementNotes || 'No measurements details recorded yet.'}</span>
                                             {selectedProject.measurementPdfUrl && (
                                                 <div className="mt-3">
-                                                    <a 
-                                                        href={selectedProject.measurementPdfUrl} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => viewDocument(selectedProject.measurementPdfUrl)}
                                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-900 border border-blue-200 rounded font-bold text-[11px] hover:bg-blue-100 transition"
                                                     >
                                                         📄 View Site Measurement PDF
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>
@@ -966,14 +988,13 @@ function ProjectPaymentsList({ projectId, triggerReload }) {
                     <div className="flex justify-between items-center text-[10px] text-blue-700 capitalize">
                         <span>Method: {p.paymentMethod?.replace('_', ' ')}</span>
                         {p.receiptUrl && (
-                            <a 
-                                href={p.receiptUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="text-blue-600 hover:underline font-semibold"
+                            <button 
+                                type="button"
+                                onClick={() => viewDocument(p.receiptUrl)} 
+                                className="text-blue-600 hover:underline font-semibold text-[10px]"
                             >
                                 📄 View Receipt
-                            </a>
+                            </button>
                         )}
                     </div>
                 </div>

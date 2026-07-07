@@ -52,6 +52,40 @@ service cloud.firestore {
 
 > **Note**: These rules allow anyone to read projects and payments. For production, you should implement authentication and restrict access to specific users.
 
+## Step 2b: Set Up Firebase Storage & Authentication
+
+### 1. Enable Anonymous Authentication
+Because the app registers payments and uploads files securely, it uses Firebase Anonymous Authentication.
+1. In the Firebase console left sidebar, click **Build** → **Authentication**.
+2. Click **Get Started**.
+3. Under the **Sign-in method** tab, click **Anonymous** (under *Additional providers*).
+4. Toggle **Enable** to active, and click **Save**.
+
+### 2. Set Up Cloud Storage
+1. In the Firebase console left sidebar, click **Build** → **Storage**.
+2. Click **Get Started**.
+3. Select **Start in production mode** (we will configure storage rules next).
+4. Choose the same Cloud Storage location as your Firestore database and click **Done** / **Next**.
+
+### 3. Configure Storage Security Rules
+1. Once Storage is initialized, go to the **Rules** tab.
+2. Replace the default rules with the rules below to allow authenticated (anonymous or admin) clients and admins to upload and view measurement PDFs and payment receipts:
+
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /receipts/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    match /payments/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+3. Click **Publish**.
+
 ## Step 3: Get Firebase Configuration
 
 1. In Firebase Console, click the gear icon ⚙️ next to "Project Overview"

@@ -14,8 +14,7 @@ import {
     arrayUnion,
     onSnapshot
 } from 'firebase/firestore'
-import { db, storage, isFirebaseConfigured, initFirebaseAuth } from '../firebase'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { db, isFirebaseConfigured, initFirebaseAuth } from '../firebase'
 
 const PROJECTS_COLLECTION = 'projects'
 const PAYMENTS_COLLECTION = 'payments'
@@ -696,30 +695,26 @@ export const deleteProject = async (projectId) => {
 }
 
 /**
- * Upload a file to Firebase Storage (with local base64 fallback)
- * @param {string} path - Storage path
+ * Upload a file by converting it to a base64 data URL.
+ * Stores directly in Firestore (no Firebase Storage / Blaze plan required).
+ * Max file size: ~750KB (Firestore 1MB document limit with other fields).
+ * @param {string} path - Original storage path (kept for logging/reference)
  * @param {File} file - File object to upload
- * @returns {Promise<string>} - Download URL or base64 data URL
+ * @returns {Promise<string>} - base64 data URL
  */
 export const uploadFile = async (path, file) => {
-    if (!isFirebaseConfigured) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = () => resolve(reader.result)
-            reader.onerror = (err) => reject(err)
-            reader.readAsDataURL(file)
-        })
+    // Check file size — Firestore docs max 1MB, leave room for other fields
+    const MAX_SIZE = 750 * 1024 // 750KB
+    if (file.size > MAX_SIZE) {
+        throw new Error(`File too large (${(file.size / 1024).toFixed(0)}KB). Maximum allowed is 750KB.`)
     }
-    await initFirebaseAuth()
-    try {
-        const storageRef = ref(storage, path)
-        const snapshot = await uploadBytes(storageRef, file)
-        const downloadURL = await getDownloadURL(snapshot.ref)
-        return downloadURL
-    } catch (error) {
-        console.error('Error uploading file:', error)
-        throw error
-    }
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = (err) => reject(err)
+        reader.readAsDataURL(file)
+    })
 }
 
 /**

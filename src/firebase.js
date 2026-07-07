@@ -8,14 +8,14 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
-    apiKey: "AIzaSyC09_b_uWspKRQPEyuaPk5JZwwDTH68zpw",
-    authDomain: "demargo-erms.firebaseapp.com",
-    databaseURL: "https://demargo-erms-default-rtdb.firebaseio.com",
-    projectId: "demargo-erms",
-    storageBucket: "demargo-erms.firebasestorage.app",
-    messagingSenderId: "132903868292",
-    appId: "1:132903868292:web:480df39d05d885517cefd1",
-    measurementId: "G-39Y9DSKP29"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyC09_b_uWspKRQPEyuaPk5JZwwDTH68zpw",
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "demargo-erms.firebaseapp.com",
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://demargo-erms-default-rtdb.firebaseio.com",
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demargo-erms",
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "demargo-erms.firebasestorage.app",
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "132903868292",
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:132903868292:web:480df39d05d885517cefd1",
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-39Y9DSKP29"
 }
 
 // Initialize Firebase
@@ -23,33 +23,25 @@ const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
 export const auth = getAuth(app)
 export const storage = getStorage(app)
+storage.maxUploadRetryTime = 6000 // 6 seconds
+storage.maxOperationRetryTime = 6000 // 6 seconds
 export const isFirebaseConfigured = true
 
-let authInitialized = false
 export const initFirebaseAuth = async () => {
-    if (authInitialized) return auth.currentUser
-    authInitialized = true
-
+    // If already signed in, return immediately
     if (auth.currentUser) {
         return auth.currentUser
     }
 
     try {
-        await signInAnonymously(auth)
+        const userCredential = await signInAnonymously(auth)
+        console.log('Anonymous auth successful, uid:', userCredential.user.uid)
+        return userCredential.user
     } catch (error) {
-        console.warn('Firebase anonymous auth failed:', error)
-        // If anonymous auth is not allowed, we still allow the app to continue and let Firestore rules report the actual error.
+        console.warn('Firebase anonymous auth failed:', error.code, error.message)
+        // Return null but don't cache the failure — allow retry on next call
+        return null
     }
-
-    return new Promise((resolve, reject) => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe()
-            resolve(user)
-        }, (error) => {
-            unsubscribe()
-            reject(error)
-        })
-    })
 }
 
 export default app

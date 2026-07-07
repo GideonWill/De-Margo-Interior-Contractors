@@ -7,6 +7,7 @@ import { Helmet } from 'react-helmet'
 // import TransportPayment from './pages/TransportPayment'
 import ProjectTracker from './pages/ProjectTracker'
 import AdminPanel from './pages/AdminPanel'
+import FabricCollection from './pages/FabricCollection'
 
 function Seo({ title, description, image, type }) {
   const loc = window.location.pathname
@@ -161,7 +162,7 @@ function Navbar() {
           <li><NavLink to="/" className={linkClass}>Home</NavLink></li>
           <li><NavLink to="/portfolio" className={linkClass}>Portfolio</NavLink></li>
           <li><NavLink to="/services" className={linkClass}>Services</NavLink></li>
-          <li><NavLink to="/fabrics" className={linkClass}>Fabric Display</NavLink></li>
+          <li><NavLink to="/fabric-collection" className={linkClass}>Fabric Collection</NavLink></li>
           <li><NavLink to="/clientele" className={linkClass}>Clientele</NavLink></li>
           <li><NavLink to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
           <li><NavLink to="/awards" className={linkClass}>Awards</NavLink></li>
@@ -177,7 +178,7 @@ function Navbar() {
               <li><NavLink onClick={() => setOpen(false)} to="/" className={linkClass}>Home</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/portfolio" className={linkClass}>Portfolio</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/services" className={linkClass}>Services</NavLink></li>
-              <li><NavLink onClick={() => setOpen(false)} to="/fabrics" className={linkClass}>Fabric Display</NavLink></li>
+              <li><NavLink onClick={() => setOpen(false)} to="/fabric-collection" className={linkClass}>Fabric Collection</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/clientele" className={linkClass}>Clientele</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/awards" className={linkClass}>Awards</NavLink></li>
@@ -815,79 +816,6 @@ function Rendering3D() {
           </article>
         ))}
       </div>
-    </section>
-  )
-}
-
-function Fabrics() {
-  const [lightbox, setLightbox] = useState({ open: false, src: '', kind: 'image' })
-  const openLightbox = (src) => setLightbox({ open: true, src, kind: 'image' })
-  const closeLightbox = () => setLightbox({ open: false, src: '', kind: 'image' })
-  useEffect(() => {
-    if (!lightbox.open) return
-    const onKeyDown = (e) => { if (e.key === 'Escape') closeLightbox() }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [lightbox.open])
-  return (
-    <section className="max-w-6xl mx-auto px-4 py-16">
-      <Seo title="Fabric Display" description="Browse Demargo's curated fabric samples for curtains and upholstery." />
-      <h1 className="text-3xl md:text-5xl font-extrabold mb-3 text-center">
-        <span className="text-demargo-orange">Fabric</span> <span className="text-demargo-blue">Display</span>
-      </h1>
-      <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">Browse a curated selection of premium fabrics. Tap any tile to preview in a larger view.</p>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 card-perspective-container">
-        {[
-          { file: '1.png', code: 'MILAN-7' },
-          { file: '2.png', code: '8021-04' },
-          { file: '3.png', code: 'MILAN-9' },
-          { file: '4.png', code: '8021-05' },
-          { file: '5.png', code: 'MILAN-10' },
-          { file: '6.png', code: '8021-09' }
-        ].map((f, i) => (
-          <motion.figure
-            key={i}
-            initial={{ opacity: 0, y: 40, scale: 0.95, rotateX: 8 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (i % 3) * 0.1 }}
-            style={{ transformOrigin: 'bottom center' }}
-            className="group rounded-2xl overflow-hidden bg-white shadow transition hover:shadow-lg border border-gray-100 perspective-card"
-          >
-            <button className="relative w-full block" onClick={() => openLightbox(`/assets/${f.file}`)}>
-              <img src={`/assets/${f.file}`} alt={`Fabric ${f.code}`} className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-            </button>
-            <figcaption className="p-3 text-sm flex items-center justify-between bg-slate-50 border-t">
-              <span className="font-medium">Fabric Code</span>
-              <span className="px-2 py-1 rounded bg-orange-50 text-demargo-orange text-xs">{f.code}</span>
-            </figcaption>
-          </motion.figure>
-        ))}
-      </div>
-      <div className="text-center mt-8">
-        <a
-          href="https://www.canva.com/design/DAGr_fyK4CQ/V2rFYccaNyHAbb6TvhfDQw/view?utm_content=DAGr_fyK4CQ&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h15acb9d221"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-md bg-demargo-blue text-white hover:opacity-90"
-        >
-          View Full Fabric Catalog
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5l7 7-7 7" /></svg>
-        </a>
-      </div>
-
-      {lightbox.open && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={closeLightbox}>
-          <div className="max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="relative w-full overflow-hidden rounded-2xl bg-black shadow-xl">
-              <img src={lightbox.src} alt="preview" className="w-full h-[70vh] object-contain bg-black" />
-            </div>
-            <div className="mt-3 flex justify-center">
-              <button onClick={closeLightbox} className="inline-flex px-4 py-2 rounded-md bg-white text-gray-800 shadow">Close</button>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   )
 }
@@ -1816,7 +1744,7 @@ function AnimatedRoutes() {
         <Route path="/services" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Services /></motion.div>} />
         <Route path="/interior-design-services" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><InteriorDesign /></motion.div>} />
         <Route path="/3d-rendering" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Rendering3D /></motion.div>} />
-        <Route path="/fabrics" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Fabrics /></motion.div>} />
+        <Route path="/fabric-collection" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><FabricCollection /></motion.div>} />
         <Route path="/clientele" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Clientele /></motion.div>} />
         <Route path="/testimonials" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Testimonials /></motion.div>} />
         <Route path="/awards" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Awards /></motion.div>} />

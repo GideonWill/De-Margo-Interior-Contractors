@@ -28,6 +28,31 @@ const STAGES = [
 
 const PASSCODE = 'demargo-admin-2026'
 
+const viewDocument = (url) => {
+    if (!url) return;
+    if (url.startsWith('data:')) {
+        try {
+            const [metadata, base64Data] = url.split(',');
+            const mimeType = metadata.split(';')[0].split(':')[1] || 'application/octet-stream';
+            const binaryString = atob(base64Data);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const blob = new Blob([bytes], { type: mimeType });
+            const blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl, '_blank');
+        } catch (e) {
+            console.error('Failed to parse base64 document:', e);
+            window.open(url, '_blank');
+        }
+    } else {
+        window.open(url, '_blank');
+    }
+};
+
+
 function AdminPanel() {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [passcodeInput, setPasscodeInput] = useState('')
@@ -412,8 +437,8 @@ function AdminPanel() {
             
             showToast('PDF uploaded and saved successfully.', 'success')
         } catch (err) {
-            console.error('PDF upload error:', err)
-            showToast('Failed to upload PDF.', 'error')
+            console.error('PDF upload error:', err.code, err.message, err)
+            showToast(`Failed to upload PDF: ${err.code || err.message || 'Unknown error'}`, 'error')
         } finally {
             setUploadingPdf(false)
             e.target.value = '' // Clear input so the change event triggers next time
@@ -921,12 +946,27 @@ function AdminPanel() {
                                     <div className="space-y-3">
                                         <div>
                                             <label className="block text-slate-500 font-semibold mb-1">Measurement Date</label>
-                                            <input
-                                                type="datetime-local"
-                                                value={editProjData.measurementDate}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, measurementDate: e.target.value }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                            />
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="datetime-local"
+                                                    value={editProjData.measurementDate}
+                                                    onChange={(e) => setEditProjData(p => ({ ...p, measurementDate: e.target.value }))}
+                                                    className="flex-1 bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none focus:border-demargo-orange focus:ring-1 focus:ring-demargo-orange/20 transition-all duration-200"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        const inputEl = e.currentTarget.previousSibling;
+                                                        if (inputEl) inputEl.blur();
+                                                    }}
+                                                    className="px-4 bg-slate-900 border border-slate-800 hover:border-demargo-orange hover:bg-slate-850 text-slate-300 hover:text-white font-extrabold uppercase tracking-wider text-[10px] transition-all duration-200 shadow-sm shrink-0 flex items-center justify-center gap-1.5"
+                                                >
+                                                    <span>OK</span>
+                                                    <svg className="w-3.5 h-3.5 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                     {/* PDF Upload */}
@@ -944,14 +984,13 @@ function AdminPanel() {
                                                 />
                                             </label>
                                             {editProjData.measurementPdfUrl && (
-                                                <a 
-                                                    href={editProjData.measurementPdfUrl} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => viewDocument(editProjData.measurementPdfUrl)}
                                                     className="text-xs text-demargo-orange hover:underline font-semibold flex items-center gap-1 mt-2 sm:mt-0"
                                                 >
                                                     📄 View Uploaded PDF
-                                                </a>
+                                                </button>
                                             )}
                                         </div>
                                         {editProjData.measurementPdfUrl && (
@@ -1020,12 +1059,27 @@ function AdminPanel() {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div>
                                             <label className="block text-slate-500 font-semibold mb-1">Installation Date</label>
-                                            <input
-                                                type="datetime-local"
-                                                value={editProjData.installationDate}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, installationDate: e.target.value }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                            />
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="datetime-local"
+                                                    value={editProjData.installationDate}
+                                                    onChange={(e) => setEditProjData(p => ({ ...p, installationDate: e.target.value }))}
+                                                    className="flex-1 bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none focus:border-demargo-orange focus:ring-1 focus:ring-demargo-orange/20 transition-all duration-200"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        const inputEl = e.currentTarget.previousSibling;
+                                                        if (inputEl) inputEl.blur();
+                                                    }}
+                                                    className="px-4 bg-slate-900 border border-slate-800 hover:border-demargo-orange hover:bg-slate-850 text-slate-300 hover:text-white font-extrabold uppercase tracking-wider text-[10px] transition-all duration-200 shadow-sm shrink-0 flex items-center justify-center gap-1.5"
+                                                >
+                                                    <span>OK</span>
+                                                    <svg className="w-3.5 h-3.5 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div>
                                             <label className="block text-slate-500 font-semibold mb-1">Installation Notes</label>
@@ -1126,14 +1180,13 @@ function AdminPanel() {
                                                     <span className="text-slate-600">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : ''}</span>
                                                     <div className="flex items-center gap-2">
                                                         {p.receiptUrl && (
-                                                            <a
-                                                                href={p.receiptUrl}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => viewDocument(p.receiptUrl)}
                                                                 className="text-demargo-orange hover:underline text-[9px] font-bold"
                                                             >
                                                                 📄 Receipt
-                                                            </a>
+                                                            </button>
                                                         )}
                                                         {p.status === 'pending' && (
                                                             <button
