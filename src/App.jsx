@@ -1374,10 +1374,64 @@ function ChatBot() {
 
   const quickReplies = [
     { t: 'View Services', a: () => pushBotAction('Opening Services…', () => navigate('/services')) },
-    { t: 'Interior Design', a: () => pushBotAction('Opening Interior Design…', () => navigate('/interior-design-services')) },
+    { t: 'Fabric Collection', a: () => pushBotAction('Opening Fabric Collection…', () => navigate('/fabric-collection')) },
+    { t: 'Track Project', a: () => pushBotAction('Opening Project Tracker…', () => navigate('/track')) },
     { t: '3D Rendering', a: () => pushBotAction('Opening 3D Rendering…', () => navigate('/3d-rendering')) },
     { t: 'Contact', a: () => pushBotText('Phone: 0546478040 • Email: demargo1987@gmail.com') },
   ]
+
+  const renderMessageText = (text) => {
+    if (typeof text !== 'string') return text
+    const regex = /\[([^\]]+)\]\(([^)]+)\)/g
+    const parts = []
+    let lastIndex = 0
+    let match
+
+    while ((match = regex.exec(text)) !== null) {
+      const [_, label, url] = match
+      const matchIndex = match.index
+
+      if (matchIndex > lastIndex) {
+        parts.push(text.slice(lastIndex, matchIndex))
+      }
+
+      const isRelative = url.startsWith('/')
+      if (isRelative) {
+        parts.push(
+          <button
+            key={matchIndex}
+            onClick={() => {
+              setOpen(false)
+              navigate(url)
+            }}
+            className="text-demargo-orange hover:underline font-semibold inline-flex items-center gap-0.5 mx-0.5 align-baseline"
+          >
+            {label}
+          </button>
+        )
+      } else {
+        parts.push(
+          <a
+            key={matchIndex}
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-demargo-orange hover:underline font-semibold inline-flex items-center gap-0.5 mx-0.5 align-baseline"
+          >
+            {label}
+          </a>
+        )
+      }
+
+      lastIndex = regex.lastIndex
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex))
+    }
+
+    return parts.length > 0 ? parts : text
+  }
 
   function pushBotText(text) {
     setMessages(m => [...m, { role: 'bot', text }])
@@ -1514,7 +1568,7 @@ function ChatBot() {
               <div key={i} className={m.role === 'bot' ? 'text-gray-800' : 'text-right'}>
                 {m.type === 'actions' ? (
                   <div className="inline-block p-3 rounded-lg bg-slate-100">
-                    <div className="text-sm mb-2 text-gray-800">{m.text}</div>
+                    <div className="text-sm mb-2 text-gray-800">{renderMessageText(m.text)}</div>
                     <div className="flex flex-wrap gap-2">
                       {(m.buttons || []).map((b, bi) => (
                         <a key={bi} href={b.href} target={b.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer" className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-demargo-blue text-white hover:opacity-90">{b.label}</a>
@@ -1522,7 +1576,7 @@ function ChatBot() {
                     </div>
                   </div>
                 ) : (
-                  <span className={`inline-block px-3 py-2 rounded-lg ${m.role === 'bot' ? 'bg-slate-100' : 'bg-demargo-blue text-white'}`}>{m.text}</span>
+                  <span className={`inline-block px-3 py-2 rounded-lg ${m.role === 'bot' ? 'bg-slate-100' : 'bg-demargo-blue text-white'}`}>{renderMessageText(m.text)}</span>
                 )}
               </div>
             ))}

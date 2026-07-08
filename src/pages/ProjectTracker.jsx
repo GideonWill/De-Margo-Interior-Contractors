@@ -696,17 +696,14 @@ function ProjectTracker() {
                                         </div>
                                     )}
 
-                                    {selectedProject.status === 'completed' && (
-                                        <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-3xl text-emerald-950 space-y-3">
-                                            <div className="flex items-center gap-3 text-2xl font-bold text-emerald-900">
-                                                <TrophyIcon className="h-8 w-8 text-amber-500" />
-                                                <span>Project Complete</span>
-                                            </div>
-                                            <p className="text-sm text-emerald-800 leading-relaxed font-medium">
-                                                Your curtains and blinds have been installed neatly! The final balances are cleared. Thank you for partnering with Demargo Interior Contractors. We look forward to working with you again.
-                                            </p>
-                                        </div>
-                                    )}
+                                     {selectedProject.status === 'completed' && (
+                                         <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-3xl text-emerald-950">
+                                             <div className="flex items-center gap-3 text-2xl font-bold text-emerald-900">
+                                                 <TrophyIcon className="h-8 w-8 text-amber-500" />
+                                                 <span>Project Complete</span>
+                                             </div>
+                                         </div>
+                                     )}
                                 </div>
 
                                 {/* Project Notes & Logs Card */}
