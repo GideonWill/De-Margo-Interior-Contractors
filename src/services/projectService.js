@@ -14,7 +14,8 @@ import {
     arrayUnion,
     onSnapshot
 } from 'firebase/firestore'
-import { db, isFirebaseConfigured, initFirebaseAuth } from '../firebase'
+import { db, isFirebaseConfigured, initFirebaseAuth, storage } from '../firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const PROJECTS_COLLECTION = 'projects'
 const PAYMENTS_COLLECTION = 'payments'
@@ -696,17 +697,33 @@ export const deleteProject = async (projectId) => {
 
 /**
  * Upload a file by converting it to a base64 data URL.
- * Stores directly in Firestore (no Firebase Storage / Blaze plan required).
- * Max file size: ~750KB (Firestore 1MB document limit with other fields).
- * @param {string} path - Original storage path (kept for logging/reference)
+ * Stores in Firebase Cloud Storage when configured, or inline Base64 fallback.
+ * Max file size: 5MB
+ * @param {string} path - Storage path
  * @param {File} file - File object to upload
- * @returns {Promise<string>} - base64 data URL
+ * @returns {Promise<string>} - Download URL or base64 data URL
  */
 export const uploadFile = async (path, file) => {
-    // Check file size — Firestore docs max 1MB, leave room for other fields
-    const MAX_SIZE = 750 * 1024 // 750KB
+    // Check file size — maximum allowed is 5MB
+    const MAX_SIZE = 5 * 1024 * 1024 // 5MB
     if (file.size > MAX_SIZE) {
-        throw new Error(`File too large (${(file.size / 1024).toFixed(0)}KB). Maximum allowed is 750KB.`)
+        throw new Error(`File too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum allowed is 5MB.`)
+    }
+
+    if (isFirebaseConfigured && storage) {
+        try {
+            await initFirebaseAuth()
+            const fileRef = ref(storage, path)
+            const snapshot = await uploadBytes(fileRef, file)
+            const downloadUrl = await getDownloadURL(snapshot.ref)
+            return downloadUrl
+        } catch (err) {
+            console.warn('Firebase Storage upload failed, trying base64 fallback:', err)
+            // If it failed and file is larger than 750KB, throw because it won't fit inside Firestore limit
+            if (file.size > 750 * 1024) {
+                throw new Error(`Cloud Storage upload failed, and the file is too large (${(file.size / 1024).toFixed(0)}KB) to save inline. Max size without Cloud Storage configured is 750KB. Please configure Firebase Storage or upload a smaller file.`)
+            }
+        }
     }
 
     return new Promise((resolve, reject) => {

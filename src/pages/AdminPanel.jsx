@@ -426,37 +426,48 @@ function AdminPanel() {
     }
 
     const handlePdfUpload = async (e) => {
-        const file = e.target.files[0]
-        if (!file || !selectedProject) return
+        const files = Array.from(e.target.files)
+        if (files.length === 0 || !selectedProject) return
+        
+        if (files.length > 4) {
+            showToast('You can select a maximum of 4 files at a go.', 'error')
+            e.target.value = ''
+            return
+        }
         
         const currentUrls = editProjData.measurementPdfUrls || []
-        if (currentUrls.length >= 5) {
-            showToast('Maximum of 5 measurement files allowed.', 'error')
+        if (currentUrls.length + files.length > 5) {
+            showToast(`Adding ${files.length} files would exceed the maximum limit of 5 files (currently has ${currentUrls.length}).`, 'error')
             e.target.value = ''
             return
         }
 
         setUploadingPdf(true)
         try {
-            const path = `receipts/measurement_${selectedProject.id}_${Date.now()}_measurement.pdf`
-            const downloadUrl = await uploadFile(path, file)
+            const newUploadedFiles = []
+            for (const file of files) {
+                const path = `receipts/measurement_${selectedProject.id}_${Date.now()}_${Math.random().toString(36).substring(7)}_measurement.pdf`
+                const downloadUrl = await uploadFile(path, file)
+                newUploadedFiles.push({ name: file.name, url: downloadUrl })
+            }
             
-            const newUrls = [...currentUrls, { name: file.name, url: downloadUrl }]
+            const newUrls = [...currentUrls, ...newUploadedFiles]
+            const latestUrl = newUrls[newUrls.length - 1]?.url || ''
             
             // Auto-save to the project document immediately
             await updateProject(selectedProject.id, {
                 measurementPdfUrls: newUrls,
-                measurementPdfUrl: downloadUrl // legacy compatibility
+                measurementPdfUrl: latestUrl // legacy compatibility
             })
             
             setEditProjData(prev => ({ ...prev, measurementPdfUrls: newUrls }))
-            setSelectedProject(prev => prev ? { ...prev, measurementPdfUrls: newUrls, measurementPdfUrl: downloadUrl } : prev)
-            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, measurementPdfUrls: newUrls, measurementPdfUrl: downloadUrl } : p))
+            setSelectedProject(prev => prev ? { ...prev, measurementPdfUrls: newUrls, measurementPdfUrl: latestUrl } : prev)
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, measurementPdfUrls: newUrls, measurementPdfUrl: latestUrl } : p))
             
-            showToast('PDF uploaded and saved successfully.', 'success')
+            showToast(`${files.length} PDF(s) uploaded and saved successfully.`, 'success')
         } catch (err) {
             console.error('PDF upload error:', err.code, err.message, err)
-            showToast(`Failed to upload PDF: ${err.code || err.message || 'Unknown error'}`, 'error')
+            showToast(`Failed to upload: ${err.message || 'Unknown error'}`, 'error')
         } finally {
             setUploadingPdf(false)
             e.target.value = '' // Clear input so the change event triggers next time
@@ -486,37 +497,48 @@ function AdminPanel() {
     }
 
     const handleEstimatePdfUpload = async (e) => {
-        const file = e.target.files[0]
-        if (!file || !selectedProject) return
+        const files = Array.from(e.target.files)
+        if (files.length === 0 || !selectedProject) return
+        
+        if (files.length > 4) {
+            showToast('You can select a maximum of 4 files at a go.', 'error')
+            e.target.value = ''
+            return
+        }
         
         const currentUrls = editProjData.estimatePdfUrls || []
-        if (currentUrls.length >= 5) {
-            showToast('Maximum of 5 estimate files allowed.', 'error')
+        if (currentUrls.length + files.length > 5) {
+            showToast(`Adding ${files.length} files would exceed the maximum limit of 5 files (currently has ${currentUrls.length}).`, 'error')
             e.target.value = ''
             return
         }
 
         setUploadingEstimatePdf(true)
         try {
-            const path = `receipts/estimate_${selectedProject.id}_${Date.now()}_estimate.pdf`
-            const downloadUrl = await uploadFile(path, file)
+            const newUploadedFiles = []
+            for (const file of files) {
+                const path = `receipts/estimate_${selectedProject.id}_${Date.now()}_${Math.random().toString(36).substring(7)}_estimate.pdf`
+                const downloadUrl = await uploadFile(path, file)
+                newUploadedFiles.push({ name: file.name, url: downloadUrl })
+            }
             
-            const newUrls = [...currentUrls, { name: file.name, url: downloadUrl }]
+            const newUrls = [...currentUrls, ...newUploadedFiles]
+            const latestUrl = newUrls[newUrls.length - 1]?.url || ''
             
             // Auto-save to the project document immediately
             await updateProject(selectedProject.id, {
                 estimatePdfUrls: newUrls,
-                estimatePdfUrl: downloadUrl // legacy compatibility
+                estimatePdfUrl: latestUrl // legacy compatibility
             })
             
             setEditProjData(prev => ({ ...prev, estimatePdfUrls: newUrls }))
-            setSelectedProject(prev => prev ? { ...prev, estimatePdfUrls: newUrls, estimatePdfUrl: downloadUrl } : prev)
-            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, estimatePdfUrls: newUrls, estimatePdfUrl: downloadUrl } : p))
+            setSelectedProject(prev => prev ? { ...prev, estimatePdfUrls: newUrls, estimatePdfUrl: latestUrl } : prev)
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, estimatePdfUrls: newUrls, estimatePdfUrl: latestUrl } : p))
             
-            showToast('Estimate PDF uploaded and saved successfully.', 'success')
+            showToast(`${files.length} Estimate PDF(s) uploaded and saved successfully.`, 'success')
         } catch (err) {
             console.error('Estimate PDF upload error:', err.code, err.message, err)
-            showToast(`Failed to upload Estimate PDF: ${err.code || err.message || 'Unknown error'}`, 'error')
+            showToast(`Failed to upload: ${err.message || 'Unknown error'}`, 'error')
         } finally {
             setUploadingEstimatePdf(false)
             e.target.value = '' // Clear input so the change event triggers next time
@@ -1114,6 +1136,7 @@ function AdminPanel() {
                                                 <input 
                                                     type="file" 
                                                     accept=".pdf"
+                                                    multiple
                                                     className="hidden"
                                                     disabled={uploadingPdf}
                                                     onChange={handlePdfUpload}
@@ -1166,6 +1189,7 @@ function AdminPanel() {
                                                     <input 
                                                         type="file" 
                                                         accept=".pdf"
+                                                        multiple
                                                         className="hidden"
                                                         disabled={uploadingEstimatePdf}
                                                         onChange={handleEstimatePdfUpload}
