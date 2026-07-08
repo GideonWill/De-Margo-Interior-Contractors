@@ -254,7 +254,7 @@ function AdminPanel() {
             const amount = parseFloat(newProjData.totalAmount) || 0
             const projectId = await createProject({
                 clientName: newProjData.clientName.trim(),
-                clientEmail: newProjData.clientEmail.trim().toLowerCase(),
+                clientEmail: (newProjData.clientEmail || '').trim().toLowerCase(),
                 clientPhone: newProjData.clientPhone.trim(),
                 projectTitle: newProjData.projectTitle.trim(),
                 projectDescription: newProjData.projectDescription.trim(),
@@ -293,7 +293,7 @@ function AdminPanel() {
             const updatePayload = {
                 status: editProjData.status,
                 clientName: editProjData.clientName.trim(),
-                clientEmail: editProjData.clientEmail.trim().toLowerCase(),
+                clientEmail: (editProjData.clientEmail || '').trim().toLowerCase(),
                 clientPhone: editProjData.clientPhone.trim(),
                 projectTitle: editProjData.projectTitle.trim(),
                 projectDescription: editProjData.projectDescription.trim(),
@@ -1255,7 +1255,6 @@ function AdminPanel() {
                                     <label className="block text-slate-500 font-bold mb-1 uppercase">Client Email</label>
                                     <input
                                         type="email"
-                                        required
                                         placeholder="kofi@example.com"
                                         value={newProjData.clientEmail}
                                         onChange={(e) => setNewProjData(p => ({ ...p, clientEmail: e.target.value }))}
