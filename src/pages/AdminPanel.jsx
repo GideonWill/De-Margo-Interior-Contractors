@@ -106,16 +106,15 @@ function AdminPanel() {
         totalAmount: 0,
         measurementDate: '',
         measurementNotes: '',
-        estimateDetails: '',
+        estimatePdfUrl: '',
         estimateApproved: false,
         selectedFabrics: '',
-        fabricSelectionNotes: '',
         installationDate: '',
-        installationNotes: '',
         measurementPdfUrl: ''
     })
 
     const [uploadingPdf, setUploadingPdf] = useState(false)
+    const [uploadingEstimatePdf, setUploadingEstimatePdf] = useState(false)
 
     const [replyInput, setReplyInput] = useState('')
     const [sendingReply, setSendingReply] = useState(false)
@@ -216,12 +215,10 @@ function AdminPanel() {
             totalAmount: updatedProj.totalAmount || 0,
             measurementDate: updatedProj.measurementDate || '',
             measurementNotes: updatedProj.measurementNotes || '',
-            estimateDetails: updatedProj.estimateDetails || '',
+            estimatePdfUrl: updatedProj.estimatePdfUrl || '',
             estimateApproved: updatedProj.estimateApproved || false,
             selectedFabrics: updatedProj.selectedFabrics || '',
-            fabricSelectionNotes: updatedProj.fabricSelectionNotes || '',
             installationDate: updatedProj.installationDate || '',
-            installationNotes: updatedProj.installationNotes || '',
             measurementPdfUrl: updatedProj.measurementPdfUrl || ''
         })
         
@@ -301,12 +298,10 @@ function AdminPanel() {
                 totalAmount: total,
                 measurementDate: editProjData.measurementDate,
                 measurementNotes: editProjData.measurementNotes,
-                estimateDetails: editProjData.estimateDetails,
+                estimatePdfUrl: editProjData.estimatePdfUrl,
                 estimateApproved: editProjData.estimateApproved,
                 selectedFabrics: editProjData.selectedFabrics,
-                fabricSelectionNotes: editProjData.fabricSelectionNotes,
                 installationDate: editProjData.installationDate,
-                installationNotes: editProjData.installationNotes,
                 measurementPdfUrl: editProjData.measurementPdfUrl
             }
             
@@ -400,7 +395,8 @@ function AdminPanel() {
 
             // Update balance
             await updateProjectPayment(selectedProject.id, amountNum)
-            showToast(`Logged manual payment of GHS ${amountNum} successfully.`, 'success')
+            const timestamp = new Date().toLocaleTimeString('en-GH')
+            showToast(`Logged manual payment of GHS ${amountNum} successfully at ${timestamp}.`, 'success')
             setManualPaymentFile(null)
 
             // Refresh project view
@@ -445,10 +441,38 @@ function AdminPanel() {
         }
     }
 
+    const handleEstimatePdfUpload = async (e) => {
+        const file = e.target.files[0]
+        if (!file || !selectedProject) return
+        setUploadingEstimatePdf(true)
+        try {
+            const path = `receipts/estimate_${selectedProject.id}_${Date.now()}_estimate.pdf`
+            const downloadUrl = await uploadFile(path, file)
+            
+            // Auto-save the PDF URL to the project document immediately
+            await updateProject(selectedProject.id, {
+                estimatePdfUrl: downloadUrl
+            })
+            
+            setEditProjData(prev => ({ ...prev, estimatePdfUrl: downloadUrl }))
+            setSelectedProject(prev => prev ? { ...prev, estimatePdfUrl: downloadUrl } : prev)
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, estimatePdfUrl: downloadUrl } : p))
+            
+            showToast('Estimate PDF uploaded and saved successfully.', 'success')
+        } catch (err) {
+            console.error('Estimate PDF upload error:', err.code, err.message, err)
+            showToast(`Failed to upload Estimate PDF: ${err.code || err.message || 'Unknown error'}`, 'error')
+        } finally {
+            setUploadingEstimatePdf(false)
+            e.target.value = '' // Clear input so the change event triggers next time
+        }
+    }
+
     const handleVerifyPayment = async (projectId, paymentId, amount) => {
         try {
             await approvePayment(projectId, paymentId, amount)
-            showToast(`Approved and verified payment of GHS ${amount} successfully.`, 'success')
+            const timestamp = new Date().toLocaleTimeString('en-GH')
+            showToast(`Approved and verified payment of GHS ${amount} successfully at ${timestamp}.`, 'success')
             // Refresh project view
             const freshList = await getAllProjects()
             setProjects(freshList)
@@ -580,12 +604,26 @@ function AdminPanel() {
                         <h1 className="text-2xl font-black text-white uppercase tracking-wider">Demargo Admin Panel</h1>
                         <p className="text-xs text-slate-400 mt-0.5">Logged in as Administrator • Secure Cloud DB Mode</p>
                     </div>
-                    <button
-                        onClick={handleLogout}
-                        className="px-4 py-2 border border-slate-850 hover:bg-slate-900 transition text-xs font-bold text-slate-400 hover:text-white"
-                    >
-                        [ LOGOUT SYSTEM ]
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={async () => {
+                                showToast('Refreshing data...', 'success')
+                                await fetchData()
+                                if (selectedProject) {
+                                    await handleSelectProject(selectedProject.id)
+                                }
+                            }}
+                            className="px-4 py-2 border border-demargo-orange/40 hover:bg-slate-900/60 transition text-xs font-bold text-demargo-orange hover:text-white flex items-center gap-1.5"
+                        >
+                            <span>↻</span> Refresh Updates
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="px-4 py-2 border border-slate-850 hover:bg-slate-900 transition text-xs font-bold text-slate-400 hover:text-white"
+                        >
+                            [ LOGOUT SYSTEM ]
+                        </button>
+                    </div>
                 </div>
 
                 {/* Notification Alerts: Unread Client Messages and Pending Payments */}
@@ -1013,83 +1051,76 @@ function AdminPanel() {
                                             />
                                             <label htmlFor="estApprovedCheck" className="text-slate-300 font-bold uppercase text-[10px]">Estimate Approved by Client</label>
                                         </div>
-                                        <div>
-                                            <label className="block text-slate-500 font-semibold mb-1">Itemized Pricing details</label>
-                                            <textarea
-                                                rows="2"
-                                                value={editProjData.estimateDetails}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, estimateDetails: e.target.value }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none font-mono"
-                                                placeholder="E.g. Living room: GHS 5,000"
-                                            />
-                                        </div>
-                                    </div>
+                                        <div className="space-y-2">
+                                             <label className="block text-slate-500 font-semibold">Client Estimate PDF</label>
+                                             <div className="flex flex-col sm:flex-row gap-2 items-start">
+                                                 <label className={`cursor-pointer px-3 py-2 text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition ${uploadingEstimatePdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                     {uploadingEstimatePdf ? 'Uploading...' : '📎 Upload Estimate PDF'}
+                                                     <input 
+                                                         type="file" 
+                                                         accept=".pdf"
+                                                         className="hidden"
+                                                         disabled={uploadingEstimatePdf}
+                                                         onChange={handleEstimatePdfUpload}
+                                                     />
+                                                 </label>
+                                                 {editProjData.estimatePdfUrl && (
+                                                     <button 
+                                                         type="button"
+                                                         onClick={() => viewDocument(editProjData.estimatePdfUrl)}
+                                                         className="text-xs text-demargo-orange hover:underline font-semibold flex items-center gap-1 mt-2 sm:mt-0"
+                                                     >
+                                                         📄 View Uploaded Estimate PDF
+                                                     </button>
+                                                 )}
+                                             </div>
+                                             {editProjData.estimatePdfUrl && (
+                                                 <p className="text-[10px] text-slate-500 truncate">{editProjData.estimatePdfUrl.substring(0, 60)}...</p>
+                                             )}
+                                         </div>
+                                     </div>
                                 </div>
 
                                 {/* 3. Fabric selection */}
                                 <div className="border-t border-slate-850 pt-4 space-y-3">
                                     <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">3. Fabric Selections</span>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-slate-500 font-semibold mb-1">Selected Fabric Codes</label>
-                                            <input
-                                                type="text"
-                                                value={editProjData.selectedFabrics}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, selectedFabrics: e.target.value }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                placeholder="E.g Velvet blue (Code: BL-03)"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-slate-500 font-semibold mb-1">Fabric choice notes</label>
-                                            <textarea
-                                                rows="2"
-                                                value={editProjData.fabricSelectionNotes}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, fabricSelectionNotes: e.target.value }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                placeholder="Details on textures, linings..."
-                                            />
-                                        </div>
+                                    <div>
+                                        <label className="block text-slate-500 font-semibold mb-1">Selected Fabric Codes</label>
+                                        <input
+                                            type="text"
+                                            value={editProjData.selectedFabrics}
+                                            onChange={(e) => setEditProjData(p => ({ ...p, selectedFabrics: e.target.value }))}
+                                            className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                            placeholder="E.g Velvet blue (Code: BL-03)"
+                                        />
                                     </div>
                                 </div>
 
                                 {/* 4. Installation scheduling */}
                                 <div className="border-t border-slate-850 pt-4 space-y-3">
                                     <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">4. Installation Information</span>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-slate-500 font-semibold mb-1">Installation Date</label>
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="datetime-local"
-                                                    value={editProjData.installationDate}
-                                                    onChange={(e) => setEditProjData(p => ({ ...p, installationDate: e.target.value }))}
-                                                    className="flex-1 bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none focus:border-demargo-orange focus:ring-1 focus:ring-demargo-orange/20 transition-all duration-200"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        const inputEl = e.currentTarget.previousSibling;
-                                                        if (inputEl) inputEl.blur();
-                                                    }}
-                                                    className="px-4 bg-slate-900 border border-slate-800 hover:border-demargo-orange hover:bg-slate-850 text-slate-300 hover:text-white font-extrabold uppercase tracking-wider text-[10px] transition-all duration-200 shadow-sm shrink-0 flex items-center justify-center gap-1.5"
-                                                >
-                                                    <span>OK</span>
-                                                    <svg className="w-3.5 h-3.5 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-slate-500 font-semibold mb-1">Installation Notes</label>
-                                            <textarea
-                                                rows="2"
-                                                value={editProjData.installationNotes}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, installationNotes: e.target.value }))}
-                                                className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
-                                                placeholder="Track fittings details, special heights..."
+                                    <div>
+                                        <label className="block text-slate-500 font-semibold mb-1">Installation Date</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="datetime-local"
+                                                value={editProjData.installationDate}
+                                                onChange={(e) => setEditProjData(p => ({ ...p, installationDate: e.target.value }))}
+                                                className="flex-1 bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none focus:border-demargo-orange focus:ring-1 focus:ring-demargo-orange/20 transition-all duration-200"
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    const inputEl = e.currentTarget.previousSibling;
+                                                    if (inputEl) inputEl.blur();
+                                                }}
+                                                className="px-4 bg-slate-900 border border-slate-800 hover:border-demargo-orange hover:bg-slate-850 text-slate-300 hover:text-white font-extrabold uppercase tracking-wider text-[10px] transition-all duration-200 shadow-sm shrink-0 flex items-center justify-center gap-1.5"
+                                            >
+                                                <span>OK</span>
+                                                <svg className="w-3.5 h-3.5 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -1177,7 +1208,7 @@ function AdminPanel() {
                                                     <span className="capitalize">{p.paymentMethod?.replace('_', ' ')}</span>
                                                 </div>
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-slate-600">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : ''}</span>
+                                                    <span className="text-slate-600">{p.paidAt ? new Date(p.paidAt).toLocaleString('en-GH') : ''}</span>
                                                     <div className="flex items-center gap-2">
                                                         {p.receiptUrl && (
                                                             <button

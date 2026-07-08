@@ -573,9 +573,7 @@ function ProjectTracker() {
                         </div>
 
                         {/* Interactive Context Cards */}
-                        <div className="grid md:grid-cols-3 gap-6">
-                            {/* Detailed Info Column (Takes 2 cols) */}
-                            <div className="md:col-span-2 space-y-6">
+                        <div className="max-w-4xl mx-auto space-y-6">
                                 {/* Active Step Details Card */}
                                 <div className="bg-white border border-gray-200 p-6">
                                     <h4 className="text-xs text-demargo-orange uppercase tracking-wider font-semibold mb-2">Stage Details</h4>
@@ -594,18 +592,7 @@ function ProjectTracker() {
                                                     {new Date(selectedProject.measurementDate).toLocaleString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             )}
-                                            {selectedProject.measurementPdfUrl && (
-                                                <div className="mt-2">
-                                                    <button 
-                                                        type="button"
-                                                        onClick={() => viewDocument(selectedProject.measurementPdfUrl)}
-                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-demargo-orange hover:opacity-90 text-blue-900 font-bold text-xs transition"
-                                                    >
-                                                        📄 View Site Measurements PDF
-                                                    </button>
-                                                </div>
-                                            )}
-                                            {!selectedProject.measurementDate && !selectedProject.measurementPdfUrl && (
+                                            {!selectedProject.measurementDate && (
                                                 <p className="text-xs text-blue-700 italic">Site measurement details/date will be set shortly by the admin.</p>
                                             )}
                                         </div>
@@ -616,13 +603,19 @@ function ProjectTracker() {
                                             <p className="text-sm text-blue-900 leading-relaxed">
                                                 Your site measurements are completed and an estimate has been prepared. Please review the breakdown below. Once you make the required deposit/payment manually, the admin team will update your project to the next stage (Fabric Selection).
                                             </p>
-                                            {selectedProject.estimateDetails ? (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs whitespace-pre-line text-blue-900 font-mono">
-                                                    <strong className="text-blue-900 font-sans block mb-2 text-sm">Estimate Breakdown:</strong>
-                                                    {selectedProject.estimateDetails}
+                                            {selectedProject.estimatePdfUrl ? (
+                                                <div className="bg-white p-4 border border-gray-200 text-xs text-blue-900 space-y-2">
+                                                    <strong className="text-blue-900 font-sans block mb-2 text-sm">Estimate Document:</strong>
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => viewDocument(selectedProject.estimatePdfUrl)}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-demargo-orange hover:opacity-90 text-blue-900 font-bold text-xs transition"
+                                                    >
+                                                        📄 View Client Estimate PDF
+                                                    </button>
                                                 </div>
                                             ) : (
-                                                <p className="text-xs text-blue-700 italic">No itemized estimate details uploaded yet. Total amount is GHS {selectedProject.totalAmount.toLocaleString('en-GH')}.</p>
+                                                <p className="text-xs text-blue-700 italic">No estimate document uploaded yet. Total amount is GHS {selectedProject.totalAmount.toLocaleString('en-GH')}.</p>
                                             )}
 
                                             <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
@@ -688,11 +681,6 @@ function ProjectTracker() {
                                                     {new Date(selectedProject.installationDate).toLocaleString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             )}
-                                            {selectedProject.installationNotes && (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs text-blue-700 italic">
-                                                    <strong>Status Notes:</strong> {selectedProject.installationNotes}
-                                                </div>
-                                            )}
                                         </div>
                                     )}
 
@@ -713,21 +701,6 @@ function ProjectTracker() {
                                         <div className="bg-white p-4 border border-gray-200">
                                             <span className="text-slate-500 uppercase block mb-1">Client Address / Site Location</span>
                                             <span className="text-blue-900">{selectedProject.serviceAddress || 'No site location registered.'}</span>
-                                        </div>
-                                        <div className="bg-white p-4 border border-gray-200">
-                                            <span className="text-slate-500 uppercase block mb-1">Measurement Details</span>
-                                            <span className="text-blue-900 whitespace-pre-line">{selectedProject.measurementNotes || 'No measurements details recorded yet.'}</span>
-                                            {selectedProject.measurementPdfUrl && (
-                                                <div className="mt-3">
-                                                    <button 
-                                                        type="button"
-                                                        onClick={() => viewDocument(selectedProject.measurementPdfUrl)}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-900 border border-blue-200 rounded font-bold text-[11px] hover:bg-blue-100 transition"
-                                                    >
-                                                        📄 View Site Measurement PDF
-                                                    </button>
-                                                </div>
-                                            )}
                                         </div>
                                         <div className="bg-slate-50 border border-gray-200 rounded-3xl p-5 flex flex-col h-[480px]">
                                             <div className="flex items-center justify-between pb-3 border-b border-gray-200">
@@ -823,102 +796,11 @@ function ProjectTracker() {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Payment Column (Takes 1 col) */}
-                            <div className="space-y-6">
-                                {/* Make Payment Widget */}
-                                <div className="bg-white border border-gray-200 p-6 relative overflow-hidden">
-                                    <div className="absolute top-0 left-0 w-full h-1 bg-demargo-orange" />
-                                    <h3 className="font-bold text-blue-900 text-md mb-4 uppercase tracking-wider">Settle Payments</h3>
-                                    <div className="space-y-4">
-                                        <div className="bg-white p-4 border border-gray-200 space-y-3">
-                                            <h4 className="text-sm font-semibold text-blue-900 mb-2">Manual Payment Options</h4>
-                                            <ul className="list-disc list-inside text-blue-700 space-y-1">
-                                                <li><strong>MTN MOMO:</strong> 0538804623 (Demargo Interior Contractors)</li>
-                                                <li><strong>Cal Bank:</strong> 1400005238082 (De Margo Bedding Sets and Collections)</li>
-                                                <li><strong>Stanbic Bank:</strong> 9040013941399 (Demargo Interior Contractors)</li>
-                                            </ul>
-                                            <p className="text-xs text-blue-600">After payment, please inform the office so we can update the project status.</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Submit Payment Proof Form */}
-                                {selectedProject.balance > 0 && (
-                                    <div className="bg-white border border-gray-200 p-6 relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500" />
-                                        <h3 className="font-bold text-blue-900 text-sm mb-4 uppercase tracking-wider">Submit Payment Receipt</h3>
-                                        <form onSubmit={handleManualPaymentSubmit} className="space-y-3 text-xs text-blue-900">
-                                            <div>
-                                                <label className="block font-semibold mb-1">Amount Paid (GHS) *</label>
-                                                <input 
-                                                    type="number" 
-                                                    required 
-                                                    min="1"
-                                                    step="0.01"
-                                                    value={clientPaymentData.amount}
-                                                    onChange={(e) => setClientPaymentData(prev => ({ ...prev, amount: e.target.value }))}
-                                                    className="w-full bg-white border border-gray-300 px-3 py-2 text-blue-900 focus:outline-none"
-                                                    placeholder="0.00"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block font-semibold mb-1">Payment Method *</label>
-                                                <select 
-                                                    value={clientPaymentData.method}
-                                                    onChange={(e) => setClientPaymentData(prev => ({ ...prev, method: e.target.value }))}
-                                                    className="w-full bg-white border border-gray-300 px-2 py-2 text-blue-900 focus:outline-none"
-                                                >
-                                                    <option value="mobile_money">MTN MOMO</option>
-                                                    <option value="bank_transfer">Bank Transfer</option>
-                                                    <option value="cash">Cash</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block font-semibold mb-1">Reference / Slip Details *</label>
-                                                <input 
-                                                    type="text" 
-                                                    required 
-                                                    value={clientPaymentData.reference}
-                                                    onChange={(e) => setClientPaymentData(prev => ({ ...prev, reference: e.target.value }))}
-                                                    className="w-full bg-white border border-gray-300 px-3 py-2 text-blue-900 focus:outline-none"
-                                                    placeholder="Transaction ID, reference, etc."
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block font-semibold mb-1">Upload Receipt (PDF/Image) *</label>
-                                                <input 
-                                                    type="file" 
-                                                    required 
-                                                    accept=".pdf,image/*"
-                                                    onChange={(e) => setClientPaymentFile(e.target.files[0])}
-                                                    className="w-full text-blue-900 text-[11px]"
-                                                />
-                                            </div>
-                                            <button 
-                                                type="submit"
-                                                disabled={submittingPaymentProof}
-                                                className="w-full py-2.5 bg-emerald-600 text-white font-bold uppercase tracking-wider text-[10px] hover:bg-emerald-500 transition disabled:opacity-50"
-                                            >
-                                                {submittingPaymentProof ? 'Uploading Receipt...' : 'Submit Payment Proof'}
-                                            </button>
-                                        </form>
-                                    </div>
-                                )}
-
-                                {/* Payments Log */}
-                                <div className="bg-white border border-gray-200 p-6">
-                                    <h3 className="font-bold text-blue-900 text-md mb-4 uppercase tracking-wider">Payment Log</h3>
-                                    
-                                    <ProjectPaymentsList projectId={selectedProject.id} triggerReload={loadingProject} />
-                                </div>
-                            </div>
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
+        </div>
 
             {/* Paystack Payment Modal Wrapper */}
             
@@ -980,7 +862,7 @@ function ProjectPaymentsList({ projectId, triggerReload }) {
                     </div>
                     <div className="flex justify-between text-slate-500">
                         <span>Ref: {p.reference?.substring(0, 14)}</span>
-                        <span>{p.paidAt ? new Date(p.paidAt).toLocaleDateString('en-GH') : ''}</span>
+                        <span>{p.paidAt ? new Date(p.paidAt).toLocaleString('en-GH') : ''}</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] text-blue-700 capitalize">
                         <span>Method: {p.paymentMethod?.replace('_', ' ')}</span>
