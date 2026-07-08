@@ -106,11 +106,11 @@ function AdminPanel() {
         totalAmount: 0,
         measurementDate: '',
         measurementNotes: '',
-        estimatePdfUrl: '',
+        estimatePdfUrls: [],
         estimateApproved: false,
         selectedFabrics: '',
         installationDate: '',
-        measurementPdfUrl: ''
+        measurementPdfUrls: []
     })
 
     const [uploadingPdf, setUploadingPdf] = useState(false)
@@ -204,6 +204,15 @@ function AdminPanel() {
         }
 
         setSelectedProject(updatedProj)
+        
+        const mUrls = updatedProj.measurementPdfUrls && Array.isArray(updatedProj.measurementPdfUrls)
+            ? updatedProj.measurementPdfUrls
+            : (updatedProj.measurementPdfUrl ? [{ name: 'Legacy Measurement PDF.pdf', url: updatedProj.measurementPdfUrl }] : [])
+
+        const eUrls = updatedProj.estimatePdfUrls && Array.isArray(updatedProj.estimatePdfUrls)
+            ? updatedProj.estimatePdfUrls
+            : (updatedProj.estimatePdfUrl ? [{ name: 'Legacy Estimate PDF.pdf', url: updatedProj.estimatePdfUrl }] : [])
+
         setEditProjData({
             status: updatedProj.status || 'measurement',
             clientName: updatedProj.clientName || '',
@@ -215,11 +224,11 @@ function AdminPanel() {
             totalAmount: updatedProj.totalAmount || 0,
             measurementDate: updatedProj.measurementDate || '',
             measurementNotes: updatedProj.measurementNotes || '',
-            estimatePdfUrl: updatedProj.estimatePdfUrl || '',
+            estimatePdfUrls: eUrls,
             estimateApproved: updatedProj.estimateApproved || false,
             selectedFabrics: updatedProj.selectedFabrics || '',
             installationDate: updatedProj.installationDate || '',
-            measurementPdfUrl: updatedProj.measurementPdfUrl || ''
+            measurementPdfUrls: mUrls
         })
         
         // Reset manual payment logger
@@ -298,11 +307,13 @@ function AdminPanel() {
                 totalAmount: total,
                 measurementDate: editProjData.measurementDate,
                 measurementNotes: editProjData.measurementNotes,
-                estimatePdfUrl: editProjData.estimatePdfUrl,
+                estimatePdfUrls: editProjData.estimatePdfUrls,
+                estimatePdfUrl: editProjData.estimatePdfUrls.length > 0 ? editProjData.estimatePdfUrls[0].url : '',
                 estimateApproved: editProjData.estimateApproved,
                 selectedFabrics: editProjData.selectedFabrics,
                 installationDate: editProjData.installationDate,
-                measurementPdfUrl: editProjData.measurementPdfUrl
+                measurementPdfUrls: editProjData.measurementPdfUrls,
+                measurementPdfUrl: editProjData.measurementPdfUrls.length > 0 ? editProjData.measurementPdfUrls[0].url : ''
             }
             
             await updateProject(selectedProject.id, updatePayload)
@@ -417,19 +428,30 @@ function AdminPanel() {
     const handlePdfUpload = async (e) => {
         const file = e.target.files[0]
         if (!file || !selectedProject) return
+        
+        const currentUrls = editProjData.measurementPdfUrls || []
+        if (currentUrls.length >= 5) {
+            showToast('Maximum of 5 measurement files allowed.', 'error')
+            e.target.value = ''
+            return
+        }
+
         setUploadingPdf(true)
         try {
             const path = `receipts/measurement_${selectedProject.id}_${Date.now()}_measurement.pdf`
             const downloadUrl = await uploadFile(path, file)
             
-            // Auto-save the PDF URL to the project document immediately
+            const newUrls = [...currentUrls, { name: file.name, url: downloadUrl }]
+            
+            // Auto-save to the project document immediately
             await updateProject(selectedProject.id, {
-                measurementPdfUrl: downloadUrl
+                measurementPdfUrls: newUrls,
+                measurementPdfUrl: downloadUrl // legacy compatibility
             })
             
-            setEditProjData(prev => ({ ...prev, measurementPdfUrl: downloadUrl }))
-            setSelectedProject(prev => prev ? { ...prev, measurementPdfUrl: downloadUrl } : prev)
-            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, measurementPdfUrl: downloadUrl } : p))
+            setEditProjData(prev => ({ ...prev, measurementPdfUrls: newUrls }))
+            setSelectedProject(prev => prev ? { ...prev, measurementPdfUrls: newUrls, measurementPdfUrl: downloadUrl } : prev)
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, measurementPdfUrls: newUrls, measurementPdfUrl: downloadUrl } : p))
             
             showToast('PDF uploaded and saved successfully.', 'success')
         } catch (err) {
@@ -441,22 +463,55 @@ function AdminPanel() {
         }
     }
 
+    const handleDeleteMeasurementPdf = async (indexToDelete) => {
+        if (!selectedProject) return
+        try {
+            const currentUrls = editProjData.measurementPdfUrls || []
+            const newUrls = currentUrls.filter((_, idx) => idx !== indexToDelete)
+            
+            await updateProject(selectedProject.id, {
+                measurementPdfUrls: newUrls,
+                measurementPdfUrl: newUrls.length > 0 ? newUrls[0].url : '' // legacy compat
+            })
+            
+            setEditProjData(prev => ({ ...prev, measurementPdfUrls: newUrls }))
+            setSelectedProject(prev => prev ? { ...prev, measurementPdfUrls: newUrls, measurementPdfUrl: newUrls.length > 0 ? newUrls[0].url : '' } : prev)
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, measurementPdfUrls: newUrls, measurementPdfUrl: newUrls.length > 0 ? newUrls[0].url : '' } : p))
+            
+            showToast('Measurement file removed successfully.', 'success')
+        } catch (err) {
+            console.error('Error removing measurement file:', err)
+            showToast('Failed to remove measurement file.', 'error')
+        }
+    }
+
     const handleEstimatePdfUpload = async (e) => {
         const file = e.target.files[0]
         if (!file || !selectedProject) return
+        
+        const currentUrls = editProjData.estimatePdfUrls || []
+        if (currentUrls.length >= 5) {
+            showToast('Maximum of 5 estimate files allowed.', 'error')
+            e.target.value = ''
+            return
+        }
+
         setUploadingEstimatePdf(true)
         try {
             const path = `receipts/estimate_${selectedProject.id}_${Date.now()}_estimate.pdf`
             const downloadUrl = await uploadFile(path, file)
             
-            // Auto-save the PDF URL to the project document immediately
+            const newUrls = [...currentUrls, { name: file.name, url: downloadUrl }]
+            
+            // Auto-save to the project document immediately
             await updateProject(selectedProject.id, {
-                estimatePdfUrl: downloadUrl
+                estimatePdfUrls: newUrls,
+                estimatePdfUrl: downloadUrl // legacy compatibility
             })
             
-            setEditProjData(prev => ({ ...prev, estimatePdfUrl: downloadUrl }))
-            setSelectedProject(prev => prev ? { ...prev, estimatePdfUrl: downloadUrl } : prev)
-            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, estimatePdfUrl: downloadUrl } : p))
+            setEditProjData(prev => ({ ...prev, estimatePdfUrls: newUrls }))
+            setSelectedProject(prev => prev ? { ...prev, estimatePdfUrls: newUrls, estimatePdfUrl: downloadUrl } : prev)
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, estimatePdfUrls: newUrls, estimatePdfUrl: downloadUrl } : p))
             
             showToast('Estimate PDF uploaded and saved successfully.', 'success')
         } catch (err) {
@@ -465,6 +520,28 @@ function AdminPanel() {
         } finally {
             setUploadingEstimatePdf(false)
             e.target.value = '' // Clear input so the change event triggers next time
+        }
+    }
+
+    const handleDeleteEstimatePdf = async (indexToDelete) => {
+        if (!selectedProject) return
+        try {
+            const currentUrls = editProjData.estimatePdfUrls || []
+            const newUrls = currentUrls.filter((_, idx) => idx !== indexToDelete)
+            
+            await updateProject(selectedProject.id, {
+                estimatePdfUrls: newUrls,
+                estimatePdfUrl: newUrls.length > 0 ? newUrls[0].url : '' // legacy compat
+            })
+            
+            setEditProjData(prev => ({ ...prev, estimatePdfUrls: newUrls }))
+            setSelectedProject(prev => prev ? { ...prev, estimatePdfUrls: newUrls, estimatePdfUrl: newUrls.length > 0 ? newUrls[0].url : '' } : prev)
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, estimatePdfUrls: newUrls, estimatePdfUrl: newUrls.length > 0 ? newUrls[0].url : '' } : p))
+            
+            showToast('Estimate file removed successfully.', 'success')
+        } catch (err) {
+            console.error('Error removing estimate file:', err)
+            showToast('Failed to remove estimate file.', 'error')
         }
     }
 
@@ -1009,9 +1086,30 @@ function AdminPanel() {
                                     </div>
                                     {/* PDF Upload */}
                                     <div className="space-y-2">
-                                        <label className="block text-slate-500 font-semibold">Site Measurement PDF</label>
-                                        <div className="flex flex-col sm:flex-row gap-2 items-start">
-                                            <label className={`cursor-pointer px-3 py-2 text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition ${uploadingPdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                        <label className="block text-slate-500 font-semibold">Site Measurement Documents (Max 5)</label>
+                                        <div className="space-y-1.5 max-w-md">
+                                            {(editProjData.measurementPdfUrls || []).map((fileItem, idx) => (
+                                                <div key={idx} className="flex items-center justify-between bg-slate-900 border border-slate-850 p-2 text-xs text-slate-300">
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => viewDocument(fileItem.url)}
+                                                        className="text-left font-semibold truncate hover:underline hover:text-demargo-orange pr-2 flex-1"
+                                                        title={fileItem.name}
+                                                    >
+                                                        📄 {fileItem.name}
+                                                    </button>
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => handleDeleteMeasurementPdf(idx)}
+                                                        className="text-[10px] font-black text-red-500 hover:text-red-400 bg-slate-950 px-2 py-1 rounded transition uppercase"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {(editProjData.measurementPdfUrls || []).length < 5 && (
+                                            <label className={`inline-block cursor-pointer px-3 py-2 text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition ${uploadingPdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                                 {uploadingPdf ? 'Uploading...' : '📎 Upload Measurement PDF'}
                                                 <input 
                                                     type="file" 
@@ -1021,18 +1119,6 @@ function AdminPanel() {
                                                     onChange={handlePdfUpload}
                                                 />
                                             </label>
-                                            {editProjData.measurementPdfUrl && (
-                                                <button 
-                                                    type="button"
-                                                    onClick={() => viewDocument(editProjData.measurementPdfUrl)}
-                                                    className="text-xs text-demargo-orange hover:underline font-semibold flex items-center gap-1 mt-2 sm:mt-0"
-                                                >
-                                                    📄 View Uploaded PDF
-                                                </button>
-                                            )}
-                                        </div>
-                                        {editProjData.measurementPdfUrl && (
-                                            <p className="text-[10px] text-slate-500 truncate">{editProjData.measurementPdfUrl.substring(0, 60)}...</p>
                                         )}
                                     </div>
                                 </div>
@@ -1052,32 +1138,41 @@ function AdminPanel() {
                                             <label htmlFor="estApprovedCheck" className="text-slate-300 font-bold uppercase text-[10px]">Estimate Approved by Client</label>
                                         </div>
                                         <div className="space-y-2">
-                                             <label className="block text-slate-500 font-semibold">Client Estimate PDF</label>
-                                             <div className="flex flex-col sm:flex-row gap-2 items-start">
-                                                 <label className={`cursor-pointer px-3 py-2 text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition ${uploadingEstimatePdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                                     {uploadingEstimatePdf ? 'Uploading...' : '📎 Upload Estimate PDF'}
-                                                     <input 
-                                                         type="file" 
-                                                         accept=".pdf"
-                                                         className="hidden"
-                                                         disabled={uploadingEstimatePdf}
-                                                         onChange={handleEstimatePdfUpload}
-                                                     />
-                                                 </label>
-                                                 {editProjData.estimatePdfUrl && (
-                                                     <button 
-                                                         type="button"
-                                                         onClick={() => viewDocument(editProjData.estimatePdfUrl)}
-                                                         className="text-xs text-demargo-orange hover:underline font-semibold flex items-center gap-1 mt-2 sm:mt-0"
-                                                     >
-                                                         📄 View Uploaded Estimate PDF
-                                                     </button>
-                                                 )}
-                                             </div>
-                                             {editProjData.estimatePdfUrl && (
-                                                 <p className="text-[10px] text-slate-500 truncate">{editProjData.estimatePdfUrl.substring(0, 60)}...</p>
-                                             )}
-                                         </div>
+                                            <label className="block text-slate-500 font-semibold">Client Estimate Documents (Max 5)</label>
+                                            <div className="space-y-1.5 max-w-md">
+                                                {(editProjData.estimatePdfUrls || []).map((fileItem, idx) => (
+                                                    <div key={idx} className="flex items-center justify-between bg-slate-900 border border-slate-850 p-2 text-xs text-slate-300">
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => viewDocument(fileItem.url)}
+                                                            className="text-left font-semibold truncate hover:underline hover:text-demargo-orange pr-2 flex-1"
+                                                            title={fileItem.name}
+                                                        >
+                                                            📄 {fileItem.name}
+                                                        </button>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => handleDeleteEstimatePdf(idx)}
+                                                            className="text-[10px] font-black text-red-500 hover:text-red-400 bg-slate-955 px-2 py-1 rounded transition uppercase"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {(editProjData.estimatePdfUrls || []).length < 5 && (
+                                                <label className={`inline-block cursor-pointer px-3 py-2 text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition ${uploadingEstimatePdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                    {uploadingEstimatePdf ? 'Uploading...' : '📎 Upload Estimate PDF'}
+                                                    <input 
+                                                        type="file" 
+                                                        accept=".pdf"
+                                                        className="hidden"
+                                                        disabled={uploadingEstimatePdf}
+                                                        onChange={handleEstimatePdfUpload}
+                                                    />
+                                                </label>
+                                            )}
+                                        </div>
                                      </div>
                                 </div>
 
