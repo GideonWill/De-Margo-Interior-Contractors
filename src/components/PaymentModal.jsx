@@ -38,7 +38,7 @@ function PaymentModal({ project, onClose, onSuccess }) {
     }
 
     const onPaymentSuccess = (reference) => {
-        // We call onSuccess immediately so the parent (TransportPayment) can hide the modal
+        // We call onSuccess immediately so the parent can hide the modal
         // and perform the database updates.
         if (onSuccess) {
             onSuccess(reference)

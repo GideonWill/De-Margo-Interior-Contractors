@@ -311,7 +311,7 @@ function ProjectTracker() {
                                         type="tel"
                                         id="phoneSearch"
                                         value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
+                                        onChange={(e) => setPhone(e.target.value.replace(/\s+/g, ''))}
                                         required
                                         placeholder="Phone number used to register"
                                         className="w-full pl-10 pr-4 py-4 bg-white border border-gray-300 text-blue-900 placeholder-gray-500 focus:outline-none focus:border-demargo-orange transition-colors"

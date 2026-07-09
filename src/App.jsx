@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation, use
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import { Helmet } from 'react-helmet'
-// import TransportPayment from './pages/TransportPayment'
 import ProjectTracker from './pages/ProjectTracker'
 import AdminPanel from './pages/AdminPanel'
 import FabricCollection from './pages/FabricCollection'
@@ -167,7 +166,6 @@ function Navbar() {
           <li><NavLink to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
           <li><NavLink to="/awards" className={linkClass}>Awards</NavLink></li>
           <li><NavLink to="/track" className={linkClass}>Track Project</NavLink></li>
-          {/* <li><NavLink to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li> */}
           <li><NavLink to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white transition-colors ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
         </ul>
       </nav>
@@ -184,7 +182,6 @@ function Navbar() {
               <li><NavLink onClick={() => setOpen(false)} to="/awards" className={linkClass}>Awards</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/about" className={linkClass}>About</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/track" className={linkClass}>Track Project</NavLink></li>
-              {/* <li><NavLink onClick={() => setOpen(false)} to="/transport-payment" className={linkClass}>Transport Payment</NavLink></li> */}
               <li><NavLink onClick={() => setOpen(false)} to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white inline-block ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
             </ul>
           </div>
@@ -333,11 +330,11 @@ function Home() {
           </div>
           <div className="hidden md:flex flex-col gap-4">
             <div className="panel-glass p-6 text-white">
-              <div className="text-3xl font-extrabold">2000+</div>
+              <div className="text-3xl font-extrabold">4000+</div>
               <div className="text-white/80">Projects</div>
             </div>
             <div className="panel-glass p-6 text-white">
-              <div className="text-3xl font-extrabold">7+</div>
+              <div className="text-3xl font-extrabold">8+</div>
               <div className="text-white/80">Years</div>
             </div>
             <div className="panel-glass p-6 text-white">
@@ -418,11 +415,11 @@ function Home() {
             <p className="mt-4 text-gray-700">Since 2018, we've been transforming spaces with premium interior design solutions. Our expertise in curtains, lighting, and bedroom styling has made us the preferred choice for discerning clients across the region.</p>
             <div className="mt-6 grid sm:grid-cols-2 gap-4">
               <div className="p-6 rounded-2xl bg-orange-50">
-                <div className="text-3xl font-extrabold text-demargo-orange">2000+</div>
+                <div className="text-3xl font-extrabold text-demargo-orange">4000+</div>
                 <div className="text-gray-700">Projects Completed</div>
               </div>
               <div className="p-6 rounded-2xl bg-blue-50">
-                <div className="text-3xl font-extrabold text-demargo-blue">7+</div>
+                <div className="text-3xl font-extrabold text-demargo-blue">8+</div>
                 <div className="text-gray-700">Years of Excellence</div>
               </div>
             </div>
@@ -784,7 +781,7 @@ function Rendering3D() {
       />
       <div className="grid md:grid-cols-2 gap-8 items-center">
         <div className="rounded-2xl overflow-hidden shadow">
-          <img src="/assets/d2.jpg" alt="3D interior rendering" className="w-full h-72 object-cover" />
+          <img src="/assets/3D interior rendering.jpeg" alt="3D interior rendering" className="w-full h-72 object-cover" />
         </div>
         <div>
           <h1 className="text-3xl md:text-5xl font-extrabold">3D Rendering & Visualization</h1>
@@ -1068,11 +1065,11 @@ function Awards() {
         <h2 className="text-2xl font-bold text-center mb-6">Our Commitment to Excellence</h2>
         <div className="grid md:grid-cols-3 gap-6 text-center">
           <div>
-            <div className="text-3xl font-extrabold text-demargo-orange mb-2">7+</div>
+            <div className="text-3xl font-extrabold text-demargo-orange mb-2">8+</div>
             <div className="text-gray-700">Years of Excellence</div>
           </div>
           <div>
-            <div className="text-3xl font-extrabold text-demargo-blue mb-2">2000+</div>
+            <div className="text-3xl font-extrabold text-demargo-blue mb-2">4000+</div>
             <div className="text-gray-700">Projects Completed</div>
           </div>
           <div>
@@ -1803,7 +1800,6 @@ function AnimatedRoutes() {
         <Route path="/testimonials" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Testimonials /></motion.div>} />
         <Route path="/awards" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Awards /></motion.div>} />
         <Route path="/about" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><About /></motion.div>} />
-        {/* <Route path="/transport-payment" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><TransportPayment /></motion.div>} /> */}
         <Route path="/track" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><ProjectTracker /></motion.div>} />
         <Route path="/admin" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><AdminPanel /></motion.div>} />
         <Route path="/contact" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Contact /></motion.div>} />

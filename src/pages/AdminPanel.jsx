@@ -1040,7 +1040,7 @@ function AdminPanel() {
                                         <input
                                             type="text"
                                             value={editProjData.clientPhone}
-                                            onChange={(e) => setEditProjData(p => ({ ...p, clientPhone: e.target.value }))}
+                                            onChange={(e) => setEditProjData(p => ({ ...p, clientPhone: e.target.value.replace(/\s+/g, '') }))}
                                             className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
                                         />
                                     </div>
@@ -1394,7 +1394,7 @@ function AdminPanel() {
                                         required
                                         placeholder="0241234567"
                                         value={newProjData.clientPhone}
-                                        onChange={(e) => setNewProjData(p => ({ ...p, clientPhone: e.target.value }))}
+                                        onChange={(e) => setNewProjData(p => ({ ...p, clientPhone: e.target.value.replace(/\s+/g, '') }))}
                                         className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2 focus:outline-none"
                                     />
                                 </div>
