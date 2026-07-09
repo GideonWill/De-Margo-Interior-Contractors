@@ -65,6 +65,7 @@ function AdminPanel() {
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
+    const [hasBeeped, setHasBeeped] = useState(false)
 
     // Modals & Selection
     const [showCreateModal, setShowCreateModal] = useState(false)
@@ -182,6 +183,70 @@ function AdminPanel() {
             setLoading(false)
         }
     }
+
+    // Beep sound trigger when there are installations scheduled for today or tomorrow
+    useEffect(() => {
+        if (loading || projects.length === 0 || hasBeeped) return
+
+        const getLocalDateString = (d) => {
+            const year = d.getFullYear()
+            const month = String(d.getMonth() + 1).padStart(2, '0')
+            const day = String(d.getDate()).padStart(2, '0')
+            return `${year}-${month}-${day}`
+        }
+        const now = new Date()
+        const todayStr = getLocalDateString(now)
+        const tomorrowVal = new Date(now)
+        tomorrowVal.setDate(tomorrowVal.getDate() + 1)
+        const tomorrowStr = getLocalDateString(tomorrowVal)
+
+        const dueInstallations = projects.filter(p => {
+            if (p.status === 'completed' || !p.installationDate) return false
+            const pDateStr = p.installationDate.split('T')[0]
+            return pDateStr === todayStr || pDateStr === tomorrowStr
+        })
+
+        if (dueInstallations.length > 0) {
+            const playAlert = () => {
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+                    
+                    const beep = (freq, duration, delay) => {
+                        setTimeout(() => {
+                            const osc = audioCtx.createOscillator()
+                            const gain = audioCtx.createGain()
+                            osc.type = 'sine'
+                            osc.frequency.value = freq
+                            gain.gain.setValueAtTime(0.15, audioCtx.currentTime)
+                            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration)
+                            osc.connect(gain)
+                            gain.connect(audioCtx.destination)
+                            osc.start()
+                            osc.stop(audioCtx.currentTime + duration)
+                        }, delay)
+                    }
+
+                    // Play double beep alert
+                    beep(880, 0.12, 0)
+                    beep(880, 0.12, 180)
+
+                    setHasBeeped(true)
+                    window.removeEventListener('click', playAlert)
+                    window.removeEventListener('keydown', playAlert)
+                } catch (err) {
+                    console.error('AudioContext error:', err)
+                }
+            }
+
+            playAlert()
+            window.addEventListener('click', playAlert)
+            window.addEventListener('keydown', playAlert)
+            return () => {
+                window.removeEventListener('click', playAlert)
+                window.removeEventListener('keydown', playAlert)
+            }
+        }
+    }, [projects, loading, hasBeeped])
 
     const handleSelectProject = async (projOrId) => {
         const proj = typeof projOrId === 'string' ? await getProjectById(projOrId) : projOrId
@@ -625,13 +690,58 @@ function AdminPanel() {
         balance: Math.max(0, (p.totalAmount || 0) - (p.amountPaid || 0))
     }))
 
-    // Filter projects
+    // Date utility for installation alerts
+    const getLocalDateString = (d) => {
+        const year = d.getFullYear()
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+    const todayStr = getLocalDateString(new Date())
+    const tomorrowVal = new Date()
+    tomorrowVal.setDate(tomorrowVal.getDate() + 1)
+    const tomorrowStr = getLocalDateString(tomorrowVal)
+
+    const isProjectDueSoon = (p) => {
+        if (p.status === 'completed' || !p.installationDate) return false
+        const pDateStr = p.installationDate.split('T')[0]
+        return pDateStr === todayStr || pDateStr === tomorrowStr
+    }
+
+    const formatTime12Hour = (dateTimeStr) => {
+        if (!dateTimeStr) return ''
+        const parts = dateTimeStr.split('T')
+        if (parts.length < 2) return ''
+        const timeStr = parts[1] // "HH:mm"
+        const timeParts = timeStr.split(':')
+        const hourStr = timeParts[0]
+        const minuteStr = timeParts[1] || '00'
+        let hour = parseInt(hourStr, 10)
+        if (isNaN(hour)) return ''
+        const ampm = hour >= 12 ? 'PM' : 'AM'
+        hour = hour % 12
+        hour = hour ? hour : 12
+        return `${hour}:${minuteStr} ${ampm}`
+    }
+
+    // Filter and sort projects (upcoming installations pinned to the top)
     const filteredProjects = projectsWithCorrectBalance.filter(p => {
         const matchesQuery = p.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                              p.clientPhone.includes(searchQuery) ||
                              p.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())
         const matchesStatus = statusFilter === 'all' ? true : p.status === statusFilter
         return matchesQuery && matchesStatus
+    })
+
+    const sortedProjects = [...filteredProjects].sort((a, b) => {
+        const aDue = isProjectDueSoon(a)
+        const bDue = isProjectDueSoon(b)
+        if (aDue && !bDue) return -1
+        if (!aDue && bDue) return 1
+        if (aDue && bDue) {
+            return new Date(a.installationDate) - new Date(b.installationDate)
+        }
+        return 0
     })
 
     if (loading) {
@@ -733,9 +843,62 @@ function AdminPanel() {
                     const pendingPaymentProjects = projects.filter(p =>
                         pendingClientPaymentProjectIds.has(p.id)
                     )
-                    if (unreadProjects.length === 0 && pendingPaymentProjects.length === 0) return null
+                    const dueInstallations = projects.filter(p => isProjectDueSoon(p))
+
+                    if (unreadProjects.length === 0 && pendingPaymentProjects.length === 0 && dueInstallations.length === 0) return null
                     return (
                         <div className="space-y-2">
+                            {dueInstallations.length > 0 && (
+                                <div className="border border-red-600/30 bg-red-950/20 px-4 py-3 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                    <div className="flex items-center gap-2 text-red-400 text-xs font-bold uppercase tracking-wider">
+                                        <span className="inline-flex h-2 w-2 rounded-full bg-red-500 animate-ping" />
+                                        ⚠️ Urgent Installations Due ({dueInstallations.length})
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 flex-1">
+                                        {dueInstallations.map(p => {
+                                            const isToday = p.installationDate.split('T')[0] === todayStr
+                                            const timeFormatted = formatTime12Hour(p.installationDate)
+                                            const formattedTime = timeFormatted ? ` at ${timeFormatted}` : ''
+                                            return (
+                                                <button
+                                                    key={p.id}
+                                                    onClick={() => handleSelectProject(p)}
+                                                    className="text-[11px] px-2 py-1 bg-red-900/30 text-red-300 border border-red-800/40 hover:bg-red-900/60 transition font-bold uppercase tracking-wide flex items-center gap-1.5"
+                                                >
+                                                    <span>{p.clientName} ({isToday ? 'TODAY' : 'TOMORROW'}{formattedTime})</span>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            try {
+                                                const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+                                                const beep = (freq, duration, delay) => {
+                                                    setTimeout(() => {
+                                                        const osc = audioCtx.createOscillator()
+                                                        const gain = audioCtx.createGain()
+                                                        osc.type = 'sine'
+                                                        osc.frequency.value = freq
+                                                        gain.gain.setValueAtTime(0.15, audioCtx.currentTime)
+                                                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration)
+                                                        osc.connect(gain)
+                                                        gain.connect(audioCtx.destination)
+                                                        osc.start()
+                                                        osc.stop(audioCtx.currentTime + duration)
+                                                    }, delay)
+                                                }
+                                                beep(880, 0.12, 0)
+                                                beep(880, 0.12, 180)
+                                            } catch (err) {}
+                                        }}
+                                        title="Play alarm beep test sound"
+                                        className="text-[10px] px-2 py-1 rounded bg-slate-900 border border-slate-800 hover:border-red-500 hover:text-red-400 text-slate-400 transition uppercase font-extrabold flex items-center gap-1 shrink-0"
+                                    >
+                                        🔊 Test Alarm
+                                    </button>
+                                </div>
+                            )}
                             {unreadProjects.length > 0 && (
                                 <div className="border border-yellow-600/30 bg-yellow-950/20 px-4 py-3 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                                     <div className="flex items-center gap-2 text-yellow-400 text-xs font-bold uppercase tracking-wider">
@@ -849,41 +1012,62 @@ function AdminPanel() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-850">
-                                    {filteredProjects.length === 0 ? (
+                                    {sortedProjects.length === 0 ? (
                                         <tr>
                                             <td colSpan="4" className="py-8 text-center text-slate-500 italic">No records found matching filters.</td>
                                         </tr>
                                     ) : (
-                                        filteredProjects.map(p => (
-                                            <tr
-                                                key={p.id}
-                                                onClick={() => handleSelectProject(p)}
-                                                className={`cursor-pointer hover:bg-slate-850 transition ${selectedProject?.id === p.id ? 'bg-slate-850/60 border-l-2 border-l-demargo-orange' : ''}`}
-                                            >
-                                                <td className="py-3 px-2">
-                                                    <div className="font-bold text-white">{p.clientName}</div>
-                                                    <div className="text-[10px] text-slate-500 mt-0.5">{p.clientPhone}</div>
-                                                </td>
-                                                <td className="py-3 px-2 max-w-[220px] min-w-0 break-words">
-                                                    <div className="font-semibold text-slate-200 break-words">{p.projectTitle}</div>
-                                                    <div className="text-[10px] text-slate-500 mt-0.5 break-words">{p.serviceAddress}</div>
-                                                </td>
-                                                <td className="py-3 px-2">
-                                                    <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${
-                                                        p.status === 'completed' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
-                                                        p.status === 'production' ? 'bg-orange-500/10 border-orange-500/20 text-demargo-orange' :
-                                                        p.status === 'estimate' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
-                                                        'bg-slate-800 border-slate-700 text-slate-400'
-                                                    }`}>
-                                                        {STAGES.find(s => s.key === p.status)?.label || p.status}
-                                                    </span>
-                                                </td>
-                                                <td className="py-3 px-2 text-right">
-                                                    <div className="font-bold text-slate-200">GHS {p.amountPaid.toLocaleString('en-GH')}</div>
-                                                    <div className="text-[10px] text-slate-500 mt-0.5">Bal: GHS {p.balance.toLocaleString('en-GH')}</div>
-                                                </td>
-                                            </tr>
-                                        ))
+                                        sortedProjects.map(p => {
+                                            const isDue = isProjectDueSoon(p)
+                                            return (
+                                                <tr
+                                                    key={p.id}
+                                                    onClick={() => handleSelectProject(p)}
+                                                    className={`cursor-pointer hover:bg-slate-850 transition ${
+                                                        selectedProject?.id === p.id 
+                                                            ? 'bg-slate-850/60 border-l-2 border-l-demargo-orange' 
+                                                            : isDue 
+                                                                ? 'bg-red-950/15 border-l-2 border-l-red-500' 
+                                                                : ''
+                                                    }`}
+                                                >
+                                                    <td className="py-3 px-2">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <div className="font-bold text-white">{p.clientName}</div>
+                                                            {isDue && (
+                                                                <span className="animate-pulse inline-flex h-1.5 w-1.5 rounded-full bg-red-500" />
+                                                            )}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-500 mt-0.5">{p.clientPhone}</div>
+                                                        {isDue && (
+                                                            <div className="mt-1">
+                                                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 bg-red-500/10 border border-red-500/20 text-red-400 text-[8px] font-extrabold uppercase tracking-wider rounded">
+                                                                    🔔 INSTALLATION: {p.installationDate.split('T')[0] === todayStr ? 'TODAY' : 'TOMORROW'} {formatTime12Hour(p.installationDate)}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-3 px-2 max-w-[220px] min-w-0 break-words">
+                                                        <div className="font-semibold text-slate-200 break-words">{p.projectTitle}</div>
+                                                        <div className="text-[10px] text-slate-500 mt-0.5 break-words">{p.serviceAddress}</div>
+                                                    </td>
+                                                    <td className="py-3 px-2">
+                                                        <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${
+                                                            p.status === 'completed' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
+                                                            p.status === 'production' ? 'bg-orange-500/10 border-orange-500/20 text-demargo-orange' :
+                                                            p.status === 'estimate' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
+                                                            'bg-slate-800 border-slate-700 text-slate-400'
+                                                        }`}>
+                                                            {STAGES.find(s => s.key === p.status)?.label || p.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-3 px-2 text-right">
+                                                        <div className="font-bold text-slate-200">GHS {p.amountPaid.toLocaleString('en-GH')}</div>
+                                                        <div className="text-[10px] text-slate-500 mt-0.5">Bal: GHS {p.balance.toLocaleString('en-GH')}</div>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })
                                     )}
                                 </tbody>
                             </table>
