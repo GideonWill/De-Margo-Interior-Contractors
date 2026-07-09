@@ -870,33 +870,6 @@ function AdminPanel() {
                                             )
                                         })}
                                     </div>
-                                    <button
-                                        onClick={() => {
-                                            try {
-                                                const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
-                                                const beep = (freq, duration, delay) => {
-                                                    setTimeout(() => {
-                                                        const osc = audioCtx.createOscillator()
-                                                        const gain = audioCtx.createGain()
-                                                        osc.type = 'sine'
-                                                        osc.frequency.value = freq
-                                                        gain.gain.setValueAtTime(0.15, audioCtx.currentTime)
-                                                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration)
-                                                        osc.connect(gain)
-                                                        gain.connect(audioCtx.destination)
-                                                        osc.start()
-                                                        osc.stop(audioCtx.currentTime + duration)
-                                                    }, delay)
-                                                }
-                                                beep(880, 0.12, 0)
-                                                beep(880, 0.12, 180)
-                                            } catch (err) {}
-                                        }}
-                                        title="Play alarm beep test sound"
-                                        className="text-[10px] px-2 py-1 rounded bg-slate-900 border border-slate-800 hover:border-red-500 hover:text-red-400 text-slate-400 transition uppercase font-extrabold flex items-center gap-1 shrink-0"
-                                    >
-                                        🔊 Test Alarm
-                                    </button>
                                 </div>
                             )}
                             {unreadProjects.length > 0 && (
