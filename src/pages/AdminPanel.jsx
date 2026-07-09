@@ -1048,7 +1048,7 @@ function AdminPanel() {
                     </div>
 
                     {/* Right Column: Manage Details Panel (5 Cols) */}
-                    <div className="lg:col-span-5 bg-slate-900 border border-slate-850 p-6 space-y-6 rounded-3xl shadow-2xl">
+                    <div ref={selectedProjectRef} className="lg:col-span-5 bg-slate-900 border border-slate-850 p-6 space-y-6 rounded-3xl shadow-2xl">
                         {!selectedProject ? (
                             <div className="min-h-[18rem] sm:h-96 flex flex-col justify-center items-center text-center p-6 border border-dashed border-slate-800 text-slate-500">
                                 <span className="text-2xl block mb-2">📋</span>
@@ -1056,7 +1056,7 @@ function AdminPanel() {
                                 <p className="text-[11px] text-slate-500 mt-1 max-w-[220px]">Click a row in the project records directory to manage stages, set measurements, fabrics and log manual payments.</p>
                             </div>
                         ) : (
-                            <div ref={selectedProjectRef} className="space-y-6">
+                            <div className="space-y-6">
                                 <div className="flex justify-between items-start border-b border-slate-850 pb-4">
                                     <div>
                                         <span className="text-[10px] text-slate-500 uppercase">Selected Project</span>
