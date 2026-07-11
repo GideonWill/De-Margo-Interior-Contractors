@@ -58,3 +58,11 @@
 .admin-panel * {
   color: #000000 !important;
 }
+
+/* Override global border-radius reset for loader elements */
+.admin-loader-spinner {
+  border-radius: 9999px !important;
+}
+.admin-loader-logo {
+  border-radius: 16px !important;
+}

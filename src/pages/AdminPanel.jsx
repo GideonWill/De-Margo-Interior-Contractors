@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import {
     getAllProjects,
@@ -12,7 +12,8 @@ import {
     updateProjectPayment,
     getProjectPayments,
     uploadFile,
-    approvePayment
+    approvePayment,
+    deletePayment
 } from '../services/projectService'
 import './AdminPanel.css';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -65,7 +66,14 @@ function AdminPanel() {
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
+    const [currentPage, setCurrentPage] = useState(1)
+    const [mobileView, setMobileView] = useState('list')
     const [hasBeeped, setHasBeeped] = useState(false)
+
+    // Reset to page 1 when search query or status filter changes
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [searchQuery, statusFilter])
 
     // Modals & Selection
     const [showCreateModal, setShowCreateModal] = useState(false)
@@ -310,11 +318,18 @@ function AdminPanel() {
         } finally {
             setLoadingPayments(false)
         }
+
+        setMobileView('details')
+        if (window.innerWidth < 1024) {
+            window.scrollTo({ top: 0, behavior: 'instant' })
+        }
     }
 
     React.useEffect(() => {
         if (!selectedProject || !selectedProjectRef.current) return
-        selectedProjectRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        if (window.innerWidth >= 1024) {
+            selectedProjectRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
     }, [selectedProject?.id])
 
     // Create new project
@@ -650,6 +665,57 @@ function AdminPanel() {
         }
     }
 
+    const handleDeletePayment = async (paymentId, amount, isApproved) => {
+        if (!selectedProject) return
+        const confirmMsg = isApproved 
+            ? `Are you sure you want to delete this payment of GHS ${amount.toLocaleString()}? Since it is verified, it will be deducted from the client's paid balance.`
+            : `Are you sure you want to delete this pending payment of GHS ${amount.toLocaleString()}?`
+        
+        if (!window.confirm(confirmMsg)) return
+
+        try {
+            await deletePayment(selectedProject.id, paymentId, amount, isApproved)
+            
+            const freshList = await getAllProjects()
+            setProjects(freshList)
+            
+            const updatedPayments = await getProjectPayments(selectedProject.id)
+            setProjectPayments(updatedPayments)
+            
+            const freshProj = freshList.find(p => p.id === selectedProject.id)
+            if (freshProj) {
+                setSelectedProject(freshProj)
+                setEditProjData({
+                    status: freshProj.status || 'measurement',
+                    clientName: freshProj.clientName || '',
+                    clientEmail: freshProj.clientEmail || '',
+                    clientPhone: freshProj.clientPhone || '',
+                    projectTitle: freshProj.projectTitle || '',
+                    projectDescription: freshProj.projectDescription || '',
+                    serviceAddress: freshProj.serviceAddress || '',
+                    totalAmount: freshProj.totalAmount || 0,
+                    measurementDate: freshProj.measurementDate || '',
+                    measurementNotes: freshProj.measurementNotes || '',
+                    measurementPdfUrls: freshProj.measurementPdfUrls || [],
+                    estimateDetails: freshProj.estimateDetails || '',
+                    estimateApproved: freshProj.estimateApproved || false,
+                    estimatePdfUrls: freshProj.estimatePdfUrls || [],
+                    selectedFabrics: freshProj.selectedFabrics || '',
+                    fabricSelectionNotes: freshProj.fabricSelectionNotes || '',
+                    installationDate: freshProj.installationDate || '',
+                    installationNotes: freshProj.installationNotes || '',
+                    satisfaction: freshProj.satisfaction || '',
+                    feedbackRemarks: freshProj.feedbackRemarks || ''
+                })
+            }
+            
+            showToast('Payment record deleted successfully.', 'success')
+        } catch (err) {
+            console.error('Error deleting payment:', err)
+            showToast('Failed to delete payment record.', 'error')
+        }
+    }
+
     // Delete project (non-blocking)
     const requestDeleteProject = (id, name) => {
         setDeleteConfirm({ show: true, id, name })
@@ -662,6 +728,7 @@ function AdminPanel() {
             await deleteProject(id)
             setDeleteConfirm({ show: false, id: null, name: '' })
             setSelectedProject(null)
+            setMobileView('list')
             showToast('Project deleted successfully.', 'success')
             fetchData()
         } catch (err) {
@@ -685,10 +752,12 @@ function AdminPanel() {
     )
     
     // Ensure all projects have correct balance calculated
-    const projectsWithCorrectBalance = projects.map(p => ({
-        ...p,
-        balance: Math.max(0, (p.totalAmount || 0) - (p.amountPaid || 0))
-    }))
+    const projectsWithCorrectBalance = useMemo(() => {
+        return projects.map(p => ({
+            ...p,
+            balance: Math.max(0, (p.totalAmount || 0) - (p.amountPaid || 0))
+        }))
+    }, [projects])
 
     // Date utility for installation alerts
     const getLocalDateString = (d) => {
@@ -725,29 +794,52 @@ function AdminPanel() {
     }
 
     // Filter and sort projects (upcoming installations pinned to the top)
-    const filteredProjects = projectsWithCorrectBalance.filter(p => {
-        const matchesQuery = p.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                             p.clientPhone.includes(searchQuery) ||
-                             p.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())
-        const matchesStatus = statusFilter === 'all' ? true : p.status === statusFilter
-        return matchesQuery && matchesStatus
-    })
+    const sortedProjects = useMemo(() => {
+        const filtered = projectsWithCorrectBalance.filter(p => {
+            const matchesQuery = p.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                 p.clientPhone.includes(searchQuery) ||
+                                 p.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())
+            const matchesStatus = statusFilter === 'all' ? true : p.status === statusFilter
+            return matchesQuery && matchesStatus
+        })
 
-    const sortedProjects = [...filteredProjects].sort((a, b) => {
-        const aDue = isProjectDueSoon(a)
-        const bDue = isProjectDueSoon(b)
-        if (aDue && !bDue) return -1
-        if (!aDue && bDue) return 1
-        if (aDue && bDue) {
-            return new Date(a.installationDate) - new Date(b.installationDate)
-        }
-        return 0
-    })
+        return [...filtered].sort((a, b) => {
+            const aDue = isProjectDueSoon(a)
+            const bDue = isProjectDueSoon(b)
+            if (aDue && !bDue) return -1
+            if (!aDue && bDue) return 1
+            if (aDue && bDue) {
+                return new Date(a.installationDate) - new Date(b.installationDate)
+            }
+            return 0
+        })
+    }, [projectsWithCorrectBalance, searchQuery, statusFilter])
+
+    const itemsPerPage = 10
+    const totalItems = sortedProjects.length
+    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1
+    const activePage = Math.min(currentPage, totalPages)
+    const paginatedProjects = sortedProjects.slice(
+        (activePage - 1) * itemsPerPage,
+        activePage * itemsPerPage
+    )
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center text-sm font-mono">
-                [ LOADING SYSTEM DATA... ]
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-6 select-none">
+                <div className="relative">
+                    <img 
+                        src="/assets/Demargo Logo.jpg" 
+                        alt="Demargo Logo" 
+                        className="w-32 h-32 object-contain shadow-2xl admin-loader-logo animate-pulse"
+                    />
+                </div>
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 border-4 border-transparent border-t-[#ff7a00] admin-loader-spinner animate-spin"></div>
+                    <span className="text-xs uppercase tracking-widest text-slate-400 font-bold animate-pulse">
+                        Loading Database...
+                    </span>
+                </div>
             </div>
         )
     }
@@ -941,7 +1033,7 @@ function AdminPanel() {
                 {/* Primary Workspace: Projects List and Project Details */}
                 <div className="grid lg:grid-cols-12 gap-8">
                     {/* Left Column: Projects Table (7 Cols) */}
-                    <div className="lg:col-span-7 bg-slate-900 border border-slate-850 p-6 space-y-6 rounded-3xl shadow-2xl">
+                    <div className={`${mobileView === 'details' ? 'hidden' : 'block'} lg:block lg:col-span-7 bg-slate-900 border border-slate-850 p-6 space-y-6 rounded-3xl shadow-2xl max-w-full overflow-hidden`}>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <h2 className="font-extrabold text-white text-md uppercase tracking-wider">Project Records Directory</h2>
                             <button
@@ -974,8 +1066,8 @@ function AdminPanel() {
                         </div>
 
                         {/* Projects Table */}
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-full text-left border-collapse text-xs">
+                        <div className="overflow-x-auto w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
+                            <table className="w-full text-left border-collapse text-xs" style={{ minWidth: '720px' }}>
                                 <thead>
                                     <tr className="border-b border-slate-800 text-slate-500 uppercase tracking-wider">
                                         <th className="py-3 px-2">Client Details</th>
@@ -985,12 +1077,12 @@ function AdminPanel() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-850">
-                                    {sortedProjects.length === 0 ? (
+                                    {totalItems === 0 ? (
                                         <tr>
                                             <td colSpan="4" className="py-8 text-center text-slate-500 italic">No records found matching filters.</td>
                                         </tr>
                                     ) : (
-                                        sortedProjects.map(p => {
+                                        paginatedProjects.map(p => {
                                             const isDue = isProjectDueSoon(p)
                                             return (
                                                 <tr
@@ -1045,10 +1137,53 @@ function AdminPanel() {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Pagination Controls */}
+                        {totalItems > 0 && totalPages > 1 && (
+                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-850">
+                                <div className="text-xs text-slate-500 font-medium">
+                                    Showing <span className="font-bold">{(activePage - 1) * itemsPerPage + 1}</span> to{' '}
+                                    <span className="font-bold">{Math.min(activePage * itemsPerPage, totalItems)}</span> of{' '}
+                                    <span className="font-bold">{totalItems}</span> projects
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={activePage === 1}
+                                        className="px-3 py-1.5 border border-slate-800 rounded hover:bg-slate-800 transition text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        Prev
+                                    </button>
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                        <button
+                                            key={page}
+                                            type="button"
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`px-3 py-1.5 border text-xs font-semibold rounded transition ${
+                                                activePage === page
+                                                    ? 'bg-demargo-orange border-demargo-orange text-white font-bold'
+                                                    : 'border-slate-800 hover:bg-slate-800'
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={activePage === totalPages}
+                                        className="px-3 py-1.5 border border-slate-800 rounded hover:bg-slate-800 transition text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Column: Manage Details Panel (5 Cols) */}
-                    <div ref={selectedProjectRef} className="lg:col-span-5 bg-slate-900 border border-slate-850 p-6 space-y-6 rounded-3xl shadow-2xl">
+                    <div ref={selectedProjectRef} className={`${mobileView === 'list' ? 'hidden' : 'block'} lg:block lg:col-span-5 bg-slate-900 border border-slate-850 p-6 space-y-6 rounded-3xl shadow-2xl max-w-full overflow-hidden`}>
                         {!selectedProject ? (
                             <div className="min-h-[18rem] sm:h-96 flex flex-col justify-center items-center text-center p-6 border border-dashed border-slate-800 text-slate-500">
                                 <span className="text-2xl block mb-2">📋</span>
@@ -1057,6 +1192,15 @@ function AdminPanel() {
                             </div>
                         ) : (
                             <div className="space-y-6">
+                                <div className="lg:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileView('list')}
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-slate-950 border border-slate-850 hover:bg-slate-800 transition text-xs font-bold uppercase tracking-wider rounded-xl mb-2"
+                                    >
+                                        <span>←</span> Back to List
+                                    </button>
+                                </div>
                                 <div className="flex justify-between items-start border-b border-slate-850 pb-4">
                                     <div>
                                         <span className="text-[10px] text-slate-500 uppercase">Selected Project</span>
@@ -1072,98 +1216,7 @@ function AdminPanel() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-4 bg-slate-950 border border-slate-850 rounded-3xl p-5 flex flex-col h-[460px]">
-                                    <div className="flex items-center justify-between pb-3 border-b border-slate-850">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-demargo-orange animate-pulse" />
-                                            <span className="text-[10px] uppercase tracking-wider font-bold text-white">Project Conversation</span>
-                                        </div>
-                                        <span className="text-[9px] text-slate-500 font-semibold bg-slate-900 border border-slate-850 px-2 py-0.5 rounded-full">{(selectedProject.messages || []).length} messages</span>
-                                    </div>
-                                    
-                                    {/* Messages list */}
-                                    <div ref={messagesListRef} className="flex-1 overflow-y-auto space-y-4 my-3 pr-1 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', overscrollBehavior: 'contain' }}>
-                                        {(selectedProject.messages || []).length === 0 ? (
-                                            <div className="h-full flex flex-col justify-center items-center text-center text-slate-500 py-10">
-                                                <span className="text-2xl mb-1">💬</span>
-                                                <p className="text-[11px] italic">No messages yet. Send a note to start the chat.</p>
-                                            </div>
-                                        ) : (
-                                            selectedProject.messages.map((msg) => {
-                                                const isAdmin = msg.sender === 'admin'
-                                                const clientInitial = selectedProject.clientName ? selectedProject.clientName.trim().charAt(0).toUpperCase() : 'C'
-                                                return (
-                                                    <div key={msg.id} className={`flex w-full gap-2.5 ${isAdmin ? 'justify-end' : 'justify-start'}`}>
-                                                        {!isAdmin && (
-                                                            <div className="w-7 h-7 rounded-full bg-slate-800 text-slate-200 border border-slate-700 font-black text-xs flex items-center justify-center shrink-0 shadow-sm" title={selectedProject.clientName}>
-                                                                {clientInitial}
-                                                            </div>
-                                                        )}
-                                                        <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm text-xs relative ${
-                                                            isAdmin 
-                                                                ? 'bg-demargo-orange text-blue-950 font-semibold rounded-tr-none' 
-                                                                : 'bg-slate-900 text-slate-100 border border-slate-800 rounded-tl-none'
-                                                        }`}>
-                                                            <p className="whitespace-pre-line leading-relaxed">{msg.body}</p>
-                                                            {isAdmin ? (
-                                                                <div className="flex items-center justify-end gap-1 text-[8px] mt-1.5 text-blue-950/60">
-                                                                    <span>{new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}</span>
-                                                                    {msg.readByClient ? (
-                                                                        <span className="text-white font-black text-[9px] leading-none" title="Read by Client">✓✓</span>
-                                                                    ) : (
-                                                                        <span className="text-blue-950/40 font-black text-[9px] leading-none" title="Sent">✓</span>
-                                                                    )}
-                                                                </div>
-                                                            ) : (
-                                                                <span className="block text-[8px] mt-1.5 text-right text-slate-500">
-                                                                    {new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        {isAdmin && (
-                                                            <div className="w-7 h-7 rounded-full bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-blue-950" title="Admin">
-                                                                A
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )
-                                            })
-                                        )}
-                                    </div>
-                                    
-                                    {/* Inline reply bar */}
-                                    <div className="flex gap-2 items-center bg-slate-900 border border-slate-850 rounded-full px-4 py-2 focus-within:border-demargo-orange focus-within:ring-1 focus-within:ring-demargo-orange/20 transition">
-                                        <input
-                                            type="text"
-                                            value={replyInput}
-                                            onChange={(e) => setReplyInput(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && replyInput.trim() && !sendingReply) {
-                                                    handleSendReply()
-                                                }
-                                            }}
-                                            placeholder="Write your admin reply..."
-                                            className="flex-1 bg-transparent text-xs text-white placeholder-slate-650 focus:outline-none border-none outline-none"
-                                            disabled={sendingReply}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={handleSendReply}
-                                            disabled={sendingReply || !replyInput.trim()}
-                                            className="p-1 text-demargo-orange hover:text-orange-400 disabled:opacity-30 transition shrink-0"
-                                        >
-                                            <svg className="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => requestDeleteProject(selectedProject.id, selectedProject.clientName)}
-                                    className="px-2.5 py-1.5 bg-red-950/40 text-red-500 border border-red-900/50 hover:bg-red-900/40 hover:text-white transition text-[10px] font-bold uppercase"
-                                >
-                                    Delete Record
-                                </button>
+
 
                                 {/* Form for Updates */}
                                 <form onSubmit={handleUpdateProject} className="space-y-4 text-xs">
@@ -1234,6 +1287,26 @@ function AdminPanel() {
                                     />
                                 </div>
 
+                                <div>
+                                    <label className="block text-slate-500 font-bold mb-1 uppercase">Project Title</label>
+                                    <input
+                                        type="text"
+                                        value={editProjData.projectTitle}
+                                        onChange={(e) => setEditProjData(p => ({ ...p, projectTitle: e.target.value }))}
+                                        className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-slate-500 font-bold mb-1 uppercase">Project Description</label>
+                                    <textarea
+                                        rows="2"
+                                        value={editProjData.projectDescription}
+                                        onChange={(e) => setEditProjData(p => ({ ...p, projectDescription: e.target.value }))}
+                                        className="w-full bg-slate-950 border border-slate-850 text-white px-3 py-2 focus:outline-none"
+                                    />
+                                </div>
+
                                 {/* 1. Measurement Settings */}
                                 <div className="border-t border-slate-850 pt-4 space-y-3">
                                     <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">1. Measurements Information</span>
@@ -1268,11 +1341,11 @@ function AdminPanel() {
                                         <label className="block text-slate-500 font-semibold">Site Measurement Documents (Max 5)</label>
                                         <div className="space-y-1.5 max-w-md">
                                             {(editProjData.measurementPdfUrls || []).map((fileItem, idx) => (
-                                                <div key={idx} className="flex items-center justify-between bg-slate-900 border border-slate-850 p-2 text-xs text-slate-300">
+                                                <div key={idx} className="flex items-center justify-between bg-slate-900 border border-slate-850 p-2 text-xs text-slate-300 min-w-0 w-full">
                                                     <button 
                                                         type="button"
                                                         onClick={() => viewDocument(fileItem.url)}
-                                                        className="text-left font-semibold truncate hover:underline hover:text-demargo-orange pr-2 flex-1"
+                                                        className="text-left font-semibold truncate hover:underline hover:text-demargo-orange pr-2 flex-1 min-w-0"
                                                         title={fileItem.name}
                                                     >
                                                         📄 {fileItem.name}
@@ -1321,11 +1394,11 @@ function AdminPanel() {
                                             <label className="block text-slate-500 font-semibold">Client Estimate Documents (Max 5)</label>
                                             <div className="space-y-1.5 max-w-md">
                                                 {(editProjData.estimatePdfUrls || []).map((fileItem, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between bg-slate-900 border border-slate-850 p-2 text-xs text-slate-300">
+                                                    <div key={idx} className="flex items-center justify-between bg-slate-900 border border-slate-850 p-2 text-xs text-slate-300 min-w-0 w-full">
                                                         <button 
                                                             type="button"
                                                             onClick={() => viewDocument(fileItem.url)}
-                                                            className="text-left font-semibold truncate hover:underline hover:text-demargo-orange pr-2 flex-1"
+                                                            className="text-left font-semibold truncate hover:underline hover:text-demargo-orange pr-2 flex-1 min-w-0"
                                                             title={fileItem.name}
                                                         >
                                                             📄 {fileItem.name}
@@ -1333,7 +1406,7 @@ function AdminPanel() {
                                                         <button 
                                                             type="button"
                                                             onClick={() => handleDeleteEstimatePdf(idx)}
-                                                            className="text-[10px] font-black text-red-500 hover:text-red-400 bg-slate-955 px-2 py-1 rounded transition uppercase"
+                                                            className="text-[10px] font-black text-red-500 hover:text-red-400 bg-slate-950 px-2 py-1 rounded transition uppercase"
                                                         >
                                                             Remove
                                                         </button>
@@ -1503,12 +1576,118 @@ function AdminPanel() {
                                                                 ✓ Approve
                                                             </button>
                                                         )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDeletePayment(p.id, p.amount, p.status !== 'pending')}
+                                                            className="text-red-500 hover:text-red-400 hover:underline text-[9px] font-bold uppercase"
+                                                        >
+                                                            Delete
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Project Conversation (moved to bottom) */}
+                            <div className="mt-4 bg-slate-950 border border-slate-850 rounded-3xl p-5 flex flex-col h-[460px]">
+                                <div className="flex items-center justify-between pb-3 border-b border-slate-850">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-demargo-orange animate-pulse" />
+                                        <span className="text-[10px] uppercase tracking-wider font-bold text-white">Project Conversation</span>
+                                    </div>
+                                    <span className="text-[9px] text-slate-500 font-semibold bg-slate-900 border border-slate-850 px-2 py-0.5 rounded-full">{(selectedProject.messages || []).length} messages</span>
+                                </div>
+                                
+                                {/* Messages list */}
+                                <div ref={messagesListRef} className="flex-1 overflow-y-auto space-y-4 my-3 pr-1 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', overscrollBehavior: 'contain' }}>
+                                    {(selectedProject.messages || []).length === 0 ? (
+                                        <div className="h-full flex flex-col justify-center items-center text-center text-slate-500 py-10">
+                                            <span className="text-2xl mb-1">💬</span>
+                                            <p className="text-[11px] italic">No messages yet. Send a note to start the chat.</p>
+                                        </div>
+                                    ) : (
+                                        selectedProject.messages.map((msg) => {
+                                            const isAdmin = msg.sender === 'admin'
+                                            const clientInitial = selectedProject.clientName ? selectedProject.clientName.trim().charAt(0).toUpperCase() : 'C'
+                                            return (
+                                                <div key={msg.id} className={`flex w-full gap-2.5 ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                                                    {!isAdmin && (
+                                                        <div className="w-7 h-7 rounded-full bg-slate-800 text-slate-200 border border-slate-700 font-black text-xs flex items-center justify-center shrink-0 shadow-sm" title={selectedProject.clientName}>
+                                                            {clientInitial}
+                                                        </div>
+                                                    )}
+                                                    <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm text-xs relative ${
+                                                        isAdmin 
+                                                            ? 'bg-demargo-orange text-blue-950 font-semibold rounded-tr-none' 
+                                                            : 'bg-slate-900 text-slate-100 border border-slate-800 rounded-tl-none'
+                                                    }`}>
+                                                        <p className="whitespace-pre-line leading-relaxed">{msg.body}</p>
+                                                        {isAdmin ? (
+                                                            <div className="flex items-center justify-end gap-1 text-[8px] mt-1.5 text-blue-950/60">
+                                                                <span>{new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                {msg.readByClient ? (
+                                                                    <span className="text-white font-black text-[9px] leading-none" title="Read by Client">✓✓</span>
+                                                                ) : (
+                                                                    <span className="text-blue-950/40 font-black text-[9px] leading-none" title="Sent">✓</span>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="block text-[8px] mt-1.5 text-right text-slate-500">
+                                                                {new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {isAdmin && (
+                                                        <div className="w-7 h-7 rounded-full bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-blue-950" title="Admin">
+                                                            A
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )
+                                        })
+                                    )}
+                                </div>
+                                
+                                {/* Inline reply bar */}
+                                <div className="flex gap-2 items-center bg-slate-900 border border-slate-850 rounded-full px-4 py-2 focus-within:border-demargo-orange focus-within:ring-1 focus-within:ring-demargo-orange/20 transition">
+                                    <input
+                                        type="text"
+                                        value={replyInput}
+                                        onChange={(e) => setReplyInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && replyInput.trim() && !sendingReply) {
+                                                handleSendReply()
+                                            }
+                                        }}
+                                        placeholder="Write your admin reply..."
+                                        className="flex-1 bg-transparent text-xs text-white placeholder-slate-650 focus:outline-none border-none outline-none"
+                                        disabled={sendingReply}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleSendReply}
+                                        disabled={sendingReply || !replyInput.trim()}
+                                        className="p-1 text-demargo-orange hover:text-orange-400 disabled:opacity-30 transition shrink-0"
+                                    >
+                                        <svg className="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Danger Zone: Delete Record Button */}
+                            <div className="pt-4 border-t border-slate-850 flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => requestDeleteProject(selectedProject.id, selectedProject.clientName)}
+                                    className="px-4 py-2 bg-red-950/40 text-red-500 border border-red-900/50 hover:bg-red-900/40 hover:text-white transition text-[10px] font-bold uppercase tracking-wider rounded-xl"
+                                >
+                                    Delete Record
+                                </button>
                             </div>
                         </div>
                         )}
@@ -1532,7 +1711,7 @@ function AdminPanel() {
                         </div>
 
                         <form onSubmit={handleCreateProject} className="space-y-4 text-xs">
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-slate-500 font-bold mb-1 uppercase">Client Name</label>
                                     <input
@@ -1557,7 +1736,7 @@ function AdminPanel() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-slate-500 font-bold mb-1 uppercase">Client Email</label>
                                     <input

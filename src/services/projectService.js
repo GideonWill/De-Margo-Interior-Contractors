@@ -771,4 +771,56 @@ export const approvePayment = async (projectId, paymentId, amount) => {
     }
 }
 
+/**
+ * Delete a payment transaction and update the project's payment balances if it was verified/success.
+ * @param {string} projectId - Project ID
+ * @param {string} paymentId - Payment ID
+ * @param {number} amount - Payment amount
+ * @param {boolean} isApproved - Whether the payment was verified/approved
+ * @returns {Promise<void>}
+ */
+export const deletePayment = async (projectId, paymentId, amount, isApproved) => {
+    if (!isFirebaseConfigured) {
+        const payments = getMockData('demargo_mock_payments', defaultPayments)
+        const newPayments = payments.filter(p => p.id !== paymentId)
+        saveMockData('demargo_mock_payments', newPayments)
+        
+        if (isApproved) {
+            await mockUpdateProjectPayment(projectId, -amount)
+        }
+        return
+    }
+
+    await initFirebaseAuth()
+    try {
+        const paymentRef = doc(db, PAYMENTS_COLLECTION, paymentId)
+        await deleteDoc(paymentRef)
+
+        if (isApproved) {
+            const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
+            const projectSnap = await getDoc(projectRef)
+            if (projectSnap.exists()) {
+                const projectData = projectSnap.data()
+                const newAmountPaid = Math.max(0, (projectData.amountPaid || 0) - amount)
+                const newBalance = Math.max(0, (projectData.totalAmount || 0) - newAmountPaid)
+                
+                let newStatus = projectData.status
+                if (newStatus === 'completed' && newBalance > 0) {
+                    newStatus = 'fabric' // default fallback stage when payment is revoked
+                }
+
+                await updateDoc(projectRef, {
+                    amountPaid: newAmountPaid,
+                    balance: newBalance,
+                    status: newStatus,
+                    updatedAt: serverTimestamp()
+                })
+            }
+        }
+    } catch (error) {
+        console.error('Error deleting payment:', error)
+        throw error
+    }
+}
+
 
