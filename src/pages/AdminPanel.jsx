@@ -100,7 +100,8 @@ function AdminPanel() {
         projectTitle: '',
         projectDescription: '',
         serviceAddress: '',
-        totalAmount: '0'
+        totalAmount: '0',
+        measurementDate: ''
     })
 
     // Edit Project Details Form
@@ -347,7 +348,8 @@ function AdminPanel() {
                 serviceAddress: newProjData.serviceAddress.trim(),
                 totalAmount: amount,
                 messages: [],
-                status: 'measurement'
+                status: 'measurement',
+                measurementDate: newProjData.measurementDate || ''
             })
             await fetchData()
             setNewProjData({
@@ -357,7 +359,8 @@ function AdminPanel() {
                 projectTitle: '',
                 projectDescription: '',
                 serviceAddress: '',
-                totalAmount: '0'
+                totalAmount: '0',
+                measurementDate: ''
             })
             setShowCreateModal(false)
             showToast('Project created successfully.', 'success')
@@ -1790,6 +1793,16 @@ function AdminPanel() {
                                     placeholder="Cantonments, Accra Ghana"
                                     value={newProjData.serviceAddress}
                                     onChange={(e) => setNewProjData(p => ({ ...p, serviceAddress: e.target.value }))}
+                                    className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2 focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-slate-500 font-bold mb-1 uppercase">Measurement Date & Time (Optional)</label>
+                                <input
+                                    type="datetime-local"
+                                    value={newProjData.measurementDate}
+                                    onChange={(e) => setNewProjData(p => ({ ...p, measurementDate: e.target.value }))}
                                     className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2 focus:outline-none"
                                 />
                             </div>
