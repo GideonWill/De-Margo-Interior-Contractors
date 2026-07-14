@@ -735,37 +735,8 @@ function ProjectTracker() {
                                                 <span className="text-slate-500 uppercase block mb-1">Client Address / Site Location</span>
                                                 <span className="text-blue-900">{selectedProject.serviceAddress || 'No site location registered.'}</span>
                                             </div>
-                                            <div className="pt-3 border-t border-gray-150">
-                                                <span className="text-slate-500 uppercase block mb-1.5">Estimate Documents</span>
-                                                {((selectedProject.estimatePdfUrls && selectedProject.estimatePdfUrls.length > 0) || selectedProject.estimatePdfUrl) ? (
-                                                    <div className="flex flex-col gap-2">
-                                                        {selectedProject.estimatePdfUrls && selectedProject.estimatePdfUrls.length > 0 ? (
-                                                            selectedProject.estimatePdfUrls.map((fileItem, idx) => (
-                                                                <div key={idx}>
-                                                                    <button 
-                                                                        type="button"
-                                                                        onClick={() => viewDocument(fileItem.url)}
-                                                                        className="text-blue-600 hover:underline font-semibold hover:text-demargo-orange inline-flex items-center gap-1 text-[11px]"
-                                                                    >
-                                                                        📄 {fileItem.name}
-                                                                    </button>
-                                                                </div>
-                                                            ))
-                                                        ) : (
-                                                            <button 
-                                                                type="button"
-                                                                onClick={() => viewDocument(selectedProject.estimatePdfUrl)}
-                                                                className="text-blue-600 hover:underline font-semibold hover:text-demargo-orange inline-flex items-center gap-1 text-[11px]"
-                                                            >
-                                                                📄 View Estimate PDF
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-blue-700 italic block mt-1">No estimate documents uploaded yet.</span>
-                                                )}
-                                            </div>
                                         </div>
+
                                         <div className="bg-slate-50 border border-gray-200 rounded-3xl p-5 flex flex-col h-[480px]">
                                             <div className="flex items-center justify-between pb-3 border-b border-gray-200">
                                                 <div className="flex items-center gap-2">
