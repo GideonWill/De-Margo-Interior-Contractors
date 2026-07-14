@@ -24,6 +24,7 @@ const STAGES = [
     { key: 'fabric', label: 'Fabric Selection' },
     { key: 'production', label: 'Tailoring/Sewing' },
     { key: 'installation', label: 'Installation' },
+    { key: 'correction', label: 'Correction/Issues' },
     { key: 'completed', label: 'Completed' }
 ]
 
@@ -796,6 +797,25 @@ function AdminPanel() {
         return `${hour}:${minuteStr} ${ampm}`
     }
 
+    const formatDateOnly = (dateStr) => {
+        if (!dateStr) return ''
+        const datePart = dateStr.split('T')[0]
+        const dateParts = datePart.split('-')
+        if (dateParts.length !== 3) return datePart
+        const [year, month, day] = dateParts
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        const monthName = months[parseInt(month, 10) - 1] || month
+        return `${day} ${monthName} ${year}`
+    }
+
+    const isMeasurementUpcoming = (dateTimeStr) => {
+        if (!dateTimeStr) return null
+        const datePart = dateTimeStr.split('T')[0]
+        if (datePart === todayStr) return 'today'
+        if (datePart === tomorrowStr) return 'tomorrow'
+        return null
+    }
+
     // Filter and sort projects (upcoming installations pinned to the top)
     const sortedProjects = useMemo(() => {
         const filtered = projectsWithCorrectBalance.filter(p => {
@@ -807,14 +827,44 @@ function AdminPanel() {
         })
 
         return [...filtered].sort((a, b) => {
-            const aDue = isProjectDueSoon(a)
-            const bDue = isProjectDueSoon(b)
-            if (aDue && !bDue) return -1
-            if (!aDue && bDue) return 1
-            if (aDue && bDue) {
+            // 1. Check if installation is due soon (critical alerts)
+            const aInstDue = isProjectDueSoon(a)
+            const bInstDue = isProjectDueSoon(b)
+            if (aInstDue && !bInstDue) return -1
+            if (!aInstDue && bInstDue) return 1
+            if (aInstDue && bInstDue) {
                 return new Date(a.installationDate) - new Date(b.installationDate)
             }
-            return 0
+
+            // 2. Sort by upcoming/due measurement dates (most due / earliest first)
+            const aHasMeas = !!a.measurementDate
+            const bHasMeas = !!b.measurementDate
+            
+            if (aHasMeas && bHasMeas) {
+                const nowMs = Date.now()
+                const aTime = new Date(a.measurementDate).getTime()
+                const bTime = new Date(b.measurementDate).getTime()
+                
+                const aIsFuture = aTime >= nowMs
+                const bIsFuture = bTime >= nowMs
+                
+                if (aIsFuture && !bIsFuture) return -1
+                if (!aIsFuture && bIsFuture) return 1
+                
+                if (aIsFuture && bIsFuture) {
+                    return aTime - bTime // Earliest future date first (due soonest)
+                }
+                
+                return bTime - aTime // Past dates (most recent first)
+            }
+            
+            if (aHasMeas && !bHasMeas) return -1
+            if (!aHasMeas && bHasMeas) return 1
+            
+            // 3. Fallback to creation date (newest first)
+            const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0
+            const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0
+            return bCreated - aCreated
         })
     }, [projectsWithCorrectBalance, searchQuery, statusFilter])
 
@@ -1070,19 +1120,20 @@ function AdminPanel() {
 
                         {/* Projects Table */}
                         <div className="overflow-x-auto w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
-                            <table className="w-full text-left border-collapse text-xs" style={{ minWidth: '720px' }}>
+                            <table className="w-full text-left border-collapse text-xs min-w-[840px] lg:min-w-0">
                                 <thead>
                                     <tr className="border-b border-slate-800 text-slate-500 uppercase tracking-wider">
                                         <th className="py-3 px-2">Client Details</th>
                                         <th className="py-3 px-2">Project</th>
                                         <th className="py-3 px-2">Status</th>
+                                        <th className="py-3 px-2">Measurement</th>
                                         <th className="py-3 px-2 text-right">Payments</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-850">
                                     {totalItems === 0 ? (
                                         <tr>
-                                            <td colSpan="4" className="py-8 text-center text-slate-500 italic">No records found matching filters.</td>
+                                            <td colSpan="5" className="py-8 text-center text-slate-500 italic">No records found matching filters.</td>
                                         </tr>
                                     ) : (
                                         paginatedProjects.map(p => {
@@ -1124,10 +1175,49 @@ function AdminPanel() {
                                                             p.status === 'completed' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
                                                             p.status === 'production' ? 'bg-orange-500/10 border-orange-500/20 text-demargo-orange' :
                                                             p.status === 'estimate' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
+                                                            p.status === 'correction' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
                                                             'bg-slate-800 border-slate-700 text-slate-400'
                                                         }`}>
                                                             {STAGES.find(s => s.key === p.status)?.label || p.status}
                                                         </span>
+                                                    </td>
+                                                    <td className="py-3 px-2">
+                                                        {p.measurementDate ? (
+                                                            <div>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span className="font-semibold text-slate-200">
+                                                                        {formatDateOnly(p.measurementDate)}
+                                                                    </span>
+                                                                    {(() => {
+                                                                        const upcoming = isMeasurementUpcoming(p.measurementDate)
+                                                                        if (upcoming === 'today') {
+                                                                            return (
+                                                                                <span className="px-1.5 py-0.2 bg-red-500/10 border border-red-500/20 text-red-400 text-[8px] font-extrabold uppercase rounded animate-pulse">
+                                                                                    Today
+                                                                                </span>
+                                                                            )
+                                                                        }
+                                                                        if (upcoming === 'tomorrow') {
+                                                                            return (
+                                                                                <span className="px-1.5 py-0.2 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[8px] font-extrabold uppercase rounded">
+                                                                                    Tomorrow
+                                                                                </span>
+                                                                            )
+                                                                        }
+                                                                        return null
+                                                                    })()}
+                                                                </div>
+                                                                <div className="text-[10px] text-slate-500 mt-0.5">
+                                                                    {formatTime12Hour(p.measurementDate)}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            p.status !== 'measurement' ? (
+                                                                <span className="text-emerald-500/80 font-semibold text-[9px] uppercase tracking-wider bg-emerald-500/5 border border-emerald-500/10 px-1.5 py-0.5 rounded">Measurement Taken</span>
+                                                            ) : (
+                                                                <span className="text-slate-600 italic text-[11px]">Not scheduled</span>
+                                                            )
+                                                        )}
                                                     </td>
                                                     <td className="py-3 px-2 text-right">
                                                         <div className="font-bold text-slate-200">GHS {p.amountPaid.toLocaleString('en-GH')}</div>

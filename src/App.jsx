@@ -621,8 +621,8 @@ function Services() {
           preload="metadata"
           className="absolute inset-0 w-full h-full object-cover"
         >
-          <source src="/assets/reel.MOV" type="video/quicktime" />
           <source src="/assets/video.mp4" type="video/mp4" />
+          <source src="/assets/reel.MOV" type="video/quicktime" />
         </video>
         <div className="absolute inset-0 bg-black/45" />
         <div className="relative z-10 max-w-6xl mx-auto px-4 w-full">
@@ -2161,7 +2161,7 @@ function Portfolio() {
             >
               <button className="relative w-full text-left" onClick={() => openLightbox(src, src.endsWith('.mp4') ? 'video' : 'image')}>
                 {src.endsWith('.mp4') ? (
-                  <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
+                  <VideoReveal src={src} className="w-full h-64 object-cover opacity-80" />
                 ) : (
                   <img src={src} alt={`Portfolio ${i + 1}`} className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
                 )}
@@ -2194,8 +2194,8 @@ function Portfolio() {
             }
             return (
               <article key={`vmore-${i}`} className="group relative rounded-2xl overflow-hidden bg-white card-glow">
-                <button className="relative w-full" onClick={() => openLightbox(src, 'video')}>
-                  <video src={src} muted playsInline loop autoPlay className="w-full h-64 object-cover" />
+                <button className="relative w-full text-left" onClick={() => openLightbox(src, 'video')}>
+                  <VideoReveal src={src} className="w-full h-64 object-cover opacity-80" />
                   {/* Hover overlay with project description */}
                   <div className="absolute inset-0 bg-gradient-to-t from-orange-600/95 via-orange-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                     <div className="w-full px-4 py-4">

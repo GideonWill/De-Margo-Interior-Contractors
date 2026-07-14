@@ -10,6 +10,7 @@ const STAGES = [
     { key: 'fabric', label: 'Fabric Selection', title: 'Fabric Selection', desc: 'Choosing colors, patterns & styles of fabrics' },
     { key: 'production', label: 'Tailoring', title: 'Production & Sewing', desc: 'Production team crafting your custom curtains (Min 60% deposit)' },
     { key: 'installation', label: 'Installation', title: 'Site Installation', desc: 'Installation team mounting curtains neatly at your site' },
+    { key: 'correction', label: 'Correction', title: 'Project Under Correction', desc: 'Addressing and correcting any issues or adjustments with the project' },
     { key: 'completed', label: 'Completed', title: 'Project Finished', desc: 'Lifecycle complete and balance cleared' }
 ]
 
@@ -440,7 +441,11 @@ function ProjectTracker() {
                             </div>
                             <div>
                                 <span className="text-xs text-slate-500 uppercase tracking-wider block">Current Status</span>
-                                <div className="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-demargo-orange/15 text-demargo-orange text-xs font-bold border border-demargo-orange/20 uppercase tracking-wider">
+                                <div className={`inline-flex items-center gap-2 mt-2 px-3 py-1 text-xs font-bold border uppercase tracking-wider ${
+                                    selectedProject.status === 'correction' 
+                                        ? 'bg-red-500/15 text-red-500 border-red-500/20 animate-pulse' 
+                                        : 'bg-demargo-orange/15 text-demargo-orange border-demargo-orange/20'
+                                }`}>
                                     {STAGES[currentStageIdx]?.label}
                                 </div>
                                 <p className="text-xs text-blue-700 mt-2">{STAGES[currentStageIdx]?.desc}</p>
@@ -696,6 +701,18 @@ function ProjectTracker() {
                                                     {new Date(selectedProject.installationDate).toLocaleString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             )}
+                                        </div>
+                                    )}
+
+                                    {selectedProject.status === 'correction' && (
+                                        <div className="bg-red-50/50 p-5 border border-red-200 space-y-3">
+                                            <p className="text-sm text-red-950 font-medium">
+                                                Ongoing issues or post-installation adjustments have been reported.
+                                            </p>
+                                            <div className="bg-white/80 p-4 border border-red-100 text-xs text-red-900 flex items-center gap-3">
+                                                <div className="w-4 h-4 rounded-full border border-red-500 border-t-transparent animate-spin shrink-0" />
+                                                <span>Our team is actively working to resolve the issues and make the necessary corrections.</span>
+                                            </div>
                                         </div>
                                     )}
 

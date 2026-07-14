@@ -130,6 +130,8 @@ const FABRIC_FILENAMES = [
   "SP3300-8.jpeg"
 ]
 
+const BLINDS_FILENAMES = Array.from({ length: 34 }, (_, i) => `page_${String(i + 1).padStart(2, '0')}.jpg`)
+
 const Seo = ({ title, description }) => (
   <Helmet>
     <title>{title} | Demargo Interior Contractors</title>
@@ -138,9 +140,10 @@ const Seo = ({ title, description }) => (
 )
 
 function FabricCollection() {
+  const [activeTab, setActiveTab] = useState('fabrics') // 'fabrics' or 'blinds'
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
-  const [lightbox, setLightbox] = useState({ open: false, fabric: null })
+  const [lightbox, setLightbox] = useState({ open: false, item: null })
 
   // Parse and cache the fabric data
   const fabrics = useMemo(() => {
@@ -179,17 +182,38 @@ function FabricCollection() {
     })
   }, [])
 
-  // Extract unique categories in alphabetical order
-  const categories = useMemo(() => {
-    const cats = new Set(fabrics.map(f => f.category))
-    return ['All', '100% Blackout', ...Array.from(cats).sort()]
-  }, [fabrics])
+  // Parse and cache the blinds data
+  const blinds = useMemo(() => {
+    return BLINDS_FILENAMES.map((filename, i) => {
+      const idx = i + 1
+      const code = `BL-${String(idx).padStart(2, '0')}`
+      return {
+        filename,
+        code,
+        category: "Window Blinds",
+        isBlackout: false,
+        src: `/assets/Blinds/pages/${filename}`,
+        thumb: `/assets/Blinds/thumbnails/${filename}`,
+        index: idx
+      }
+    })
+  }, [])
 
-  // Filter fabrics based on category tab and search query
-  const filteredFabrics = useMemo(() => {
-    return fabrics.filter(f => {
+  // Extract unique categories for fabrics
+  const categories = useMemo(() => {
+    if (activeTab === 'blinds') return ['All']
+    const cats = new Set(fabrics.map(item => item.category))
+    return ['All', '100% Blackout', ...Array.from(cats).sort()]
+  }, [activeTab, fabrics])
+
+  // Filter items based on activeTab, category tab, and search query
+  const filteredItems = useMemo(() => {
+    const items = activeTab === 'fabrics' ? fabrics : blinds
+    return items.filter(f => {
       let matchesCategory = false
-      if (selectedCategory === 'All') {
+      if (activeTab === 'blinds') {
+        matchesCategory = true
+      } else if (selectedCategory === 'All') {
         matchesCategory = true
       } else if (selectedCategory === '100% Blackout') {
         matchesCategory = f.isBlackout
@@ -198,15 +222,17 @@ function FabricCollection() {
       }
 
       const matchesSearch = f.code.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            f.category.toLowerCase().includes(searchQuery.toLowerCase())
+                            f.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (activeTab === 'blinds' && `page ${f.index}`.includes(searchQuery.toLowerCase()))
       return matchesCategory && matchesSearch
     })
-  }, [fabrics, selectedCategory, searchQuery])
+  }, [activeTab, fabrics, blinds, selectedCategory, searchQuery])
 
-  // Group filtered fabrics by their category to render headers
-  const groupedFabrics = useMemo(() => {
+  // Group filtered items by their category to render headers (fabrics only)
+  const groupedItems = useMemo(() => {
+    if (activeTab === 'blinds') return {}
     const groups = {}
-    filteredFabrics.forEach(f => {
+    filteredItems.forEach(f => {
       const catKey = selectedCategory === '100% Blackout' ? '100% Blackout Curtains' : f.category
       if (!groups[catKey]) {
         groups[catKey] = []
@@ -214,57 +240,98 @@ function FabricCollection() {
       groups[catKey].push(f)
     })
     return groups
-  }, [filteredFabrics, selectedCategory])
+  }, [filteredItems, selectedCategory, activeTab])
 
   // Escape key to close lightbox
   useEffect(() => {
     if (!lightbox.open) return
     const onKeyDown = (e) => {
-      if (e.key === 'Escape') setLightbox({ open: false, fabric: null })
+      if (e.key === 'Escape') setLightbox({ open: false, item: null })
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [lightbox.open])
 
-  const openLightbox = (fabric) => {
-    setLightbox({ open: true, fabric })
+  const openLightbox = (item) => {
+    setLightbox({ open: true, item })
   }
 
   const closeLightbox = () => {
-    setLightbox({ open: false, fabric: null })
+    setLightbox({ open: false, item: null })
   }
 
   // Get WhatsApp message link
-  const getWhatsAppLink = (fabric) => {
-    if (!fabric) return ''
-    const text = encodeURIComponent(
-      `Hello Demargo Interior Contractors, I'm interested in fabric code "${fabric.code}" from your ${fabric.category}. Can I request a quote or order sample details?`
-    )
-    return `https://wa.me/233546478040?text=${text}`
+  const getWhatsAppLink = (item) => {
+    if (!item) return ''
+    if (activeTab === 'fabrics') {
+      const text = encodeURIComponent(
+        `Hello Demargo Interior Contractors, I'm interested in the fabric code "${item.code}" from your ${item.category}. Can I request a quote or order sample details?`
+      )
+      return `https://wa.me/233546478040?text=${text}`
+    } else {
+      const text = encodeURIComponent(
+        `Hello Demargo Interior Contractors, I'm interested in the window blind design on Page ${item.index} of your Blinds Catalog. Can I request a quote or order details?`
+      )
+      return `https://wa.me/233546478040?text=${text}`
+    }
   }
 
   return (
     <div className="bg-slate-50 min-h-screen pt-24 pb-16">
       <Seo 
-        title="Fabric Collection Catalog" 
-        description="Browse Demargo's extensive curated collection of premium drapery, sheers, and 100% blackout fabrics grouped by code and collection." 
+        title={activeTab === 'fabrics' ? "Fabric Collection Catalog" : "Blinds Catalog Collection"} 
+        description="Browse Demargo's extensive curated collection of premium drapery fabrics, sheers, and custom blinds." 
       />
 
-      {/* Hero Header Section aligned with standard pages */}
+      {/* Hero Header Section */}
       <section className="max-w-6xl mx-auto px-4 py-8 text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 text-[10px] uppercase tracking-widest text-demargo-orange shadow-sm font-bold">
-          <span>●</span> Premium Curtains & Sheers
+          <span>●</span> {activeTab === 'fabrics' ? 'Premium Curtains & Sheers' : 'Custom Window Blinds'}
         </div>
         <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 uppercase tracking-tight">
-          <span className="text-demargo-orange">Fabric</span> <span className="text-demargo-blue">Collection</span>
+          <span className="text-demargo-orange">Demargo</span> <span className="text-demargo-blue">Collections</span>
         </h1>
         <p className="max-w-2xl mx-auto text-gray-600 text-xs md:text-sm leading-relaxed">
-          Browse our curated catalog of high-quality fabrics. Choose a category tab below or search by code to view samples, then select any card to enquire directly via WhatsApp.
+          {activeTab === 'fabrics' 
+            ? "Browse our curated catalogs of curtain fabrics. Filter by category series or search by code, and click any item to enquire directly via WhatsApp." 
+            : "Browse our window blinds catalog. Search by page number, click any page to zoom in, and enquire directly via WhatsApp."}
         </p>
       </section>
 
+      {/* Tab Switcher */}
+      <section className="max-w-6xl mx-auto px-4 flex justify-center gap-4 mb-6">
+        <button
+          onClick={() => {
+            setActiveTab('fabrics')
+            setSelectedCategory('All')
+            setSearchQuery('')
+          }}
+          className={`flex-1 max-w-[220px] py-3 text-xs font-black uppercase tracking-wider transition-all duration-300 border ${
+            activeTab === 'fabrics'
+              ? 'bg-demargo-orange border-demargo-orange text-white shadow-lg'
+              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-demargo-orange shadow-sm'
+          }`}
+        >
+          🏷️ Curtain Fabrics ({fabrics.length})
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('blinds')
+            setSelectedCategory('All')
+            setSearchQuery('')
+          }}
+          className={`flex-1 max-w-[220px] py-3 text-xs font-black uppercase tracking-wider transition-all duration-300 border ${
+            activeTab === 'blinds'
+              ? 'bg-demargo-blue border-demargo-blue text-white shadow-lg'
+              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-demargo-blue shadow-sm'
+          }`}
+        >
+          📐 Window Blinds ({blinds.length})
+        </button>
+      </section>
+
       {/* Main Filter Section */}
-      <section className="max-w-6xl mx-auto px-4 mt-4">
+      <section className="max-w-6xl mx-auto px-4">
         <div className="bg-white border border-slate-200 p-4 md:p-6 shadow-sm space-y-4">
           <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
             {/* Search Input */}
@@ -276,7 +343,7 @@ function FabricCollection() {
               </span>
               <input 
                 type="text"
-                placeholder="Search fabric code (e.g. Milan, 2008-17)..."
+                placeholder={activeTab === 'fabrics' ? "Search fabric code (e.g. Milan, 2008-17)..." : "Search blind page (e.g. Page 12, 5)..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-8 py-2 text-xs border border-slate-200 focus:outline-none focus:border-demargo-orange transition bg-slate-50"
@@ -295,53 +362,96 @@ function FabricCollection() {
 
             {/* Total Count */}
             <div className="text-[10px] uppercase font-bold text-slate-400 self-center tracking-wider">
-              Showing {filteredFabrics.length} of {fabrics.length} Fabrics
+              Showing {filteredItems.length} of {activeTab === 'fabrics' ? fabrics.length : blinds.length} {activeTab === 'fabrics' ? 'Fabrics' : 'Blinds'}
             </div>
           </div>
 
-          {/* Categories Tab Bar */}
-          <div className="border-t border-slate-100 pt-4">
-            <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 text-xs font-bold whitespace-nowrap transition border ${
-                    selectedCategory === cat 
-                      ? 'bg-demargo-orange text-white border-demargo-orange' 
-                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-demargo-orange'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+          {/* Categories Tab Bar (Curtain Fabrics only) */}
+          {activeTab === 'fabrics' && (
+            <div className="border-t border-slate-100 pt-4">
+              <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1.5 text-xs font-bold whitespace-nowrap transition border ${
+                      selectedCategory === cat 
+                        ? 'bg-demargo-orange text-white border-demargo-orange' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-demargo-orange'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* Grid of Grouped Fabrics */}
+      {/* Grid of Items */}
       <main className="max-w-6xl mx-auto px-4 mt-8 space-y-12">
-        {filteredFabrics.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <div className="bg-white border border-slate-200 py-16 text-center shadow-sm">
             <svg className="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <h3 className="font-extrabold text-slate-800 text-sm uppercase">No Fabrics Found</h3>
-            <p className="text-xs text-slate-500 mt-1">Try adjusting your search query or choosing another collection category tab.</p>
+            <h3 className="font-extrabold text-slate-800 text-sm uppercase">No {activeTab === 'fabrics' ? 'Fabrics' : 'Blinds'} Found</h3>
+            <p className="text-xs text-slate-500 mt-1">Try adjusting your search query.</p>
+          </div>
+        ) : activeTab === 'blinds' ? (
+          <div className="space-y-4">
+            {/* Simple count header */}
+            <div className="flex items-baseline justify-between border-b border-slate-200 pb-2">
+              <h2 className="text-lg md:text-xl font-black text-slate-900 uppercase tracking-tight">Window Blinds</h2>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{filteredItems.length} items</span>
+            </div>
+
+            {/* Continuous Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {filteredItems.map(f => (
+                <motion.div
+                  key={f.code}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-20px" }}
+                  transition={{ duration: 0.4 }}
+                  className="group bg-white border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-between overflow-hidden relative cursor-zoom-in"
+                >
+                  {/* Image click-to-lightbox */}
+                  <button 
+                    onClick={() => openLightbox(f)}
+                    className="relative w-full aspect-square overflow-hidden bg-slate-100 flex items-center justify-center"
+                  >
+                    <img 
+                      src={f.thumb || f.src} 
+                      alt={`Blinds page ${f.index}`} 
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <span className="px-2.5 py-1 bg-white text-slate-900 text-[10px] font-bold uppercase shadow tracking-wider">
+                        Quick View
+                      </span>
+                    </div>
+                  </button>
+                </motion.div>
+              ))}
+            </div>
           </div>
         ) : (
-          Object.keys(groupedFabrics).sort().map(catName => (
+          Object.keys(groupedItems).sort().map(catName => (
             <div key={catName} className="space-y-4">
               {/* Group Header */}
               <div className="flex items-baseline justify-between border-b border-slate-200 pb-2">
                 <h2 className="text-lg md:text-xl font-black text-slate-900 uppercase tracking-tight">{catName}</h2>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{groupedFabrics[catName].length} items</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{groupedItems[catName].length} items</span>
               </div>
 
-              {/* Group Fabric Cards Grid */}
+              {/* Group Cards Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {groupedFabrics[catName].map(f => (
+                {groupedItems[catName].map(f => (
                   <motion.div
                     key={f.code}
                     initial={{ opacity: 0, y: 15 }}
@@ -364,7 +474,7 @@ function FabricCollection() {
                     >
                       <img 
                         src={f.src} 
-                        alt={`Fabric sample code ${f.code}`} 
+                        alt={`Sample code ${f.code}`} 
                         loading="lazy"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                       />
@@ -391,7 +501,7 @@ function FabricCollection() {
 
       {/* Lightbox Modal */}
       <AnimatePresence>
-        {lightbox.open && lightbox.fabric && (
+        {lightbox.open && lightbox.item && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -420,8 +530,8 @@ function FabricCollection() {
               {/* Large Image */}
               <div className="w-full md:w-1/2 aspect-square bg-slate-100 flex-shrink-0">
                 <img 
-                  src={lightbox.fabric.src} 
-                  alt={`Curated Fabric sample ${lightbox.fabric.code}`} 
+                  src={lightbox.item.src} 
+                  alt={`Curated sample ${lightbox.item.code}`} 
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -431,10 +541,16 @@ function FabricCollection() {
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{lightbox.fabric.category}</span>
-                      <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{lightbox.fabric.code}</h3>
+                      {activeTab === 'fabrics' && (
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{lightbox.item.category}</span>
+                      )}
+                      {activeTab === 'fabrics' ? (
+                        <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{lightbox.item.code}</h3>
+                      ) : (
+                        <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Window Blind - Page {lightbox.item.index}</h3>
+                      )}
                     </div>
-                    {lightbox.fabric.isBlackout && (
+                    {activeTab === 'fabrics' && lightbox.item.isBlackout && (
                       <span className="px-2 py-0.5 bg-black text-white font-extrabold text-[9px] uppercase tracking-widest mt-1">
                         100% Blackout
                       </span>
@@ -443,14 +559,18 @@ function FabricCollection() {
 
                   <div className="border-t border-slate-100 pt-3 flex flex-col gap-3">
                     <p className="text-xs text-slate-500 leading-relaxed">
-                      Would you like to request samples of this fabric or get a free custom quote? Use the button below to message our designers directly on WhatsApp with this fabric code.
+                      {activeTab === 'fabrics' ? (
+                        `Would you like to request samples of this fabric or get a free custom quote? Use the button below to message our designers directly on WhatsApp with this code.`
+                      ) : (
+                        `Would you like to request details or get a free custom quote for this window blind design? Use the button below to message our designers directly on WhatsApp.`
+                      )}
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex gap-2 mt-6">
                   <a
-                    href={getWhatsAppLink(lightbox.fabric)}
+                    href={getWhatsAppLink(lightbox.item)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm uppercase tracking-wider"
