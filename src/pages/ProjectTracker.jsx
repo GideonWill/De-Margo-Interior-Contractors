@@ -837,8 +837,6 @@ function ProjectTracker() {
             )}
         </div>
 
-            {/* Paystack Payment Modal Wrapper */}
-            
             {/* Toast Notification */}
             {toast.show && (
                 <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 animate-fade-in ${
