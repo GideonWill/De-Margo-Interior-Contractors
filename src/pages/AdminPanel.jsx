@@ -7,6 +7,7 @@ import {
     updateProject,
     addProjectMessage,
     updateProjectMessages,
+    clearProjectMessages,
     deleteProject,
     recordPayment,
     updateProjectPayment,
@@ -446,6 +447,27 @@ function AdminPanel() {
             showToast('Could not send reply. Please try again.', 'error')
         } finally {
             setSendingReply(false)
+        }
+    }
+
+    const [clearingChat, setClearingChat] = useState(false)
+
+    const handleClearChat = async () => {
+        if (!selectedProject) return
+        if ((selectedProject.messages || []).length === 0) return
+        if (!window.confirm('Are you sure you want to clear all conversation messages for this project?')) return
+
+        setClearingChat(true)
+        try {
+            await clearProjectMessages(selectedProject.id)
+            setSelectedProject(prev => prev ? { ...prev, messages: [] } : prev)
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? { ...p, messages: [] } : p))
+            showToast('Project conversation cleared successfully.', 'success')
+        } catch (err) {
+            console.error('Error clearing chat:', err)
+            showToast('Failed to clear conversation history.', 'error')
+        } finally {
+            setClearingChat(false)
         }
     }
 
@@ -1691,7 +1713,23 @@ function AdminPanel() {
                                         <div className="w-2.5 h-2.5 rounded-full bg-demargo-orange animate-pulse" />
                                         <span className="text-[10px] uppercase tracking-wider font-bold text-white">Project Conversation</span>
                                     </div>
-                                    <span className="text-[9px] text-slate-500 font-semibold bg-slate-900 border border-slate-850 px-2 py-0.5 rounded-full">{(selectedProject.messages || []).length} messages</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[9px] text-slate-500 font-semibold bg-slate-900 border border-slate-850 px-2 py-0.5 rounded-full">{(selectedProject.messages || []).length} messages</span>
+                                        {(selectedProject.messages || []).length > 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={handleClearChat}
+                                                disabled={clearingChat}
+                                                className="text-[9px] text-red-400 hover:text-red-300 hover:bg-red-950/60 border border-red-900/60 rounded-full px-2 py-0.5 font-semibold transition-all flex items-center gap-1 shrink-0 disabled:opacity-50 cursor-pointer"
+                                                title="Clear conversation history"
+                                            >
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                <span>Clear Chat</span>
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                                 
                                 {/* Messages list */}

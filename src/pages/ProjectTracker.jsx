@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 import { TrophyIcon } from '@heroicons/react/24/outline'
-import { getProjectsByPhone, getProjectById, updateProject, updateProjectPayment, recordPayment, addProjectMessage, updateProjectMessages, subscribeToProject, uploadFile } from '../services/projectService'
+import { getProjectsByPhone, getProjectById, updateProject, updateProjectPayment, recordPayment, addProjectMessage, updateProjectMessages, clearProjectMessages, subscribeToProject, uploadFile } from '../services/projectService'
 
 import './ProjectTracker.css';
 const STAGES = [
@@ -198,6 +198,26 @@ function ProjectTracker() {
             showToast('Could not send your message. Please try again.', 'error')
         } finally {
             setSendingMessage(false)
+        }
+    }
+
+    const [clearingChat, setClearingChat] = useState(false)
+
+    const handleClearChat = async () => {
+        if (!selectedProject) return
+        if ((selectedProject.messages || []).length === 0) return
+        if (!window.confirm('Are you sure you want to clear this conversation history?')) return
+
+        setClearingChat(true)
+        try {
+            await clearProjectMessages(selectedProject.id)
+            setSelectedProject(prev => prev ? { ...prev, messages: [] } : prev)
+            showToast('Chat conversation cleared successfully.', 'success')
+        } catch (err) {
+            console.error('Error clearing chat:', err)
+            showToast('Failed to clear chat history.', 'error')
+        } finally {
+            setClearingChat(false)
         }
     }
 
@@ -743,7 +763,23 @@ function ProjectTracker() {
                                                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                                     <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider">Support Chat (Direct Line)</span>
                                                 </div>
-                                                <span className="text-[9px] text-slate-500 font-semibold bg-white border border-gray-200 px-2 py-0.5 rounded-full">{(selectedProject.messages || []).length} messages</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[9px] text-slate-500 font-semibold bg-white border border-gray-200 px-2 py-0.5 rounded-full">{(selectedProject.messages || []).length} messages</span>
+                                                    {(selectedProject.messages || []).length > 0 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleClearChat}
+                                                            disabled={clearingChat}
+                                                            className="text-[9px] text-red-600 hover:text-red-800 hover:bg-red-50 border border-red-200 rounded-full px-2 py-0.5 font-semibold transition-all flex items-center gap-1 shrink-0 disabled:opacity-50 cursor-pointer"
+                                                            title="Clear chat history"
+                                                        >
+                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                            <span>Clear</span>
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                             {hasNewAdminMessage && (
                                                 <div className="my-2 rounded-lg border border-emerald-200 bg-emerald-50/70 p-2 text-emerald-900 flex items-start gap-2 animate-pulse text-[11px]">

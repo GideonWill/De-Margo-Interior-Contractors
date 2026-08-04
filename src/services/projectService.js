@@ -681,6 +681,24 @@ export const updateProjectMessages = async (projectId, messages) => {
     }
 }
 
+export const clearProjectMessages = async (projectId) => {
+    if (!isFirebaseConfigured) {
+        return mockUpdateProjectMessages(projectId, [])
+    }
+    await initFirebaseAuth()
+    try {
+        const projectRef = doc(db, PROJECTS_COLLECTION, projectId)
+        await updateDoc(projectRef, {
+            messages: [],
+            updatedAt: serverTimestamp()
+        })
+    } catch (error) {
+        console.error('Error clearing project messages:', error)
+        throw error
+    }
+}
+
+
 export const deleteProject = async (projectId) => {
     if (!isFirebaseConfigured) {
         return mockDeleteProject(projectId)
