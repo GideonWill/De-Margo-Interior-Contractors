@@ -1270,20 +1270,61 @@ function AdminPanel() {
                                     >
                                         Prev
                                     </button>
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                        <button
-                                            key={page}
-                                            type="button"
-                                            onClick={() => setCurrentPage(page)}
-                                            className={`px-3 py-1.5 border text-xs font-semibold rounded transition ${
-                                                activePage === page
-                                                    ? 'bg-demargo-orange border-demargo-orange text-white font-bold'
-                                                    : 'border-slate-800 hover:bg-slate-800'
-                                            }`}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
+                                    {(() => {
+                                        const delta = 2;
+                                        const range = [];
+                                        const rangeWithDots = [];
+                                        let l;
+
+                                        for (let i = 1; i <= totalPages; i++) {
+                                            if (
+                                                i === 1 ||
+                                                i === totalPages ||
+                                                (i >= activePage - delta && i <= activePage + delta)
+                                            ) {
+                                                range.push(i);
+                                            }
+                                        }
+
+                                        for (let i = 0; i < range.length; i++) {
+                                            if (l !== undefined && range[i] - l > 1) {
+                                                rangeWithDots.push('...' + range[i]);
+                                            }
+                                            rangeWithDots.push(range[i]);
+                                            l = range[i];
+                                        }
+
+                                        return rangeWithDots.map((page, idx) => {
+                                            if (typeof page === 'string') {
+                                                const pageNum = parseInt(page.replace('...', ''), 10);
+                                                return (
+                                                    <button
+                                                        key={`dots-${idx}`}
+                                                        type="button"
+                                                        onClick={() => setCurrentPage(pageNum)}
+                                                        className="px-2 py-1.5 text-xs text-slate-500 font-semibold select-none"
+                                                        title={`Go to page ${pageNum}`}
+                                                    >
+                                                        …
+                                                    </button>
+                                                );
+                                            }
+                                            return (
+                                                <button
+                                                    key={page}
+                                                    type="button"
+                                                    onClick={() => setCurrentPage(page)}
+                                                    className={`px-3 py-1.5 border text-xs font-semibold rounded transition ${
+                                                        activePage === page
+                                                            ? 'bg-demargo-orange border-demargo-orange text-white font-bold'
+                                                            : 'border-slate-800 hover:bg-slate-800'
+                                                    }`}
+                                                >
+                                                    {page}
+                                                </button>
+                                            );
+                                        });
+                                    })()}
                                     <button
                                         type="button"
                                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
