@@ -1374,7 +1374,7 @@ function ChatBot() {
     { t: 'Fabric Collection', a: () => pushBotAction('Opening Fabric Collection…', () => navigate('/fabric-collection')) },
     { t: 'Track Project', a: () => pushBotAction('Opening Project Tracker…', () => navigate('/track')) },
     { t: '3D Rendering', a: () => pushBotAction('Opening 3D Rendering…', () => navigate('/3d-rendering')) },
-    { t: 'Contact', a: () => pushBotText('Phone: 0546478040 • Email: demargo1987@gmail.com') },
+    { t: 'Contact', a: () => pushBotText('Phone: 0546478040 • Email: info@demargointerior.com') },
   ]
 
   const renderMessageText = (text) => {
@@ -1460,7 +1460,7 @@ function ChatBot() {
       setMode('default')
       const { name, phone, service } = bookingRef.current
       const wa = `https://wa.me/233546478040?text=${encodeURIComponent(`Hi, I am ${name}. My number is ${phone}. I\'d like to book: ${service}.`)}`
-      const mail = `mailto:demargo1987@gmail.com?subject=${encodeURIComponent('Booking Request')}&body=${encodeURIComponent(`Name: ${name}\nPhone: ${phone}\nService: ${service}`)}`
+      const mail = `mailto:info@demargointerior.com?subject=${encodeURIComponent('Booking Request')}&body=${encodeURIComponent(`Name: ${name}\nPhone: ${phone}\nService: ${service}`)}`
       return {
         type: 'actions',
         text: `Thanks ${name}! We\'ll contact you shortly. You can also message us now:`,
@@ -1474,7 +1474,7 @@ function ChatBot() {
   }
 
   async function getAssistantReply(message, history) {
-    const contactFallback = 'Please call 0546478040 or email demargo1987@gmail.com for help.'
+    const contactFallback = 'Please call 0546478040 or email info@demargointerior.com for help.'
 
     let response
     try {
@@ -1540,7 +1540,7 @@ function ChatBot() {
         setMessages(m => [...m, { role: 'bot', text: reply }])
       }
     } catch (err) {
-      setMessages(m => [...m, { role: 'bot', text: 'I’m having trouble reaching the assistant right now. Please call 0546478040 or email demargo1987@gmail.com for immediate help.' }])
+      setMessages(m => [...m, { role: 'bot', text: 'I’m having trouble reaching the assistant right now. Please call 0546478040 or email info@demargointerior.com for immediate help.' }])
       setError(err.message || 'Unable to get a response right now.')
     } finally {
       setTyping(false)
@@ -1764,7 +1764,7 @@ export default function App() {
               <h4 className="font-semibold text-lg">Contact Info</h4>
               <div className="text-sm text-white/80 space-y-2">
                 <p>Tel: 0546478040</p>
-                <p>Email: demargo1987@gmail.com</p>
+                <p>Email: <a href="mailto:info@demargointerior.com" className="hover:text-demargo-orange transition-colors">info@demargointerior.com</a></p>
               </div>
             </div>
           </div>

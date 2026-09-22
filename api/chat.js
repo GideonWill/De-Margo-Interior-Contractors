@@ -25,7 +25,7 @@ const SYSTEM_PROMPT = `You are Demargo Assistant, the friendly AI helper on the 
 
 When questions relate to Demargo, use these facts:
 - Services: interior design, home renovation, 3D rendering, curtains and blinds, smart home installation, POP ceilings, painting, tiling, and cleaning
-- Contact: 0546478040, demargo1987@gmail.com, WhatsApp wa.me/233546478040
+- Contact: 0546478040, info@demargointerior.com, WhatsApp wa.me/233546478040
 - Address: HM8Q+XJR, Gbawe, Accra
 - Hours: Mon–Fri 8AM–5PM, Sat 8AM–4PM
 - Service areas: Accra, Kumasi, Tema, Takoradi, Cape Coast, and nearby locations
@@ -82,7 +82,7 @@ app.post('/api/chat', async (req, res) => {
     // Provide friendly fallback messages
     if (error.message?.includes('API key')) {
       return res.status(200).json({ 
-        reply: 'The assistant is not configured correctly yet. Please call 0546478040 or email demargo1987@gmail.com and our team will assist you.' 
+        reply: 'The assistant is not configured correctly yet. Please call 0546478040 or email info@demargointerior.com and our team will assist you.' 
       });
     }
     
