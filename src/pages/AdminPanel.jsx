@@ -18,6 +18,7 @@ import {
 } from '../services/projectService'
 import './AdminPanel.css';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { downloadCustomerDemographicsExcel } from '../utils/exportCustomerDemographics';
 
 const STAGES = [
     { key: 'measurement', label: 'Measurement' },
@@ -79,6 +80,9 @@ function AdminPanel() {
 
     // Modals & Selection
     const [showCreateModal, setShowCreateModal] = useState(false)
+    const [showExportModal, setShowExportModal] = useState(false)
+    const [exportScope, setExportScope] = useState('all') // 'all' | 'filtered'
+    const [exporting, setExporting] = useState(false)
     const [selectedProject, setSelectedProject] = useState(null)
     const [projectPayments, setProjectPayments] = useState([])
     const [loadingPayments, setLoadingPayments] = useState(false)
@@ -899,6 +903,36 @@ function AdminPanel() {
         activePage * itemsPerPage
     )
 
+    // Export customer demographics to Excel
+    const handleExportDemographics = (scopeOverride) => {
+        const targetScope = scopeOverride || exportScope
+        setExporting(true)
+        try {
+            const dataToExport = targetScope === 'filtered' ? sortedProjects : projectsWithCorrectBalance
+            if (!dataToExport || dataToExport.length === 0) {
+                showToast('No customer records available to export for this selection.', 'error')
+                return
+            }
+
+            const filterLabel = targetScope === 'filtered'
+                ? (statusFilter !== 'all' ? `Stage_${statusFilter}` : 'Filtered_Selection')
+                : 'All_Onboarded_Customers'
+
+            const result = downloadCustomerDemographicsExcel(dataToExport, {
+                filterLabel,
+                exportScope: targetScope
+            })
+
+            showToast(`Exported ${result.totalCustomers} customer demographic records to Excel!`, 'success')
+            setShowExportModal(false)
+        } catch (err) {
+            console.error('Demographics export error:', err)
+            showToast(err.message || 'Failed to export customer demographics.', 'error')
+        } finally {
+            setExporting(false)
+        }
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-6 select-none">
@@ -980,7 +1014,17 @@ function AdminPanel() {
                         <h1 className="text-2xl font-black text-white uppercase tracking-wider">Demargo Admin Panel</h1>
                         <p className="text-xs text-slate-400 mt-0.5">Logged in as Administrator • Secure Cloud DB Mode</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            onClick={() => setShowExportModal(true)}
+                            className="px-3.5 py-2 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100/90 text-emerald-900 transition text-xs font-semibold flex items-center gap-2 dem-rounded-lg shadow-2xs"
+                            title="Download Customer Demographics in Excel format (.xlsx)"
+                        >
+                            <svg className="w-4 h-4 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span className="font-semibold text-emerald-900">Export Demographics (Excel)</span>
+                        </button>
                         <button
                             onClick={async () => {
                                 showToast('Refreshing data...', 'success')
@@ -989,13 +1033,13 @@ function AdminPanel() {
                                     await handleSelectProject(selectedProject.id)
                                 }
                             }}
-                            className="px-4 py-2 border border-demargo-orange/40 hover:bg-slate-900/60 transition text-xs font-bold text-demargo-orange hover:text-white flex items-center gap-1.5"
+                            className="px-4 py-2 border border-demargo-orange/40 hover:bg-slate-900/60 transition text-xs font-bold text-demargo-orange hover:text-white flex items-center gap-1.5 rounded"
                         >
                             <span>↻</span> Refresh Updates
                         </button>
                         <button
                             onClick={handleLogout}
-                            className="px-4 py-2 border border-slate-850 hover:bg-slate-900 transition text-xs font-bold text-slate-400 hover:text-white"
+                            className="px-4 py-2 border border-slate-850 hover:bg-slate-900 transition text-xs font-bold text-slate-400 hover:text-white rounded"
                         >
                             [ LOGOUT SYSTEM ]
                         </button>
@@ -1111,12 +1155,24 @@ function AdminPanel() {
                     <div className={`${mobileView === 'details' ? 'hidden' : 'block'} lg:block lg:col-span-7 bg-slate-900 border border-slate-850 p-6 space-y-6 rounded-3xl shadow-2xl max-w-full overflow-hidden`}>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <h2 className="font-extrabold text-white text-md uppercase tracking-wider">Project Records Directory</h2>
-                            <button
-                                onClick={() => setShowCreateModal(true)}
-                                className="px-4 py-2 bg-demargo-orange hover:opacity-90 text-white font-bold text-xs transition uppercase"
-                            >
-                                + Create Project Entry
-                            </button>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                    onClick={() => setShowExportModal(true)}
+                                    className="px-3.5 py-2 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-semibold text-xs transition flex items-center gap-1.5 dem-rounded-lg shadow-2xs"
+                                    title="Export customer demographics to Excel (.xlsx)"
+                                >
+                                    <svg className="w-4 h-4 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span className="font-semibold text-emerald-900">Download Excel</span>
+                                </button>
+                                <button
+                                    onClick={() => setShowCreateModal(true)}
+                                    className="px-4 py-2 bg-demargo-orange hover:opacity-90 text-white font-bold text-xs transition uppercase rounded"
+                                >
+                                    + Create Project Entry
+                                </button>
+                            </div>
                         </div>
 
                         {/* Search and Filters */}
@@ -1984,6 +2040,256 @@ function AdminPanel() {
                                 {creatingProject ? 'Creating project...' : 'Create Project Record'}
                             </button>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Customer Demographics Excel Export Modal */}
+            {showExportModal && (
+                <div 
+                    className="dem-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+                    onClick={() => !exporting && setShowExportModal(false)}
+                >
+                    <div 
+                        className="dem-modal-card allow-custom-colors dem-rounded-2xl max-w-2xl w-full p-6 sm:p-8 relative text-slate-800 space-y-6 my-8 animate-scale-up"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="flex justify-between items-start border-b border-slate-100 pb-5">
+                            <div className="flex items-start gap-4">
+                                <div className="dem-rounded-xl w-11 h-11 bg-emerald-50 border border-emerald-200/80 flex items-center justify-center flex-shrink-0 text-emerald-600 shadow-sm">
+                                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="dem-rounded-full px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold tracking-wide">
+                                            Microsoft Excel (.xlsx)
+                                        </span>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900 tracking-tight">Export Customer Demographics</h3>
+                                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                                        Download a formatted multi-sheet Excel spreadsheet with client profiles, geographic distribution, and revenue analytics.
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => !exporting && setShowExportModal(false)}
+                                className="dem-rounded-full w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                                title="Close modal"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Export Scope Selector */}
+                        <div className="space-y-2.5">
+                            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
+                                1. Select Customer Scope
+                            </label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {/* Option 1: All Onboarded Customers */}
+                                <button
+                                    type="button"
+                                    onClick={() => setExportScope('all')}
+                                    className={`p-4 text-left transition relative flex flex-col justify-between ${
+                                        exportScope === 'all'
+                                            ? 'dem-scope-card-active shadow-sm'
+                                            : 'dem-scope-card-inactive'
+                                    }`}
+                                >
+                                    <div>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-4 h-4 dem-rounded-full border flex items-center justify-center ${
+                                                    exportScope === 'all' ? 'border-emerald-600 bg-emerald-600' : 'border-slate-300 bg-white'
+                                                }`}>
+                                                    {exportScope === 'all' && (
+                                                        <div className="w-1.5 h-1.5 dem-rounded-full bg-white" />
+                                                    )}
+                                                </div>
+                                                <span className="text-xs font-bold text-slate-900">All Customers</span>
+                                            </div>
+                                            <span className={`text-[11px] font-bold px-2.5 py-0.5 dem-rounded-full ${
+                                                exportScope === 'all' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                                            }`}>
+                                                {projectsWithCorrectBalance.length} Records
+                                            </span>
+                                        </div>
+                                        <p className="text-[11px] text-slate-500 leading-normal">
+                                            Complete client database across all project stages and history.
+                                        </p>
+                                    </div>
+                                </button>
+
+                                {/* Option 2: Filtered Selection */}
+                                <button
+                                    type="button"
+                                    onClick={() => setExportScope('filtered')}
+                                    className={`p-4 text-left transition relative flex flex-col justify-between ${
+                                        exportScope === 'filtered'
+                                            ? 'dem-scope-card-active shadow-sm'
+                                            : 'dem-scope-card-inactive'
+                                    }`}
+                                >
+                                    <div>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-4 h-4 dem-rounded-full border flex items-center justify-center ${
+                                                    exportScope === 'filtered' ? 'border-emerald-600 bg-emerald-600' : 'border-slate-300 bg-white'
+                                                }`}>
+                                                    {exportScope === 'filtered' && (
+                                                        <div className="w-1.5 h-1.5 dem-rounded-full bg-white" />
+                                                    )}
+                                                </div>
+                                                <span className="text-xs font-bold text-slate-900">Filtered View</span>
+                                            </div>
+                                            <span className={`text-[11px] font-bold px-2.5 py-0.5 dem-rounded-full ${
+                                                exportScope === 'filtered' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                                            }`}>
+                                                {sortedProjects.length} Records
+                                            </span>
+                                        </div>
+                                        <p className="text-[11px] text-slate-500 leading-normal">
+                                            {statusFilter !== 'all' 
+                                                ? `Matching stage "${STAGES.find(s => s.key === statusFilter)?.label || statusFilter}"`
+                                                : searchQuery 
+                                                    ? `Matching query "${searchQuery}"`
+                                                    : 'Currently visible search & filter results'}
+                                        </p>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Live Demographics Overview Card */}
+                        {(() => {
+                            const targetList = exportScope === 'filtered' ? sortedProjects : projectsWithCorrectBalance
+                            const targetTotalVal = targetList.reduce((sum, p) => sum + (Number(p.totalAmount) || 0), 0)
+                            const targetPaidVal = targetList.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0)
+                            const areasSet = new Set(targetList.map(p => (p.serviceAddress || '').split(',')[0].trim()).filter(Boolean))
+                            const avgVal = targetList.length ? Math.round(targetTotalVal / targetList.length) : 0
+
+                            return (
+                                <div className="dem-rounded-xl bg-slate-50 border border-slate-200/90 p-4 space-y-3">
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span className="text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                                            Selected Dataset Overview ({targetList.length} Clients)
+                                        </span>
+                                        <span className="text-slate-900 font-semibold font-mono text-xs">
+                                            Total: GHS {targetTotalVal.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                                        <div className="bg-white p-2.5 dem-rounded-lg border border-slate-200/70 shadow-2xs">
+                                            <span className="text-[10px] text-slate-500 font-medium block uppercase tracking-wide">Customers</span>
+                                            <span className="text-base font-bold text-slate-900 mt-0.5 block">{targetList.length}</span>
+                                        </div>
+                                        <div className="bg-white p-2.5 dem-rounded-lg border border-slate-200/70 shadow-2xs">
+                                            <span className="text-[10px] text-slate-500 font-medium block uppercase tracking-wide">Locations</span>
+                                            <span className="text-base font-bold text-blue-600 mt-0.5 block">{areasSet.size} areas</span>
+                                        </div>
+                                        <div className="bg-white p-2.5 dem-rounded-lg border border-slate-200/70 shadow-2xs">
+                                            <span className="text-[10px] text-slate-500 font-medium block uppercase tracking-wide">Collected</span>
+                                            <span className="text-base font-bold text-emerald-600 mt-0.5 block">
+                                                GHS {targetPaidVal.toLocaleString('en-GH')}
+                                            </span>
+                                        </div>
+                                        <div className="bg-white p-2.5 dem-rounded-lg border border-slate-200/70 shadow-2xs">
+                                            <span className="text-[10px] text-slate-500 font-medium block uppercase tracking-wide">Avg Value</span>
+                                            <span className="text-base font-bold text-slate-900 mt-0.5 block">
+                                                GHS {avgVal.toLocaleString('en-GH')}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })()}
+
+                        {/* Included Spreadsheet Sheets Info */}
+                        <div className="space-y-2.5">
+                            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
+                                2. Spreadsheet Structure (2 Sheets Included)
+                            </label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div className="bg-white border border-slate-200/90 p-3.5 dem-rounded-xl space-y-1.5 shadow-2xs">
+                                    <div className="flex items-center justify-between">
+                                        <div className="font-bold text-slate-900 flex items-center gap-2">
+                                            <svg className="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span>Sheet 1: Demographics Directory</span>
+                                        </div>
+                                        <span className="text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-600 dem-rounded-md">
+                                            24 Columns
+                                        </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                                        Detailed customer records: contact info, parsed areas, service types, onboarding dates & cohorts, contract economics, payment status, spending tiers, and satisfaction feedback.
+                                    </p>
+                                </div>
+
+                                <div className="bg-white border border-slate-200/90 p-3.5 dem-rounded-xl space-y-1.5 shadow-2xs">
+                                    <div className="flex items-center justify-between">
+                                        <div className="font-bold text-slate-900 flex items-center gap-2">
+                                            <svg className="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                            </svg>
+                                            <span>Sheet 2: Demographic Insights</span>
+                                        </div>
+                                        <span className="text-[10px] font-semibold px-2 py-0.5 bg-blue-50 text-blue-700 dem-rounded-md">
+                                            6 Tables
+                                        </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                                        Executive KPIs, geographic customer breakdown (% share by area), service demand distribution, project lifecycle stages, and payment compliance analytics.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Action Buttons */}
+                        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 border-t border-slate-100">
+                            <div className="flex items-center gap-1.5 text-slate-400 text-xs">
+                                <svg className="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <span>Output: .xlsx (Excel 2016+)</span>
+                            </div>
+                            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                                <button
+                                    type="button"
+                                    disabled={exporting}
+                                    onClick={() => setShowExportModal(false)}
+                                    className="dem-btn-cancel px-4 py-2.5 text-xs font-semibold uppercase tracking-wider flex-1 sm:flex-initial"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={exporting || (exportScope === 'filtered' ? sortedProjects.length === 0 : projectsWithCorrectBalance.length === 0)}
+                                    onClick={() => handleExportDemographics()}
+                                    className="dem-btn-download px-5 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 flex-1 sm:flex-initial shadow-sm"
+                                >
+                                    {exporting ? (
+                                        <>
+                                            <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white dem-rounded-full animate-spin" />
+                                            <span style={{ color: '#ffffff' }}>Generating File...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                            </svg>
+                                            <span style={{ color: '#ffffff' }}>Download Excel (.xlsx)</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

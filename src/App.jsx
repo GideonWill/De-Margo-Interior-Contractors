@@ -1249,54 +1249,252 @@ function Testimonials() {
 }
 
 function Contact() {
-  const address = 'Demargo Contractors, HM8Q+XJR, Gbawe'
-  const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`
-  const dirHref = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`
-  return (
-    <section className="pb-0">
-      <Seo title="Contact / Booking" description="Contact Demargo to schedule a consultation or request a quote." />
+  const address = 'Topbase Weija, Gbawe, Accra - Ghana'
+  const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent('Topbase Weija, Gbawe, Accra, Ghana')}&output=embed`
+  const dirHref = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent('Topbase Weija, Gbawe, Accra, Ghana')}`
 
-      {/* Backdrop image with centered map overlay (not edge-to-edge) */}
-      <div className="w-full h-64 md:h-80 bg-center bg-cover" style={{ backgroundImage: 'url(/assets/Serene%20Master%20Retreat.jpg)' }} />
-      <div className="-mt-12 md:-mt-16 relative z-10">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="rounded-xl overflow-hidden shadow-xl ring-1 ring-black/10 bg-white">
-            <iframe title="Demargo Location" src={mapSrc} className="w-full h-60 md:h-80" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+  return (
+    <div className="bg-[#f8fafc]">
+      <Seo
+        title="Contact Demargo Interior Contractors | Topbase Weija, Gbawe"
+        description="Contact Demargo Interior Contractors at Topbase Weija, Gbawe. Call 0546478040 or email info@demargointerior.com for luxury curtains, blinds, 3D renderings, and renovations."
+      />
+
+      {/* 1. CINEMATIC LUXURY HERO SECTION */}
+      <section className="relative min-h-[500px] md:min-h-[580px] flex items-center overflow-hidden bg-slate-950">
+        {/* High-Resolution Luxury Architectural Backdrop */}
+        <div
+          className="absolute inset-0 bg-cover bg-center transform scale-105 transition-transform duration-1000 ease-out"
+          style={{
+            backgroundImage: 'url(/assets/Executive%20Dining%20Experience.jpg)',
+            backgroundPosition: 'center 40%'
+          }}
+        />
+
+        {/* Sophisticated Dual Gradient Scrim for Contrast & Legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-900/50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
+
+        {/* Floating Ambient Glow Accent */}
+        <div className="absolute -top-24 right-1/4 w-96 h-96 bg-demargo-orange/15 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 w-full py-16 md:py-24 pb-28 md:pb-36">
+          <div className="max-w-3xl space-y-6">
+            {/* Glassmorphic Brand Pill Badge */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold tracking-wider uppercase shadow-lg">
+              <span className="w-2 h-2 rounded-full bg-demargo-orange animate-pulse" />
+              <span>Demargo Interior Contractors • Topbase Weija, Gbawe</span>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.08]">
+              Let’s Create Something <br className="hidden sm:block" />
+              <span className="text-demargo-orange">Extraordinary</span> Together.
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-white/85 text-sm sm:text-base md:text-lg max-w-2xl font-normal leading-relaxed">
+              Connect directly with our team for custom automated curtains, premium blinds, architectural 3D visualizations, and complete interior makeovers across Ghana.
+            </p>
+
+            {/* Value Highlights Strip */}
+            <div className="pt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-white/90">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15">
+                <svg className="w-4 h-4 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Free On-Site Assessment</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15">
+                <svg className="w-4 h-4 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Showroom in Topbase Weija, Gbawe</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15">
+                <svg className="w-4 h-4 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Fast 24h Response</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Blue Contact banner */}
-      <div className="relative -mt-10 md:-mt-14">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="rounded-xl md:rounded-2xl bg-[#0f4560] text-white px-6 md:px-12 py-10 md:py-16 shadow-xl">
-            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-3">Book a Consultation</h2>
-            <p className="text-center text-white/90 mb-8 max-w-2xl mx-auto">Schedule a consultation directly via Calendly to get started.</p>
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <a href="https://calendly.com/gideonogunu/demargo-booking-consultation" target="_blank" rel="noreferrer" className="px-6 py-3 rounded-md bg-demargo-orange font-semibold hover:bg-white text-white hover:text-[#e46424] transition group relative overflow-hidden flex items-center shadow-lg hover:-translate-y-0.5">
-                <span className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition"></span>
-                <span className="relative">BOOK</span>
+      {/* 2. ELEVATED FLOATING COMPANY CONTACT CARDS (SHOWN FIRST) */}
+      <div className="-mt-16 md:-mt-24 relative z-20 max-w-6xl mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1: Telephone / WhatsApp */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group">
+            <div>
+              <div className="w-13 h-13 w-12 h-12 rounded-xl bg-orange-50 border border-orange-200/70 flex items-center justify-center text-demargo-orange mb-5 group-hover:scale-105 transition-transform">
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </div>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                Telephone & WhatsApp
+              </span>
+              <a
+                href="tel:0546478040"
+                className="text-2xl font-black text-slate-900 hover:text-demargo-orange transition mt-1.5 block tracking-tight"
+              >
+                054 647 8040
+              </a>
+              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                Available Mon – Sat: 8:00 AM – 6:00 PM for instant phone calls and direct WhatsApp messaging.
+              </p>
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-slate-100 flex flex-wrap gap-2.5">
+              <a
+                href="tel:0546478040"
+                className="flex-1 min-w-[120px] text-center px-4 py-3 bg-demargo-orange text-white text-xs font-bold rounded-xl hover:opacity-95 transition shadow-sm hover:shadow"
+              >
+                Call Now
+              </a>
+              <a
+                href="https://wa.me/233546478040?text=Hello%20Demargo%20Interior%20Contractors,%20I%20would%20like%20to%20inquire%20about%20your%20services"
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 min-w-[120px] text-center px-4 py-3 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition shadow-sm hover:shadow flex items-center justify-center gap-1.5"
+              >
+                <span>WhatsApp</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Card 2: Email Address */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200/70 flex items-center justify-center text-demargo-blue mb-5 group-hover:scale-105 transition-transform">
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                Official Email
+              </span>
+              <a
+                href="mailto:info@demargointerior.com"
+                className="text-xl font-black text-slate-900 hover:text-demargo-blue transition mt-1.5 block break-all tracking-tight"
+              >
+                info@demargointerior.com
+              </a>
+              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                Send floor plans, architectural drawings, tender briefs, or quote requests. We reply within 24 hours.
+              </p>
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-slate-100">
+              <a
+                href="mailto:info@demargointerior.com"
+                className="block text-center w-full px-4 py-3 bg-[#0f4560] text-white text-xs font-bold rounded-xl hover:bg-[#0c374d] transition shadow-sm hover:shadow"
+              >
+                Send Email
+              </a>
+            </div>
+          </div>
+
+          {/* Card 3: Office Location */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200/70 flex items-center justify-center text-amber-600 mb-5 group-hover:scale-105 transition-transform">
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                Office & Showroom
+              </span>
+              <div className="text-2xl font-black text-slate-900 mt-1.5 tracking-tight">
+                Topbase Weija, Gbawe
+              </div>
+              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                Accra – Ghana. Visit our studio for fabric catalogue consultations, blind mechanism tests, and material selection.
+              </p>
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-slate-100">
+              <a
+                href={dirHref}
+                target="_blank"
+                rel="noreferrer"
+                className="block text-center w-full px-4 py-3 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition shadow-sm hover:shadow"
+              >
+                Get Directions
               </a>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Contact info tiles */}
-      <div className="max-w-md mx-auto px-4">
-        <div className="bg-white rounded-b-2xl md:rounded-b-2xl">
-          <div className="text-center px-6 py-10">
-            <div className="mx-auto mb-3 w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center">
-              <svg className="w-6 h-6 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l7 7-7 7-7-7 7-7z" /></svg>
+      {/* 3. ADDITIONAL CONTENT (CONSULTATION & INTERACTIVE MAP) */}
+      <div className="max-w-6xl mx-auto px-4 py-16 space-y-12">
+        {/* Book a Consultation Banner */}
+        <div className="rounded-3xl bg-[#0f4560] text-white p-8 md:p-14 shadow-2xl relative overflow-hidden">
+          {/* Subtle background luxury pattern */}
+          <div className="absolute -right-10 -bottom-10 w-80 h-80 rounded-full bg-white/5 pointer-events-none" />
+          <div className="relative z-10 max-w-2xl mx-auto text-center space-y-4">
+            <span className="inline-block px-3.5 py-1 bg-white/10 text-white text-xs font-bold uppercase tracking-wider rounded-full backdrop-blur-sm">
+              Personalized Consultation
+            </span>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight">
+              Schedule a Design Consultation
+            </h2>
+            <p className="text-white/85 text-xs sm:text-sm md:text-base leading-relaxed">
+              Book a dedicated one-on-one session directly via Calendly with our lead designer for site measurements, space assessment, and custom design recommendations.
+            </p>
+            <div className="pt-2">
+              <a
+                href="https://calendly.com/gideonogunu/demargo-booking-consultation"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-demargo-orange font-bold text-white hover:bg-white hover:text-demargo-orange transition shadow-xl text-sm tracking-wide group"
+              >
+                <span>Book on Calendly</span>
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
             </div>
-            <div className="font-medium mb-1">Where are we?</div>
-            <div className="text-sm text-gray-600">{address}</div>
-            <div className="text-sm text-gray-600">Accra - Ghana</div>
-            <a href={dirHref} target="_blank" rel="noreferrer" className="inline-block mt-3 text-demargo-blue underline">Directions</a>
+          </div>
+        </div>
+
+        {/* Interactive Google Map */}
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 md:p-8 shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-2 border-b border-slate-100">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight">Our Office Location on Google Maps</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Topbase Weija, Gbawe, Accra, Ghana</p>
+            </div>
+            <a
+              href={dirHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-demargo-orange hover:text-orange-700 transition"
+            >
+              <span>Open in Google Maps</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+          <div className="rounded-2xl overflow-hidden border border-slate-200/80 shadow-inner">
+            <iframe
+              title="Demargo Location"
+              src={mapSrc}
+              className="w-full h-80 md:h-[420px]"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }
 
@@ -1765,6 +1963,7 @@ export default function App() {
               <div className="text-sm text-white/80 space-y-2">
                 <p>Tel: 0546478040</p>
                 <p>Email: <a href="mailto:info@demargointerior.com" className="hover:text-demargo-orange transition-colors">info@demargointerior.com</a></p>
+                <p>Location: Topbase Weija, Gbawe, Accra - Ghana</p>
               </div>
             </div>
           </div>

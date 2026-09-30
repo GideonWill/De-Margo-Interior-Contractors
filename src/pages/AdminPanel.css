@@ -54,8 +54,8 @@
 }
 
 
-/* Force all text in admin panel to black */
-.admin-panel * {
+/* Force all text in admin panel to black, except inside elements with .allow-custom-colors */
+.admin-panel *:not(.allow-custom-colors):not(.allow-custom-colors *) {
   color: #000000 !important;
 }
 
@@ -66,3 +66,89 @@
 .admin-loader-logo {
   border-radius: 16px !important;
 }
+
+/* ==========================================================================
+   CUSTOMER DEMOGRAPHICS EXPORT MODAL — HIGH-END ENTERPRISE UI
+   ========================================================================== */
+.admin-panel .dem-modal-overlay {
+  background-color: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.admin-panel .dem-modal-card {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.05) !important;
+}
+
+.admin-panel .dem-modal-card * {
+  color: inherit !important;
+}
+
+.admin-panel .dem-rounded-2xl {
+  border-radius: 20px !important;
+}
+
+.admin-panel .dem-rounded-xl {
+  border-radius: 14px !important;
+}
+
+.admin-panel .dem-rounded-lg {
+  border-radius: 10px !important;
+}
+
+.admin-panel .dem-rounded-md {
+  border-radius: 6px !important;
+}
+
+.admin-panel .dem-rounded-full {
+  border-radius: 9999px !important;
+}
+
+.admin-panel .dem-btn-download {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+.admin-panel .dem-btn-download:hover {
+  background-color: #047857 !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3) !important;
+}
+
+.admin-panel .dem-btn-download * {
+  color: #ffffff !important;
+}
+
+.admin-panel .dem-btn-cancel {
+  background-color: transparent !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+.admin-panel .dem-btn-cancel:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.admin-panel .dem-scope-card-active {
+  background-color: #f0fdf4 !important;
+  border: 2px solid #059669 !important;
+  border-radius: 14px !important;
+}
+
+.admin-panel .dem-scope-card-inactive {
+  background-color: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+}
+
+.admin-panel .dem-scope-card-inactive:hover {
+  border-color: #cbd5e1 !important;
+  background-color: #f8fafc !important;
+}
+

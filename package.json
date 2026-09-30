@@ -26,7 +26,8 @@
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
     "react-paystack": "^6.0.0",
-    "react-router-dom": "^6.20.1"
+    "react-router-dom": "^6.20.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",
