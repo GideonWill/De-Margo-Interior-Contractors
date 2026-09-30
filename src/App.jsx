@@ -1326,15 +1326,18 @@ function Contact() {
       {/* 2. ELEVATED FLOATING COMPANY CONTACT CARDS (SHOWN FIRST) */}
       <div className="-mt-16 md:-mt-24 relative z-20 max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: Telephone / WhatsApp */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group">
+          {/* Card 1: Telephone / WhatsApp (Theme Orange Accent) */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group relative overflow-hidden">
+            {/* Top theme color accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-demargo-orange" />
+
             <div>
-              <div className="w-13 h-13 w-12 h-12 rounded-xl bg-orange-50 border border-orange-200/70 flex items-center justify-center text-demargo-orange mb-5 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-orange-50 border border-demargo-orange/30 flex items-center justify-center text-demargo-orange mb-5 group-hover:scale-105 transition-transform">
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+              <span className="text-[11px] font-bold text-demargo-orange uppercase tracking-wider block">
                 Telephone & WhatsApp
               </span>
               <a
@@ -1344,14 +1347,14 @@ function Contact() {
                 054 647 8040
               </a>
               <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                Available Mon – Sat: 8:00 AM – 6:00 PM for instant phone calls and direct WhatsApp messaging.
+                Available Mon – Sat: 8:00 AM – 6:00 PM for phone calls and direct WhatsApp chats.
               </p>
             </div>
 
             <div className="pt-6 mt-6 border-t border-slate-100 flex flex-wrap gap-2.5">
               <a
                 href="tel:0546478040"
-                className="flex-1 min-w-[120px] text-center px-4 py-3 bg-demargo-orange text-white text-xs font-bold rounded-xl hover:opacity-95 transition shadow-sm hover:shadow"
+                className="flex-1 min-w-[120px] text-center px-4 py-3 bg-demargo-orange hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition shadow-sm hover:shadow"
               >
                 Call Now
               </a>
@@ -1359,22 +1362,25 @@ function Contact() {
                 href="https://wa.me/233546478040?text=Hello%20Demargo%20Interior%20Contractors,%20I%20would%20like%20to%20inquire%20about%20your%20services"
                 target="_blank"
                 rel="noreferrer"
-                className="flex-1 min-w-[120px] text-center px-4 py-3 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition shadow-sm hover:shadow flex items-center justify-center gap-1.5"
+                className="flex-1 min-w-[120px] text-center px-4 py-3 border-2 border-demargo-orange text-demargo-orange hover:bg-demargo-orange hover:text-white text-xs font-bold rounded-xl transition shadow-sm hover:shadow flex items-center justify-center gap-1.5"
               >
                 <span>WhatsApp</span>
               </a>
             </div>
           </div>
 
-          {/* Card 2: Email Address */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group">
+          {/* Card 2: Official Email (Theme Blue Accent) */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group relative overflow-hidden">
+            {/* Top theme color accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-demargo-blue" />
+
             <div>
-              <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200/70 flex items-center justify-center text-demargo-blue mb-5 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 border border-demargo-blue/30 flex items-center justify-center text-demargo-blue mb-5 group-hover:scale-105 transition-transform">
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+              <span className="text-[11px] font-bold text-demargo-blue uppercase tracking-wider block">
                 Official Email
               </span>
               <a
@@ -1391,23 +1397,26 @@ function Contact() {
             <div className="pt-6 mt-6 border-t border-slate-100">
               <a
                 href="mailto:info@demargointerior.com"
-                className="block text-center w-full px-4 py-3 bg-[#0f4560] text-white text-xs font-bold rounded-xl hover:bg-[#0c374d] transition shadow-sm hover:shadow"
+                className="block text-center w-full px-4 py-3 bg-demargo-blue hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-sm hover:shadow"
               >
                 Send Email
               </a>
             </div>
           </div>
 
-          {/* Card 3: Office Location */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group">
+          {/* Card 3: Office Location (Theme Navy / Orange Accent) */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group relative overflow-hidden">
+            {/* Top theme color accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-demargo-orange" />
+
             <div>
-              <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200/70 flex items-center justify-center text-amber-600 mb-5 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-orange-50 border border-demargo-orange/30 flex items-center justify-center text-demargo-orange mb-5 group-hover:scale-105 transition-transform">
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+              <span className="text-[11px] font-bold text-demargo-orange uppercase tracking-wider block">
                 Office & Showroom
               </span>
               <div className="text-2xl font-black text-slate-900 mt-1.5 tracking-tight">
@@ -1423,7 +1432,7 @@ function Contact() {
                 href={dirHref}
                 target="_blank"
                 rel="noreferrer"
-                className="block text-center w-full px-4 py-3 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition shadow-sm hover:shadow"
+                className="block text-center w-full px-4 py-3 bg-[#0f4560] hover:bg-demargo-orange text-white text-xs font-bold rounded-xl transition shadow-sm hover:shadow"
               >
                 Get Directions
               </a>
