@@ -27,3 +27,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Large media files
+public/assets/award video
+*.mp4
+*.mov

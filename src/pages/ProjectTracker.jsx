@@ -294,7 +294,7 @@ function ProjectTracker() {
         : 0
 
     return (
-        <main className="project-tracker-theme min-h-screen bg-white text-blue-900 py-16 px-4">
+        <main className="project-tracker-theme min-h-screen bg-white text-slate-900 py-16 px-4">
             <Helmet>
                 <title>Track Your Project • Demargo Interior Contractors</title>
                 <meta name="description" content="Track the real-time progress of your custom interior design, curtain sewing, and installation projects." />
@@ -309,7 +309,7 @@ function ProjectTracker() {
                     <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
                         TRACK <span className="text-gradient-ob font-black">PROJECT PROGRESS</span>
                     </h1>
-                    <p className="text-blue-700 mt-3 max-w-2xl mx-auto text-sm md:text-base">
+                    <p className="text-slate-600 mt-3 max-w-2xl mx-auto text-sm md:text-base">
                         Follow your design project step-by-step from measurement, fabric tailoring, to final neat installation.
                     </p>
                 </div>
@@ -318,8 +318,8 @@ function ProjectTracker() {
                 {!selectedProject && (
                     <div className="max-w-xl mx-auto bg-white border border-gray-200 p-8 shadow-2xl relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-2 h-full bg-demargo-orange" />
-                        <h2 className="text-xl font-bold text-blue-900 mb-2">Find Your Project</h2>
-                        <p className="text-xs text-blue-700 mb-6">
+                        <h2 className="text-xl font-bold text-black mb-2">Find Your Project</h2>
+                        <p className="text-xs text-slate-600 mb-6">
                             Enter the phone number you provided during your consultation (e.g. 0241234567).
                         </p>
 
@@ -327,7 +327,7 @@ function ProjectTracker() {
                             <div>
                                 <label htmlFor="phoneSearch" className="sr-only">Phone Number</label>
                                 <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-700 font-bold">☏</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">☏</span>
                                     <input
                                         type="tel"
                                         id="phoneSearch"
@@ -335,14 +335,14 @@ function ProjectTracker() {
                                         onChange={(e) => setPhone(e.target.value.replace(/\s+/g, ''))}
                                         required
                                         placeholder="Phone number used to register"
-                                        className="w-full pl-10 pr-4 py-4 bg-white border border-gray-300 text-blue-900 placeholder-gray-500 focus:outline-none focus:border-demargo-orange transition-colors"
+                                        className="w-full pl-10 pr-4 py-4 bg-white border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:border-demargo-orange transition-colors"
                                     />
                                 </div>
                             </div>
                             <button
                                 type="submit"
                                 disabled={searching}
-                                className="w-full py-4 bg-demargo-orange text-blue-900 font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                className="w-full py-4 bg-demargo-orange text-black font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
                             >
                                 {searching ? 'Searching Data...' : 'Lookup Project'}
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,7 +363,7 @@ function ProjectTracker() {
                 {/* Multiple Projects Selector */}
                 {!selectedProject && projects.length > 1 && (
                     <div className="max-w-2xl mx-auto mt-8 bg-white border border-gray-200 p-6">
-                        <h3 className="font-bold text-blue-900 mb-4">We found multiple projects under this number:</h3>
+                        <h3 className="font-bold text-black mb-4">We found multiple projects under this number:</h3>
                         <div className="grid gap-3">
                             {projects.map(p => (
                                 <button
@@ -372,8 +372,8 @@ function ProjectTracker() {
                                     className="w-full text-left p-4 bg-white hover:bg-gray-200 border border-gray-200 hover:border-gray-700 transition flex justify-between items-center gap-2"
                                 >
                                     <div>
-                                        <div className="font-bold text-blue-900">{p.projectTitle}</div>
-                                        <div className="text-xs text-blue-700 mt-1">Status: {STAGES.find(s => s.key === p.status)?.label || p.status}</div>
+                                        <div className="font-bold text-black">{p.projectTitle}</div>
+                                        <div className="text-xs text-slate-600 mt-1">Status: {STAGES.find(s => s.key === p.status)?.label || p.status}</div>
                                     </div>
                                     <span className="text-demargo-orange text-lg">›</span>
                                 </button>
@@ -388,8 +388,8 @@ function ProjectTracker() {
                         {/* Control Bar */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-gray-200 px-6 py-4">
                             <div>
-                                <span className="text-xs text-blue-700 uppercase tracking-widest">Client Name</span>
-                                <div className="text-lg font-bold text-blue-900">{selectedProject.clientName}</div>
+                                <span className="text-xs text-slate-500 uppercase tracking-widest">Client Name</span>
+                                <div className="text-lg font-bold text-black">{selectedProject.clientName}</div>
                             </div>
                             <div className="flex gap-3 w-full sm:w-auto">
                                 <button
@@ -408,12 +408,12 @@ function ProjectTracker() {
                                         }
                                     }}
                                     disabled={loadingProject}
-                                    className="px-4 py-2 border border-blue-900 hover:bg-blue-50 transition text-sm text-blue-900 font-bold w-full sm:w-auto text-center flex items-center justify-center gap-2"
+                                    className="px-4 py-2 border border-black hover:bg-slate-100 transition text-sm text-black font-bold w-full sm:w-auto text-center flex items-center justify-center gap-2"
                                 >
                                     {loadingProject ? (
                                         <>
                                             <svg
-                                                className="animate-spin h-5 w-5 text-blue-900 mr-2"
+                                                className="animate-spin h-5 w-5 text-black mr-2"
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
@@ -431,7 +431,7 @@ function ProjectTracker() {
                                     ) : (
                                         <>
                                             <svg
-                                                className="h-5 w-5 text-blue-900"
+                                                className="h-5 w-5 text-black"
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
@@ -453,11 +453,11 @@ function ProjectTracker() {
 
                         {/* Top Summary Banner */}
                         <div className="bg-white border border-gray-200 p-6 md:p-8 grid md:grid-cols-3 gap-6 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-demargo-orange to-demargo-blue" />
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-demargo-orange to-black" />
                             <div>
                                 <span className="text-xs text-slate-500 uppercase tracking-wider block">Project Title</span>
-                                <h2 className="text-2xl font-extrabold text-blue-900 mt-1">{selectedProject.projectTitle}</h2>
-                                <p className="text-xs text-blue-700 mt-2 line-clamp-2">{selectedProject.projectDescription}</p>
+                                <h2 className="text-2xl font-extrabold text-black mt-1">{selectedProject.projectTitle}</h2>
+                                <p className="text-xs text-slate-600 mt-2 line-clamp-2">{selectedProject.projectDescription}</p>
                             </div>
                             <div>
                                 <span className="text-xs text-slate-500 uppercase tracking-wider block">Current Status</span>
@@ -468,13 +468,13 @@ function ProjectTracker() {
                                 }`}>
                                     {STAGES[currentStageIdx]?.label}
                                 </div>
-                                <p className="text-xs text-blue-700 mt-2">{STAGES[currentStageIdx]?.desc}</p>
+                                <p className="text-xs text-slate-600 mt-2">{STAGES[currentStageIdx]?.desc}</p>
                             </div>
                             <div>
-                                <span className="text-xs text-blue-700 uppercase tracking-wider block">Payment Progress ({percentPaid}%)</span>
+                                <span className="text-xs text-slate-600 uppercase tracking-wider block">Payment Progress ({percentPaid}%)</span>
                                 <div className="w-full bg-gray-300 h-2 mt-3 relative">
                                     <div 
-                                        className="h-full bg-gradient-to-r from-demargo-orange to-demargo-blue transition-all duration-500" 
+                                        className="h-full bg-gradient-to-r from-demargo-orange to-black transition-all duration-500" 
                                         style={{ width: `${percentPaid}%` }}
                                     />
                                     {percentPaid < 60 && (
@@ -485,7 +485,7 @@ function ProjectTracker() {
                                         />
                                     )}
                                 </div>
-                                <div className="flex justify-between text-xs text-blue-700 mt-2">
+                                <div className="flex justify-between text-xs text-slate-600 mt-2">
                                     <span>GHS {selectedProject.amountPaid.toLocaleString('en-GH')} Paid</span>
                                     <span>GHS {selectedProject.balance.toLocaleString('en-GH')} Bal</span>
                                 </div>
@@ -507,7 +507,7 @@ function ProjectTracker() {
 
                         {/* STEPPER PROGRESS */}
                         <div className="bg-white border border-gray-200 p-6 md:p-8">
-                            <h3 className="font-bold text-blue-900 text-lg mb-8 uppercase tracking-wider">Project Lifecycle Progress</h3>
+                            <h3 className="font-bold text-black text-lg mb-8 uppercase tracking-wider">Project Lifecycle Progress</h3>
                             
                             <div className="relative">
                                 {/* Desktop Horizontal Timeline */}
@@ -532,7 +532,7 @@ function ProjectTracker() {
                                                 <div 
                                                     className={`w-10 h-10 flex items-center justify-center font-bold text-sm border-2 transition-colors duration-300 ${
                                                         isFinalCompleted ? 'bg-emerald-500 border-emerald-500 text-white ring-4 ring-emerald-500/20' :
-                                                        isCompleted ? 'bg-demargo-orange border-demargo-orange text-blue-900' :
+                                                        isCompleted ? 'bg-demargo-orange border-demargo-orange text-black' :
                                                         isActive ? 'bg-white border-demargo-orange text-demargo-orange ring-4 ring-demargo-orange/20' :
                                                         'bg-white border-gray-200 text-slate-600'
                                                     }`}
@@ -542,11 +542,11 @@ function ProjectTracker() {
 
                                                 <span className={`text-sm font-bold mt-4 transition-colors ${
                                                     isFinalCompleted ? 'text-emerald-600' : 
-                                                    isActive ? 'text-demargo-orange' : isUpcoming ? 'text-blue-700' : 'text-blue-900'
+                                                    isActive ? 'text-demargo-orange' : isUpcoming ? 'text-slate-400' : 'text-black'
                                                 }`}>
                                                     {s.label}
                                                 </span>
-                                                <span className="text-[10px] text-blue-700 mt-1 max-w-[140px] leading-relaxed">
+                                                <span className="text-[10px] text-slate-500 mt-1 max-w-[140px] leading-relaxed">
                                                     {s.title}
                                                 </span>
                                             </div>
@@ -573,7 +573,7 @@ function ProjectTracker() {
                                                 <div 
                                                     className={`w-6 h-6 flex items-center justify-center font-bold text-[10px] border-2 z-10 relative shrink-0 ${
                                                         isFinalCompleted ? 'bg-emerald-500 border-emerald-500 text-white ring-2 ring-emerald-500/20' :
-                                                        isCompleted ? 'bg-demargo-orange border-demargo-orange text-blue-900' :
+                                                        isCompleted ? 'bg-demargo-orange border-demargo-orange text-black' :
                                                         isActive ? 'bg-white border-demargo-orange text-demargo-orange ring-2 ring-demargo-orange/20' :
                                                         'bg-white border-gray-200 text-slate-600'
                                                     }`}
@@ -584,11 +584,11 @@ function ProjectTracker() {
                                                 <div>
                                                     <div className={`text-sm font-bold ${
                                                         isFinalCompleted ? 'text-emerald-600' :
-                                                        isActive ? 'text-demargo-orange' : isCompleted ? 'text-blue-900' : 'text-slate-600'
+                                                        isActive ? 'text-demargo-orange' : isCompleted ? 'text-black' : 'text-slate-600'
                                                     }`}>
                                                         {s.label} ({s.title})
                                                     </div>
-                                                    <p className="text-xs text-blue-700 mt-0.5">{s.desc}</p>
+                                                    <p className="text-xs text-slate-500 mt-0.5">{s.desc}</p>
                                                 </div>
                                             </div>
                                         )
@@ -602,35 +602,35 @@ function ProjectTracker() {
                                 {/* Active Step Details Card */}
                                 <div className="bg-white border border-gray-200 p-6">
                                     <h4 className="text-xs text-demargo-orange uppercase tracking-wider font-semibold mb-2">Stage Details</h4>
-                                    <h3 className="text-xl font-bold text-blue-900 mb-4">
+                                    <h3 className="text-xl font-bold text-black mb-4">
                                         Current Phase: {STAGES[currentStageIdx]?.title}
                                     </h3>
-                                                      {/* Action Box based on Status */}
+                                    {/* Action Box based on Status */}
                                     {selectedProject.status === 'measurement' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-3">
-                                            <p className="text-sm text-blue-900 leading-relaxed">
+                                            <p className="text-sm text-slate-700 leading-relaxed">
                                                 Our team is scheduled to visit your site. This allows us to take accurate window dimensions, inspect wall structures, and evaluate track fittings.
                                             </p>
                                             {selectedProject.measurementDate && (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs text-blue-900">
-                                                    <strong className="text-blue-900 block mb-1">Scheduled Site Visit Date:</strong>
+                                                <div className="bg-white p-4 border border-gray-200 text-xs text-black">
+                                                    <strong className="text-black block mb-1">Scheduled Site Visit Date:</strong>
                                                     {new Date(selectedProject.measurementDate).toLocaleString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             )}
                                             {!selectedProject.measurementDate && (
-                                                <p className="text-xs text-blue-700 italic">Site measurement details/date will be set shortly by the admin.</p>
+                                                <p className="text-xs text-slate-500 italic">Site measurement details/date will be set shortly by the admin.</p>
                                             )}
                                         </div>
                                     )}
 
                                     {selectedProject.status === 'estimate' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-4">
-                                            <p className="text-sm text-blue-900 leading-relaxed">
+                                            <p className="text-sm text-slate-700 leading-relaxed">
                                                 Your site measurements are completed and an estimate has been prepared. Please review the breakdown below. Once you make the required deposit/payment manually, the admin team will update your project to the next stage (Fabric Selection).
                                             </p>
                                             {((selectedProject.estimatePdfUrls && selectedProject.estimatePdfUrls.length > 0) || selectedProject.estimatePdfUrl) ? (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs text-blue-900 space-y-2">
-                                                    <strong className="text-blue-900 font-sans block mb-2 text-sm">Estimate Documents:</strong>
+                                                <div className="bg-white p-4 border border-gray-200 text-xs text-black space-y-2">
+                                                    <strong className="text-black font-sans block mb-2 text-sm">Estimate Documents:</strong>
                                                     <div className="flex flex-wrap gap-2">
                                                         {selectedProject.estimatePdfUrls && selectedProject.estimatePdfUrls.length > 0 ? (
                                                             selectedProject.estimatePdfUrls.map((fileItem, idx) => (
@@ -638,7 +638,7 @@ function ProjectTracker() {
                                                                     key={idx}
                                                                     type="button"
                                                                     onClick={() => viewDocument(fileItem.url)}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-demargo-orange hover:opacity-90 text-blue-900 font-bold text-[11px] transition"
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-demargo-orange hover:opacity-90 text-black font-bold text-[11px] transition"
                                                                 >
                                                                     📄 {fileItem.name}
                                                                 </button>
@@ -647,7 +647,7 @@ function ProjectTracker() {
                                                             <button 
                                                                 type="button"
                                                                 onClick={() => viewDocument(selectedProject.estimatePdfUrl)}
-                                                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-demargo-orange hover:opacity-90 text-blue-900 font-bold text-xs transition"
+                                                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-demargo-orange hover:opacity-90 text-black font-bold text-xs transition"
                                                             >
                                                                 📄 View Client Estimate PDF
                                                             </button>
@@ -655,15 +655,15 @@ function ProjectTracker() {
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <p className="text-xs text-blue-700 italic">No estimate document uploaded yet. Total amount is GHS {selectedProject.totalAmount.toLocaleString('en-GH')}.</p>
+                                                <p className="text-xs text-slate-500 italic">No estimate document uploaded yet. Total amount is GHS {selectedProject.totalAmount.toLocaleString('en-GH')}.</p>
                                             )}
 
                                             <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
                                                 <div>
-                                                    <span className="text-xs text-blue-700 uppercase block">Total Estimate Price</span>
+                                                    <span className="text-xs text-slate-500 uppercase block">Total Estimate Price</span>
                                                     <span className="text-xl font-black text-demargo-orange">GHS {selectedProject.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</span>
                                                 </div>
-                                                <div className="text-xs text-blue-700 font-medium italic">
+                                                <div className="text-xs text-slate-500 font-medium italic">
                                                     Awaiting manual payment/deposit to proceed.
                                                 </div>
                                             </div>
@@ -672,13 +672,13 @@ function ProjectTracker() {
 
                                     {selectedProject.status === 'fabric' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-4">
-                                            <p className="text-sm text-blue-900">
+                                            <p className="text-sm text-slate-700">
                                                 Fabric selection is now in progress. You can consult with our team to choose materials, colors, and textures for your curtains or blinds.
                                             </p>
                                             
                                             {selectedProject.selectedFabrics ? (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs text-blue-900">
-                                                    <strong className="text-blue-900 block mb-1">Selections Chosen:</strong>
+                                                <div className="bg-white p-4 border border-gray-200 text-xs text-black">
+                                                    <strong className="text-black block mb-1">Selections Chosen:</strong>
                                                     {selectedProject.selectedFabrics}
                                                 </div>
                                             ) : (
@@ -700,10 +700,10 @@ function ProjectTracker() {
 
                                     {selectedProject.status === 'production' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-3">
-                                            <p className="text-sm text-blue-900">
+                                            <p className="text-sm text-slate-700">
                                                 Your fabrics have been selected, and the tailoring team has officially started cutting and sewing. 
                                             </p>
-                                            <div className="bg-white p-4 border border-gray-200 text-xs text-blue-950 flex items-center gap-3">
+                                            <div className="bg-white p-4 border border-gray-200 text-xs text-black flex items-center gap-3">
                                                 <div className="w-4 h-4 rounded-full border border-demargo-orange border-t-transparent animate-spin shrink-0" />
                                                 <span>Fabric Tailoring / Stitching in progress at production center.</span>
                                             </div>
@@ -712,12 +712,12 @@ function ProjectTracker() {
 
                                     {selectedProject.status === 'installation' && (
                                         <div className="bg-white p-5 border border-gray-200 space-y-3">
-                                            <p className="text-sm text-blue-900">
+                                            <p className="text-sm text-slate-700">
                                                 Curtains/blinds have been fully sewn. Our installation team is scheduling or executing the onsite mounting.
                                             </p>
                                             {selectedProject.installationDate && (
-                                                <div className="bg-white p-4 border border-gray-200 text-xs text-blue-900">
-                                                    <strong className="text-blue-900 block mb-1">Installation Site Date:</strong>
+                                                <div className="bg-white p-4 border border-gray-200 text-xs text-black">
+                                                    <strong className="text-black block mb-1">Installation Site Date:</strong>
                                                     {new Date(selectedProject.installationDate).toLocaleString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             )}
@@ -746,14 +746,14 @@ function ProjectTracker() {
                                      )}
                                 </div>
 
-                                {/* Project Notes & Logs Card */}
+                                {/* Project Records & Logs Card */}
                                 <div className="bg-white border border-gray-200 p-6">
-                                    <h3 className="font-bold text-blue-900 text-md mb-4 uppercase tracking-wider">Project Records</h3>
+                                    <h3 className="font-bold text-black text-md mb-4 uppercase tracking-wider">Project Records</h3>
                                     <div className="grid sm:grid-cols-2 gap-4 text-xs">
                                         <div className="bg-white p-4 border border-gray-200 space-y-3">
                                             <div>
                                                 <span className="text-slate-500 uppercase block mb-1">Client Address / Site Location</span>
-                                                <span className="text-blue-900">{selectedProject.serviceAddress || 'No site location registered.'}</span>
+                                                <span className="text-black">{selectedProject.serviceAddress || 'No site location registered.'}</span>
                                             </div>
                                         </div>
 
@@ -761,7 +761,7 @@ function ProjectTracker() {
                                             <div className="flex items-center justify-between pb-3 border-b border-gray-200">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                                    <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider">Support Chat (Direct Line)</span>
+                                                    <span className="text-[11px] font-bold text-black uppercase tracking-wider">Support Chat (Direct Line)</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[9px] text-slate-500 font-semibold bg-white border border-gray-200 px-2 py-0.5 rounded-full">{(selectedProject.messages || []).length} messages</span>
@@ -791,40 +791,40 @@ function ProjectTracker() {
                                             )}
                                             
                                             {/* Messages Log area */}
-                                            <div ref={messagesListRef} className="flex-1 overflow-y-auto space-y-4 my-4 pr-1 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
+                                            <div data-lenis-prevent="true" ref={messagesListRef} className="flex-1 overflow-y-auto space-y-4 my-4 pr-1 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
                                                 {(selectedProject.messages || []).length > 0 ? (
                                                     selectedProject.messages.map((msg) => {
                                                         const isAdmin = msg.sender === 'admin'
                                                         return (
                                                             <div key={msg.id} className={`flex w-full gap-2 ${isAdmin ? 'justify-start' : 'justify-end'}`}>
                                                                 {isAdmin && (
-                                                                    <div className="w-8 h-8 rounded-full bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-blue-950 uppercase" title="Admin">
+                                                                    <div className="w-8 h-8 rounded-full bg-black text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-black uppercase" title="Admin">
                                                                         A
                                                                     </div>
                                                                 )}
                                                                 <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm text-xs relative ${
                                                                     isAdmin 
-                                                                        ? 'bg-white text-blue-950 border border-gray-200 rounded-tl-none' 
-                                                                        : 'bg-demargo-orange text-blue-950 font-semibold rounded-tr-none'
+                                                                        ? 'bg-white text-slate-900 border border-gray-200 rounded-tl-none' 
+                                                                        : 'bg-demargo-orange text-black font-semibold rounded-tr-none'
                                                                 }`}>
                                                                     <p className="whitespace-pre-line leading-relaxed">{msg.body}</p>
                                                                     {isAdmin ? (
-                                                                        <span className="block text-[9px] mt-1.5 text-right text-slate-450">
+                                                                        <span className="block text-[9px] mt-1.5 text-right text-slate-400">
                                                                             {new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}
                                                                         </span>
                                                                     ) : (
-                                                                        <div className="flex items-center justify-end gap-1 text-[9px] mt-1.5 text-blue-900/60">
+                                                                        <div className="flex items-center justify-end gap-1 text-[9px] mt-1.5 text-black/60">
                                                                             <span>{new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}</span>
                                                                             {msg.readByAdmin ? (
-                                                                                <span className="text-white font-black text-[10px] leading-none" title="Read by Admin">✓✓</span>
+                                                                                <span className="text-black font-black text-[10px] leading-none" title="Read by Admin">✓✓</span>
                                                                             ) : (
-                                                                                <span className="text-blue-900/40 font-black text-[10px] leading-none" title="Sent">✓</span>
+                                                                                <span className="text-black/40 font-black text-[10px] leading-none" title="Sent">✓</span>
                                                                             )}
                                                                         </div>
                                                                     )}
                                                                 </div>
                                                                 {!isAdmin && (
-                                                                    <div className="w-8 h-8 rounded-full bg-amber-500 text-blue-950 font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-amber-600 uppercase" title="You">
+                                                                    <div className="w-8 h-8 rounded-full bg-amber-500 text-black font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-amber-600 uppercase" title="You">
                                                                         U
                                                                     </div>
                                                                 )}
@@ -851,7 +851,7 @@ function ProjectTracker() {
                                                         }
                                                     }}
                                                     placeholder="Type a message..."
-                                                    className="flex-1 bg-transparent text-xs text-blue-900 focus:outline-none border-none outline-none"
+                                                    className="flex-1 bg-transparent text-xs text-black focus:outline-none border-none outline-none"
                                                     disabled={sendingMessage}
                                                 />
                                                 <button
@@ -861,7 +861,7 @@ function ProjectTracker() {
                                                     className="p-1 text-demargo-orange hover:text-orange-600 disabled:opacity-30 transition shrink-0"
                                                 >
                                                     <svg className="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                                     </svg>
                                                 </button>
                                             </div>
@@ -914,14 +914,14 @@ function ProjectPaymentsList({ projectId, triggerReload }) {
         fetchPayments()
     }, [projectId, triggerReload])
 
-    if (loading) return <p className="text-xs text-blue-700">Loading payment ledger...</p>
-    if (payments.length === 0) return <p className="text-xs text-blue-700 italic">No payments recorded yet.</p>
+    if (loading) return <p className="text-xs text-slate-500">Loading payment ledger...</p>
+    if (payments.length === 0) return <p className="text-xs text-slate-500 italic">No payments recorded yet.</p>
 
     return (
-        <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
+        <div data-lenis-prevent="true" className="space-y-3 max-h-56 overflow-y-auto pr-1">
             {payments.map(p => (
                 <div key={p.id} className="p-3 bg-white border border-gray-200 text-[11px] space-y-1">
-                    <div className="flex justify-between font-bold text-blue-900">
+                    <div className="flex justify-between font-bold text-black">
                         <span>GHS {p.amount.toLocaleString('en-GH')}</span>
                         {p.status === 'pending' ? (
                             <span className="text-orange-500 uppercase font-black text-[9px] tracking-widest bg-orange-500/10 px-1 border border-orange-500/15 animate-pulse">Pending</span>
@@ -933,13 +933,13 @@ function ProjectPaymentsList({ projectId, triggerReload }) {
                         <span>Ref: {p.reference?.substring(0, 14)}</span>
                         <span>{p.paidAt ? new Date(p.paidAt).toLocaleString('en-GH') : ''}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] text-blue-700 capitalize">
+                    <div className="flex justify-between items-center text-[10px] text-slate-600 capitalize">
                         <span>Method: {p.paymentMethod?.replace('_', ' ')}</span>
                         {p.receiptUrl && (
                             <button 
                                 type="button"
                                 onClick={() => viewDocument(p.receiptUrl)} 
-                                className="text-blue-600 hover:underline font-semibold text-[10px]"
+                                className="text-demargo-orange hover:underline font-semibold text-[10px]"
                             >
                                 📄 View Receipt
                             </button>

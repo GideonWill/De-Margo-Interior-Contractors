@@ -4,7 +4,8 @@ export default {
     extend: {
       colors: {
         'demargo-orange': '#ff7a00',
-        'demargo-blue': '#0b63d6'
+        'demargo-black': '#000000',
+        'demargo-blue': '#000000' // mapped to black for complete orange & black theme
       }
     }
   },

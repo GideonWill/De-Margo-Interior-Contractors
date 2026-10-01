@@ -289,7 +289,7 @@ function FabricCollection() {
           <span>●</span> {activeTab === 'fabrics' ? 'Premium Curtains & Sheers' : 'Custom Window Blinds'}
         </div>
         <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 uppercase tracking-tight">
-          <span className="text-demargo-orange">Demargo</span> <span className="text-demargo-blue">Collections</span>
+          <span className="text-demargo-orange">Demargo</span> <span className="text-black">Collections</span>
         </h1>
         <p className="max-w-2xl mx-auto text-gray-600 text-xs md:text-sm leading-relaxed">
           {activeTab === 'fabrics' 
@@ -322,8 +322,8 @@ function FabricCollection() {
           }}
           className={`flex-1 max-w-[220px] py-3 text-xs font-black uppercase tracking-wider transition-all duration-300 border ${
             activeTab === 'blinds'
-              ? 'bg-demargo-blue border-demargo-blue text-white shadow-lg'
-              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-demargo-blue shadow-sm'
+              ? 'bg-black border-black text-white shadow-lg'
+              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-black shadow-sm'
           }`}
         >
           📐 Window Blinds ({blinds.length})
@@ -516,6 +516,7 @@ function FabricCollection() {
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
               onClick={(e) => e.stopPropagation()}
               className="bg-white border border-slate-800 max-w-3xl w-full flex flex-col md:flex-row max-h-[90vh] overflow-y-auto shadow-2xl relative"
+              data-lenis-prevent="true"
             >
               {/* Close Button */}
               <button 

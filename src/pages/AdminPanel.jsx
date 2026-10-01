@@ -963,7 +963,7 @@ function AdminPanel() {
                 <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-2 h-full bg-demargo-orange" />
                     <div className="text-center mb-6">
-                        <h1 className="text-2xl font-bold tracking-wider text-demargo-blue uppercase">Demargo Admin</h1>
+                        <h1 className="text-2xl font-bold tracking-wider text-white uppercase">Demargo Admin</h1>
                         <p className="text-xs text-slate-500 mt-1">Please enter passcode to access project database.</p>
                     </div>
 
@@ -1133,7 +1133,7 @@ function AdminPanel() {
                     </div>
                     <div className="bg-slate-900 border border-slate-850 p-4 rounded-3xl shadow-sm">
                         <span className="text-[10px] text-slate-500 uppercase block">Active Projects</span>
-                        <span className="text-2xl font-black text-demargo-blue block mt-1">{activeProjects.length}</span>
+                        <span className="text-2xl font-black text-demargo-orange block mt-1">{activeProjects.length}</span>
                     </div>
                     <div className="bg-slate-900 border border-slate-850 p-4">
                         <span className="text-[10px] text-slate-500 uppercase block">Awaiting Estimate Review</span>
@@ -1689,7 +1689,7 @@ function AdminPanel() {
                                 {/* Save Button */}
                                 <button
                                     type="submit"
-                                    className="w-full py-3 bg-demargo-blue hover:opacity-90 text-white font-bold transition uppercase tracking-wider text-xs"
+                                    className="w-full py-3 bg-demargo-orange hover:bg-orange-600 text-black font-extrabold transition uppercase tracking-wider text-xs"
                                 >
                                     Save All Changes
                                 </button>
@@ -1849,17 +1849,17 @@ function AdminPanel() {
                                                     )}
                                                     <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm text-xs relative ${
                                                         isAdmin 
-                                                            ? 'bg-demargo-orange text-blue-950 font-semibold rounded-tr-none' 
+                                                            ? 'bg-demargo-orange text-black font-semibold rounded-tr-none' 
                                                             : 'bg-slate-900 text-slate-100 border border-slate-800 rounded-tl-none'
                                                     }`}>
                                                         <p className="whitespace-pre-line leading-relaxed">{msg.body}</p>
                                                         {isAdmin ? (
-                                                            <div className="flex items-center justify-end gap-1 text-[8px] mt-1.5 text-blue-950/60">
+                                                            <div className="flex items-center justify-end gap-1 text-[8px] mt-1.5 text-black/60">
                                                                 <span>{new Date(msg.createdAt).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' })}</span>
                                                                 {msg.readByClient ? (
-                                                                    <span className="text-white font-black text-[9px] leading-none" title="Read by Client">✓✓</span>
+                                                                    <span className="text-black font-black text-[9px] leading-none" title="Read by Client">✓✓</span>
                                                                 ) : (
-                                                                    <span className="text-blue-950/40 font-black text-[9px] leading-none" title="Sent">✓</span>
+                                                                    <span className="text-black/40 font-black text-[9px] leading-none" title="Sent">✓</span>
                                                                 )}
                                                             </div>
                                                         ) : (
@@ -1869,7 +1869,7 @@ function AdminPanel() {
                                                         )}
                                                     </div>
                                                     {isAdmin && (
-                                                        <div className="w-7 h-7 rounded-full bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-blue-950" title="Admin">
+                                                        <div className="w-7 h-7 rounded-full bg-black text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm border border-slate-700" title="Admin">
                                                             A
                                                         </div>
                                                     )}
@@ -2190,7 +2190,7 @@ function AdminPanel() {
                                         </div>
                                         <div className="bg-white p-2.5 dem-rounded-lg border border-slate-200/70 shadow-2xs">
                                             <span className="text-[10px] text-slate-500 font-medium block uppercase tracking-wide">Locations</span>
-                                            <span className="text-base font-bold text-blue-600 mt-0.5 block">{areasSet.size} areas</span>
+                                            <span className="text-base font-bold text-demargo-orange mt-0.5 block">{areasSet.size} areas</span>
                                         </div>
                                         <div className="bg-white p-2.5 dem-rounded-lg border border-slate-200/70 shadow-2xs">
                                             <span className="text-[10px] text-slate-500 font-medium block uppercase tracking-wide">Collected</span>
@@ -2235,12 +2235,12 @@ function AdminPanel() {
                                 <div className="bg-white border border-slate-200/90 p-3.5 dem-rounded-xl space-y-1.5 shadow-2xs">
                                     <div className="flex items-center justify-between">
                                         <div className="font-bold text-slate-900 flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <svg className="w-4 h-4 text-demargo-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                             </svg>
                                             <span>Sheet 2: Demographic Insights</span>
                                         </div>
-                                        <span className="text-[10px] font-semibold px-2 py-0.5 bg-blue-50 text-blue-700 dem-rounded-md">
+                                        <span className="text-[10px] font-semibold px-2 py-0.5 bg-orange-50 text-demargo-orange dem-rounded-md">
                                             6 Tables
                                         </span>
                                     </div>

@@ -7,6 +7,7 @@ import { Helmet } from 'react-helmet'
 import ProjectTracker from './pages/ProjectTracker'
 import AdminPanel from './pages/AdminPanel'
 import FabricCollection from './pages/FabricCollection'
+import NewsFeed, { NEWS_ARTICLES } from './pages/NewsFeed'
 
 function Seo({ title, description, image, type }) {
   const loc = window.location.pathname
@@ -144,20 +145,24 @@ function Navbar() {
     }
   }, [])
   const linkClass = ({ isActive }) =>
-    `px-2 py-1 rounded transition-colors ${isActive ? 'text-demargo-orange' : 'hover:text-demargo-orange'}`
+    `px-2 py-1 transition-colors ${isActive ? 'text-demargo-orange font-bold' : 'text-white/90 hover:text-demargo-orange'}`
   return (
-      <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur shadow' : 'bg-transparent'}`}>
-      <nav className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 bg-[#000000] ${scrolled ? 'shadow-2xl border-b border-[#181919]' : 'border-b border-[#181919]/60'}`}>
+      <nav className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <img src="/assets/Demargo%20Logo.jpg" alt="Demargo" className="h-8 w-auto" />
+          <img src="/assets/Demargo%20Logo.jpg" alt="Demargo" className="h-9 w-auto object-contain block" />
         </Link>
-        <button aria-label="Open menu" className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded border text-gray-700" onClick={() => setOpen(o => !o)}>
+        <button
+          aria-label="Open menu"
+          className="md:hidden inline-flex items-center justify-center w-10 h-10 border border-white/20 text-white hover:text-demargo-orange hover:border-demargo-orange transition"
+          onClick={() => setOpen(o => !o)}
+        >
           <span className="sr-only">Toggle navigation</span>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
             <path fillRule="evenodd" d="M3.75 6.75a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zm0 5.25c0-.414.336-.75.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zm.75 4.5a.75.75 0 000 1.5h15a.75.75 0 000-1.5h-15z" clipRule="evenodd" />
           </svg>
         </button>
-        <ul className="hidden md:flex gap-6 items-center text-sm">
+        <ul className="hidden md:flex gap-5 lg:gap-6 items-center text-sm">
           <li><NavLink to="/" className={linkClass}>Home</NavLink></li>
           <li><NavLink to="/portfolio" className={linkClass}>Portfolio</NavLink></li>
           <li><NavLink to="/services" className={linkClass}>Services</NavLink></li>
@@ -165,14 +170,15 @@ function Navbar() {
           <li><NavLink to="/clientele" className={linkClass}>Clientele</NavLink></li>
           <li><NavLink to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
           <li><NavLink to="/awards" className={linkClass}>Awards</NavLink></li>
+          <li><NavLink to="/news" className={linkClass}>News</NavLink></li>
           <li><NavLink to="/track" className={linkClass}>Track Project</NavLink></li>
-          <li><NavLink to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white transition-colors ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
+          <li><NavLink to="/contact" className={({ isActive }) => `px-3.5 py-2 rounded-md font-semibold text-white transition-all shadow-sm ${isActive ? 'bg-black text-demargo-orange border border-demargo-orange' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
         </ul>
       </nav>
       {open && (
-        <div className="md:hidden border-t bg-white">
-          <div className="max-w-6xl mx-auto px-4 py-3">
-            <ul className="grid gap-2 text-sm">
+        <div className="md:hidden border-t border-[#181919] bg-[#000000] text-white">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <ul className="grid gap-2.5 text-sm">
               <li><NavLink onClick={() => setOpen(false)} to="/" className={linkClass}>Home</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/portfolio" className={linkClass}>Portfolio</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/services" className={linkClass}>Services</NavLink></li>
@@ -180,9 +186,10 @@ function Navbar() {
               <li><NavLink onClick={() => setOpen(false)} to="/clientele" className={linkClass}>Clientele</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/testimonials" className={linkClass}>Testimonials</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/awards" className={linkClass}>Awards</NavLink></li>
+              <li><NavLink onClick={() => setOpen(false)} to="/news" className={linkClass}>News & Happenings</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/about" className={linkClass}>About</NavLink></li>
               <li><NavLink onClick={() => setOpen(false)} to="/track" className={linkClass}>Track Project</NavLink></li>
-              <li><NavLink onClick={() => setOpen(false)} to="/contact" className={({ isActive }) => `px-3 py-2 rounded-md text-white inline-block ${isActive ? 'bg-demargo-blue' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
+              <li><NavLink onClick={() => setOpen(false)} to="/contact" className={({ isActive }) => `px-3.5 py-2 rounded-md font-semibold text-white inline-block ${isActive ? 'bg-black text-demargo-orange border border-demargo-orange' : 'bg-demargo-orange hover:opacity-90'}`}>Contact</NavLink></li>
             </ul>
           </div>
         </div>
@@ -349,53 +356,48 @@ function Home() {
         </div>
       </section>
 
-      {/* AWARD HERO - Classy spotlight section (moved below main hero) */}
+      {/* AWARD HERO 2026 - Edge-to-edge hero image touching left and right walls of the page */}
       <motion.section
-        initial={{ opacity: 0, y: 50 }}
+        initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative h-[76vh] md:h-[88vh] flex items-center overflow-hidden"
+        className="relative w-full overflow-hidden bg-white border-b border-slate-200"
       >
-        <img
-          src="/assets/award.jpg"
-          alt="Award Certificate - Ghana Armed Forces Staff College"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          ref={el => (revealRefs.current[11] = el)}
-          style={{ transform: 'translateY(0px) scale(1.05)' }}
-          data-parallax
-        />
-        <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-demargo-blue/40 to-demargo-orange/40" />
-        <div className="relative z-10 max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center w-full">
-          <div className="text-white">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-sm">
-              <span>🏆</span>
-              <span className="tracking-wide">Award & Recognition</span>
-            </div>
-            <h2 className="mt-4 text-3xl md:text-5xl font-extrabold leading-tight max-w-2xl">
-              Excellence in Interior Design Services
-            </h2>
-            <p className="mt-4 text-white/85 max-w-xl">
-              Honored by the Ghana Armed Forces Staff College for outstanding interior design and renovation services.
-            </p>
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <Link to="/awards" className="btn-primary btn-elevate">View Award</Link>
-              <Link to="/contact" className="btn-ghost btn-elevate">Start Your Project</Link>
-            </div>
-            <div className="mt-6 flex items-center gap-3 text-white/80">
-              <img src="/assets/GAF.jpg" alt="GAF Logo" className="w-10 h-10 rounded-full object-contain bg-white/90 p-1" />
-              <div className="text-sm">
-                <div className="font-semibold">Ghana Armed Forces Staff College</div>
-                <div>2024 • Government Service Excellence</div>
-              </div>
-            </div>
-          </div>
-          <div className="hidden md:flex justify-end">
-            <div className="panel-glass p-3 rounded-2xl max-w-md w-full">
-              <div className="aspect-[4/5] rounded-xl overflow-hidden bg-black/20">
-                <img src="/assets/award.jpg" alt="Award Certificate" className="w-full h-full object-cover" />
-              </div>
-            </div>
+        {/* Full-bleed edge-to-edge award hero image touching both walls */}
+        <div className="w-full relative overflow-hidden bg-black">
+          <picture className="w-full block">
+            {/* Mobile portrait view (< 768px): Trophy Award visual */}
+            <source
+              media="(max-width: 767px)"
+              srcSet="/assets/AwardWinning%20Interior%20Design%20Trophy.png"
+            />
+            {/* Desktop landscape view (>= 768px): Full wide edge-to-edge banner */}
+            <img
+              src="/assets/Award%20Winning%20Interior%20Design%202026.png"
+              alt="Award Winning Interior Design Company of the Year 2026 - Ghana Business Standard Awards"
+              className="w-full h-auto block"
+              loading="eager"
+            />
+          </picture>
+        </div>
+
+        {/* Action CTAs */}
+        <div className="max-w-6xl mx-auto px-4 py-8 md:py-10">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to="/contact" className="btn-primary text-base font-semibold px-6 py-3 flex items-center gap-2 shadow-md hover:opacity-95">
+              <span>Start Your Award-Winning Project</span>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            </Link>
+            <Link to="/news" className="inline-flex items-center justify-center px-6 py-3 border-2 border-demargo-orange text-white bg-black hover:bg-demargo-orange hover:text-black transition font-semibold text-base shadow-sm">
+              <span>Demargo News & Press</span>
+            </Link>
+            <Link to="/awards" className="inline-flex items-center justify-center px-6 py-3 border-2 border-black text-black bg-white hover:bg-black hover:text-white transition font-semibold text-base shadow-sm">
+              <span>View All Citations & Awards</span>
+            </Link>
+            <Link to="/portfolio" className="inline-flex items-center justify-center px-6 py-3 border border-slate-300 bg-slate-50 text-slate-800 hover:bg-slate-100 transition font-semibold text-base shadow-sm">
+              <span>Explore Portfolio</span>
+            </Link>
           </div>
         </div>
       </motion.section>
@@ -411,20 +413,20 @@ function Home() {
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <div className="text-demargo-orange font-semibold tracking-wide">ABOUT DEMARGO</div>
-            <h2 className="mt-2 text-4xl md:text-5xl font-extrabold text-slate-900">Crafting Dreams Into <span className="text-demargo-blue">Reality</span></h2>
+            <h2 className="mt-2 text-4xl md:text-5xl font-extrabold text-slate-900">Crafting Dreams Into <span className="text-black">Reality</span></h2>
             <p className="mt-4 text-gray-700">Since 2018, we've been transforming spaces with premium interior design solutions. Our expertise in curtains, lighting, and bedroom styling has made us the preferred choice for discerning clients across the region.</p>
             <div className="mt-6 grid sm:grid-cols-2 gap-4">
               <div className="p-6 rounded-2xl bg-orange-50">
                 <div className="text-3xl font-extrabold text-demargo-orange">4000+</div>
                 <div className="text-gray-700">Projects Completed</div>
               </div>
-              <div className="p-6 rounded-2xl bg-blue-50">
-                <div className="text-3xl font-extrabold text-demargo-blue">8+</div>
+              <div className="p-6 rounded-2xl bg-slate-100">
+                <div className="text-3xl font-extrabold text-black">8+</div>
                 <div className="text-gray-700">Years of Excellence</div>
               </div>
             </div>
             <div className="mt-6">
-              <Link to="/about" className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-demargo-blue text-white">Learn More About Us
+              <Link to="/about" className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-black text-white hover:bg-slate-800 transition">Learn More About Us
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5l7 7-7 7" /></svg>
               </Link>
             </div>
@@ -491,7 +493,6 @@ function Home() {
         className="max-w-6xl mx-auto px-4 py-16"
       >
         <div className="flex items-center justify-center gap-2 text-demargo-orange">
-          <span>👁️</span>
           <span className="font-semibold">PORTFOLIO SHOWCASE</span>
         </div>
         <h2 className="text-4xl md:text-5xl font-extrabold text-center mt-2">Recent Projects</h2>
@@ -533,7 +534,7 @@ function Home() {
                   ))}
                 </div>
                 <div className="mt-6">
-                  <Link to="/portfolio" className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-demargo-blue text-white hover:opacity-90 active:scale-[.98]">View Full Project
+                  <Link to="/portfolio" className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-black text-white hover:bg-slate-800 transition active:scale-[.98]">View Full Project
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5l7 7-7 7" /></svg>
                   </Link>
                 </div>
@@ -581,6 +582,82 @@ function Home() {
               </motion.figure>
             ))}
           </div>
+        </div>
+      </motion.section>
+
+      {/* LATEST NEWS & HAPPENINGS PREVIEW */}
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="max-w-6xl mx-auto px-4 py-16"
+      >
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 text-[10px] uppercase tracking-widest text-demargo-orange font-bold shadow-xs">
+              <span>●</span> Demargo Journal & Newsroom
+            </div>
+            <h2 className="text-3xl md:text-5xl font-extrabold mt-3">
+              <span className="text-demargo-orange">Latest News</span> <span className="text-black">& Happenings</span>
+            </h2>
+            <p className="text-slate-600 mt-2 text-sm max-w-xl">
+              From winning Interior Design Company of the Year 2026 to our latest luxury drapery projects and design guides.
+            </p>
+          </div>
+          <Link
+            to="/news"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-black hover:bg-slate-900 text-demargo-orange font-bold text-xs uppercase tracking-wider transition shadow-sm w-fit"
+          >
+            <span>Explore All News</span>
+            <span>→</span>
+          </Link>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {NEWS_ARTICLES.slice(0, 3).map((item) => (
+            <article
+              key={item.id}
+              className="bg-white border border-slate-200 hover:border-black flex flex-col justify-between transition-all duration-300 shadow-xs hover:shadow-lg group"
+            >
+              <div>
+                <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute top-3 left-3 bg-black/90 text-white font-bold text-[9px] uppercase tracking-wider px-2 py-0.5">
+                    {item.category}
+                  </div>
+                </div>
+                <div className="p-5 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>{item.date}</span>
+                    <span>{item.readTime}</span>
+                  </div>
+                  <h3 className="font-extrabold text-base text-slate-900 group-hover:text-demargo-orange transition line-clamp-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                    {item.excerpt}
+                  </p>
+                </div>
+              </div>
+              <div className="p-5 pt-0 border-t border-slate-100 flex items-center justify-between">
+                <Link
+                  to="/news"
+                  state={{ articleId: item.id }}
+                  className="text-xs font-bold text-black hover:text-demargo-orange flex items-center gap-1 transition"
+                >
+                  <span>Read Article</span>
+                  <span className="text-sm font-black text-demargo-orange">›</span>
+                </Link>
+                <span className="text-[10px] text-slate-400 font-semibold">{item.author}</span>
+              </div>
+            </article>
+          ))}
         </div>
       </motion.section>
 
@@ -663,7 +740,7 @@ function Services() {
               style={{ transformOrigin: 'bottom center' }}
               className="bg-white rounded-2xl p-6 shadow-sm perspective-card"
             >
-              <div className="text-demargo-blue mb-2">{s.icon}</div>
+              <div className="text-demargo-orange mb-2">{s.icon}</div>
               <h3 className="font-semibold">{s.title}</h3>
               <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
             </motion.article>
@@ -682,7 +759,7 @@ function Services() {
               style={{ transformOrigin: 'bottom center' }}
               className="bg-white rounded-2xl p-6 shadow-sm perspective-card"
             >
-              <div className="text-demargo-blue mb-2">{s.icon}</div>
+              <div className="text-demargo-orange mb-2">{s.icon}</div>
               <h3 className="font-semibold">{s.title}</h3>
               <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
             </motion.article>
@@ -701,7 +778,7 @@ function Services() {
               style={{ transformOrigin: 'bottom center' }}
               className="bg-white rounded-2xl p-6 shadow-sm"
             >
-              <div className="text-demargo-blue mb-2">{s.icon}</div>
+              <div className="text-demargo-orange mb-2">{s.icon}</div>
               <h3 className="font-semibold">{s.title}</h3>
               <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
             </motion.article>
@@ -762,7 +839,7 @@ function InteriorDesign() {
       <div className="mt-10 grid md:grid-cols-3 gap-6">
         {allServices.filter(s => ['Interior Design', 'Curtains and Blinds Installation', 'Lighting Design'].includes(s.title)).map((s, i) => (
           <article key={`id-s-${i}`} className="bg-white rounded-2xl p-6 shadow-sm">
-            <div className="text-demargo-blue mb-2">{s.icon}</div>
+            <div className="text-demargo-orange mb-2">{s.icon}</div>
             <h2 className="font-semibold">{s.title}</h2>
             <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
           </article>
@@ -795,7 +872,7 @@ function Rendering3D() {
               'Fast iterations',
               'Handover-ready assets'
             ].map((b, i) => (
-              <li key={`r-b-${i}`} className="p-3 rounded-lg bg-blue-50">{b}</li>
+              <li key={`r-b-${i}`} className="p-3 rounded-lg bg-orange-50">{b}</li>
             ))}
           </ul>
           <div className="mt-6">
@@ -807,7 +884,7 @@ function Rendering3D() {
       <div className="mt-10 grid md:grid-cols-3 gap-6">
         {allServices.filter(s => s.title === '3D Rendering and Visualization').map((s, i) => (
           <article key={`rd-s-${i}`} className="bg-white rounded-2xl p-6 shadow-sm">
-            <div className="text-demargo-blue mb-2">{s.icon}</div>
+            <div className="text-demargo-orange mb-2">{s.icon}</div>
             <h2 className="font-semibold">{s.title}</h2>
             <p className="text-sm text-gray-600 mt-2">{s.desc}</p>
           </article>
@@ -853,14 +930,14 @@ function Clientele() {
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Clientele" description="Some of the clients Demargo Interior Contractors has served." />
       <h1 className="text-3xl md:text-5xl font-extrabold mb-2 text-center">
-        <span className="text-demargo-orange">Our</span> <span className="text-demargo-blue">Esteemed Clients</span>
+        <span className="text-demargo-orange">Our</span> <span className="text-black">Esteemed Clients</span>
       </h1>
       <p className="text-center text-gray-600 mb-8 max-w-3xl mx-auto">A selection of brands, residences, and developments we've had the privilege to style and fit with premium interior solutions.</p>
 
       {/* Government Projects */}
       <div className="mb-16">
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
-          <span className="text-demargo-orange">Government</span> <span className="text-demargo-blue">Projects</span>
+          <span className="text-demargo-orange">Government</span> <span className="text-black">Projects</span>
         </h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6 card-perspective-container">
           {governmentProjects.map((c, i) => (
@@ -883,7 +960,7 @@ function Clientele() {
       {/* Residential Projects */}
       <div className="mb-16">
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
-          <span className="text-demargo-orange">Residential</span> <span className="text-demargo-blue">Projects</span>
+          <span className="text-demargo-orange">Residential</span> <span className="text-black">Projects</span>
         </h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6 card-perspective-container">
           {residentialProjects.map((c, i) => (
@@ -906,7 +983,7 @@ function Clientele() {
       {/* Commercial Projects */}
       <div>
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
-          <span className="text-demargo-orange">Commercial</span> <span className="text-demargo-blue">Projects</span>
+          <span className="text-demargo-orange">Commercial</span> <span className="text-black">Projects</span>
         </h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6 card-perspective-container">
           {commercialProjects.map((c, i) => (
@@ -934,7 +1011,7 @@ function About() {
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="About" description="About Demargo Interior Contractors - mission, vision, and company story." />
       <h1 className="text-3xl md:text-4xl font-extrabold mb-6 text-center">
-        <span className="text-demargo-orange">About</span> <span className="text-demargo-blue">Demargo</span>
+        <span className="text-demargo-orange">About</span> <span className="text-black">Demargo</span>
       </h1>
       <div className="grid md:grid-cols-2 gap-8 items-center">
         <div className="grid grid-cols-2 gap-3">
@@ -956,7 +1033,7 @@ function About() {
           </div>
           <div className="mt-6 grid sm:grid-cols-2 gap-4">
             {['Insured & Certified', 'Dedicated Project Managers', 'Trusted Vendor Network', 'After‑service Support'].map((b, i) => (
-              <div key={i} className="p-4 rounded-lg bg-gradient-to-r from-demargo-orange/10 to-demargo-blue/10 border">{b}</div>
+              <div key={i} className="p-4 rounded-lg bg-gradient-to-r from-demargo-orange/10 to-black/10 border">{b}</div>
             ))}
           </div>
         </div>
@@ -1024,12 +1101,22 @@ function Awards() {
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Awards & Citations" description="Recognition and awards received by Demargo Interior Contractors for excellence in interior design and construction." />
       <h1 className="text-3xl md:text-5xl font-extrabold mb-3 text-center">
-        <span className="text-demargo-orange">Awards &</span> <span className="text-demargo-blue">Citations</span>
+        <span className="text-demargo-orange">Awards &</span> <span className="text-black">Citations</span>
       </h1>
       <p className="text-center text-gray-600 mb-10 max-w-3xl mx-auto">Recognition for our commitment to excellence in interior design, craftsmanship, and client satisfaction across Ghana and Africa.</p>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {[
+          {
+            title: "Outstanding Interior Design Company of the Year",
+            organization: "Ghana Business Standard Awards",
+            year: "2026",
+            description: "Awarded to De Margo Interior Contractors for exceptional craftsmanship, standard-setting execution, and leadership in residential and corporate interior transformation across Ghana.",
+            category: "National Industry Leadership",
+            logo: "/assets/AwardWinning%20Interior%20Design%20Trophy.png",
+            awardImage: "/assets/AwardWinning%20Interior%20Design%20Trophy.png",
+            extraImages: []
+          },
           {
             title: "Excellence in Interior Design Services",
             organization: "Ghana Armed Forces Staff College",
@@ -1052,7 +1139,7 @@ function Awards() {
                 <img src={award.logo} alt={award.organization} className="w-12 h-12 object-contain mr-3" />
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{award.title}</h3>
-                  <div className="text-demargo-blue font-semibold">{award.organization}</div>
+                  <div className="text-black font-semibold">{award.organization}</div>
                 </div>
               </div>
               <p className="text-gray-600 text-sm leading-relaxed">{award.description}</p>
@@ -1061,7 +1148,7 @@ function Awards() {
         ))}
       </div>
 
-      <div className="mt-16 bg-gradient-to-r from-demargo-orange/10 to-demargo-blue/10 rounded-2xl p-8">
+      <div className="mt-16 bg-gradient-to-r from-demargo-orange/10 to-black/10 rounded-2xl p-8">
         <h2 className="text-2xl font-bold text-center mb-6">Our Commitment to Excellence</h2>
         <div className="grid md:grid-cols-3 gap-6 text-center">
           <div>
@@ -1069,7 +1156,7 @@ function Awards() {
             <div className="text-gray-700">Years of Excellence</div>
           </div>
           <div>
-            <div className="text-3xl font-extrabold text-demargo-blue mb-2">4000+</div>
+            <div className="text-3xl font-extrabold text-black mb-2">4000+</div>
             <div className="text-gray-700">Projects Completed</div>
           </div>
           <div>
@@ -1084,17 +1171,29 @@ function Awards() {
           <div className="max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
             <div className="relative w-full rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row max-h-[90vh] overflow-y-auto overscroll-contain touch-pan-y">
               {/* Award Images on Left */}
-              <div className="w-full md:w-1/2 p-4 bg-gradient-to-br from-slate-50 to-white">
-                <div className="flex flex-col md:grid md:grid-cols-2 gap-4 items-start min-w-0 max-h-[80vh] md:max-h-[85vh] overflow-y-auto pr-1">
-                  {lightbox.award?.extraImages?.map((img, idx) => (
-                    <div key={idx} className="w-full rounded-lg bg-white shadow flex items-center justify-center">
-                      <img src={img} alt="Award Additional" className="w-full h-auto object-contain" />
+              <div className="w-full md:w-1/2 p-4 md:p-6 bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
+                {lightbox.award?.extraImages && lightbox.award.extraImages.length > 0 ? (
+                  <div className="flex flex-col md:grid md:grid-cols-2 gap-4 items-start min-w-0 max-h-[80vh] md:max-h-[85vh] overflow-y-auto pr-1 w-full">
+                    {lightbox.award.extraImages
+                      .filter(img => img !== lightbox.src)
+                      .map((img, idx) => (
+                        <div key={idx} className="w-full rounded-xl bg-white shadow-md flex items-center justify-center overflow-hidden border border-slate-100">
+                          <img src={img} alt="Award Additional" className="w-full h-auto object-contain" />
+                        </div>
+                      ))}
+                    <div className="w-full rounded-xl bg-white shadow-md flex items-center justify-center overflow-hidden border border-slate-100">
+                      <img src={lightbox.src} alt="Award Certificate" className="w-full h-auto object-contain" />
                     </div>
-                  ))}
-                  <div className="w-full rounded-lg bg-white shadow flex items-center justify-center">
-                    <img src={lightbox.src} alt="Award Certificate" className="w-full h-auto object-contain" />
                   </div>
-                </div>
+                ) : (
+                  <div className="w-full h-full max-h-[82vh] flex items-center justify-center rounded-2xl bg-white p-2 md:p-4 shadow-xl border border-slate-200/80">
+                    <img
+                      src={lightbox.src}
+                      alt={lightbox.award?.title || "Award Trophy"}
+                      className="w-full h-auto max-h-[78vh] object-contain rounded-xl block"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Description on Right */}
@@ -1114,8 +1213,8 @@ function Awards() {
                     <div>
                       <div className="text-demargo-orange text-xs font-bold uppercase tracking-wider mb-3">{lightbox.award.category}</div>
                       <h2 className="text-3xl font-extrabold text-gray-900 leading-tight mb-4">{lightbox.award.title}</h2>
-                      <div className="text-demargo-blue text-lg font-bold mb-6">{lightbox.award.organization}</div>
-                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-demargo-orange/10 to-demargo-blue/10 rounded-lg">
+                      <div className="text-black text-lg font-bold mb-6">{lightbox.award.organization}</div>
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-demargo-orange/10 to-black/10 rounded-lg">
                         <span className="text-sm font-bold text-gray-700">Year:</span>
                         <span className="text-lg font-extrabold text-demargo-orange">{lightbox.award.year}</span>
                       </div>
@@ -1150,7 +1249,7 @@ function Testimonials() {
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Testimonials" description="What our clients say about Demargo Interior Contractors - real testimonials from satisfied customers." />
       <h1 className="text-3xl md:text-5xl font-extrabold mb-3 text-center">
-        <span className="text-demargo-orange">What They</span> <span className="text-demargo-blue">Say</span>
+        <span className="text-demargo-orange">What They</span> <span className="text-black">Say</span>
       </h1>
       <p className="text-center text-gray-600 mb-10 max-w-3xl mx-auto">Don't just take our word for it. Here's what our satisfied clients have to say about their Demargo experience.</p>
 
@@ -1298,27 +1397,6 @@ function Contact() {
               Connect directly with our team for custom automated curtains, premium blinds, architectural 3D visualizations, and complete interior makeovers across Ghana.
             </p>
 
-            {/* Value Highlights Strip */}
-            <div className="pt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-white/90">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15">
-                <svg className="w-4 h-4 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Free On-Site Assessment</span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15">
-                <svg className="w-4 h-4 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Showroom in Topbase Weija, Gbawe</span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15">
-                <svg className="w-4 h-4 text-demargo-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Fast 24h Response</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -1328,9 +1406,6 @@ function Contact() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1: Telephone / WhatsApp (Theme Orange Accent) */}
           <div className="bg-white border border-slate-200/90 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group relative overflow-hidden">
-            {/* Top theme color accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-demargo-orange" />
-
             <div>
               <div className="w-12 h-12 rounded-xl bg-orange-50 border border-demargo-orange/30 flex items-center justify-center text-demargo-orange mb-5 group-hover:scale-105 transition-transform">
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1369,23 +1444,20 @@ function Contact() {
             </div>
           </div>
 
-          {/* Card 2: Official Email (Theme Blue Accent) */}
+          {/* Card 2: Official Email (Theme Black Accent) */}
           <div className="bg-white border border-slate-200/90 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group relative overflow-hidden">
-            {/* Top theme color accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-demargo-blue" />
-
             <div>
-              <div className="w-12 h-12 rounded-xl bg-blue-50 border border-demargo-blue/30 flex items-center justify-center text-demargo-blue mb-5 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-900 mb-5 group-hover:scale-105 transition-transform">
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <span className="text-[11px] font-bold text-demargo-blue uppercase tracking-wider block">
+              <span className="text-[11px] font-bold text-slate-900 uppercase tracking-wider block">
                 Official Email
               </span>
               <a
                 href="mailto:info@demargointerior.com"
-                className="text-xl font-black text-slate-900 hover:text-demargo-blue transition mt-1.5 block break-all tracking-tight"
+                className="text-xl font-black text-slate-900 hover:text-demargo-orange transition mt-1.5 block break-all tracking-tight"
               >
                 info@demargointerior.com
               </a>
@@ -1397,7 +1469,7 @@ function Contact() {
             <div className="pt-6 mt-6 border-t border-slate-100">
               <a
                 href="mailto:info@demargointerior.com"
-                className="block text-center w-full px-4 py-3 bg-demargo-blue hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-sm hover:shadow"
+                className="block text-center w-full px-4 py-3 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition shadow-sm hover:shadow"
               >
                 Send Email
               </a>
@@ -1406,9 +1478,6 @@ function Contact() {
 
           {/* Card 3: Office Location (Theme Navy / Orange Accent) */}
           <div className="bg-white border border-slate-200/90 rounded-2xl p-7 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between group relative overflow-hidden">
-            {/* Top theme color accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-demargo-orange" />
-
             <div>
               <div className="w-12 h-12 rounded-xl bg-orange-50 border border-demargo-orange/30 flex items-center justify-center text-demargo-orange mb-5 group-hover:scale-105 transition-transform">
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1548,7 +1617,7 @@ function BackToTop() {
     <button
       onClick={scrollTop}
       aria-label="Back to top"
-      className={`fixed bottom-6 left-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 chatbot-icon border-2 border-demargo-orange text-demargo-orange bg-transparent shadow-lg w-12 h-12 flex items-center justify-center hover:text-demargo-blue hover:border-demargo-blue hover:bg-slate-100/30 backdrop-blur-xs active:scale-95 transition-all duration-300 ease-out transform ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3 pointer-events-none'}`}
+      className={`fixed bottom-6 left-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 chatbot-icon border-2 border-demargo-orange text-demargo-orange bg-transparent shadow-lg w-12 h-12 flex items-center justify-center hover:text-black hover:border-black hover:bg-slate-100/30 backdrop-blur-xs active:scale-95 transition-all duration-300 ease-out transform ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3 pointer-events-none'}`}
     >
       <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></svg>
     </button>
@@ -1763,7 +1832,7 @@ function ChatBot() {
     <div className="fixed z-50 right-4 sm:right-6 bottom-4 sm:bottom-20 left-4 sm:left-auto pointer-events-none flex flex-col items-end">
       {open && (
         <div className="mb-3 w-[min(92vw,360px)] rounded-2xl bg-white shadow-2xl border overflow-hidden transition-all duration-300 ease-out transform origin-bottom-right pointer-events-auto">
-          <div className="px-4 py-3 bg-gradient-to-r from-demargo-orange/90 to-demargo-blue/90 text-white flex items-center justify-between">
+          <div className="px-4 py-3 bg-gradient-to-r from-demargo-orange to-black text-white flex items-center justify-between">
             <div className="font-semibold">Demargo Assistant</div>
             <button onClick={() => setOpen(false)} className="opacity-90 hover:opacity-100">×</button>
           </div>
@@ -1775,12 +1844,12 @@ function ChatBot() {
                     <div className="text-sm mb-2 text-gray-800">{renderMessageText(m.text)}</div>
                     <div className="flex flex-wrap gap-2">
                       {(m.buttons || []).map((b, bi) => (
-                        <a key={bi} href={b.href} target={b.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer" className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-demargo-blue text-white hover:opacity-90">{b.label}</a>
+                        <a key={bi} href={b.href} target={b.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer" className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-black text-white hover:bg-slate-800">{b.label}</a>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <span className={`inline-block px-3 py-2 rounded-lg ${m.role === 'bot' ? 'bg-slate-100' : 'bg-demargo-blue text-white'}`}>{renderMessageText(m.text)}</span>
+                  <span className={`inline-block px-3 py-2 rounded-lg ${m.role === 'bot' ? 'bg-slate-100' : 'bg-black text-white'}`}>{renderMessageText(m.text)}</span>
                 )}
               </div>
             ))}
@@ -1963,6 +2032,7 @@ export default function App() {
               <h4 className="font-semibold text-lg">Connect</h4>
               <ul className="space-y-2 text-sm text-white/80">
                 <li><Link to="/about">About Us</Link></li>
+                <li><Link to="/news">News & Happenings</Link></li>
                 <li><Link to="/contact">Contact</Link></li>
                 <li><Link to="/track">Track Project</Link></li>
               </ul>
@@ -2008,6 +2078,8 @@ function AnimatedRoutes() {
         <Route path="/testimonials" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Testimonials /></motion.div>} />
         <Route path="/awards" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Awards /></motion.div>} />
         <Route path="/about" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><About /></motion.div>} />
+        <Route path="/news" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><NewsFeed /></motion.div>} />
+        <Route path="/blog" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><NewsFeed /></motion.div>} />
         <Route path="/track" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><ProjectTracker /></motion.div>} />
         <Route path="/admin" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><AdminPanel /></motion.div>} />
         <Route path="/contact" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Contact /></motion.div>} />
@@ -2327,7 +2399,7 @@ function Portfolio() {
     <section className="max-w-6xl mx-auto px-4 py-16">
       <Seo title="Portfolio" description="Recent interior projects by Demargo." />
       <h1 className="text-3xl md:text-5xl font-extrabold text-center">
-        <span className="text-demargo-orange">Demargo</span> <span className="text-demargo-blue">Project Showcase</span>
+        <span className="text-demargo-orange">Demargo</span> <span className="text-black">Project Showcase</span>
       </h1>
       <p className="text-center text-gray-600 mt-3 max-w-3xl mx-auto">A curated selection of interiors we’ve crafted — curtains, lighting systems and bespoke styling across living, dining and bedroom spaces.</p>
 

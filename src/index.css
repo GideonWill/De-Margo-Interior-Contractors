@@ -89,7 +89,7 @@ footer a {
 
 /* Tag pill */
 .tag-pill { 
-    @apply px-4 py-2 bg-blue-50 text-demargo-blue text-sm; 
+    @apply px-4 py-2 bg-slate-100 text-slate-900 text-sm font-semibold; 
 }
 
 /* Card glow */
@@ -125,9 +125,9 @@ footer a {
 @media (min-width: 640px) { .scroll-heading { font-size: 36px; } }
 @media (min-width: 768px) { .scroll-heading { font-size: 40px; } }
 
-/* Gradient text utility (orange to blue) */
+/* Gradient text utility (orange to black) */
 .text-gradient-ob { 
-    background: linear-gradient(90deg, #f97316 0%, #2563eb 100%); 
+    background: linear-gradient(90deg, #ff7a00 0%, #000000 100%); 
     -webkit-background-clip: text; 
     background-clip: text; 
     color: transparent; 
