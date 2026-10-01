@@ -1129,24 +1129,6 @@ function Awards() {
         ))}
       </div>
 
-      <div className="mt-16 bg-gradient-to-r from-demargo-orange/10 to-black/10 rounded-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Our Commitment to Excellence</h2>
-        <div className="grid md:grid-cols-3 gap-6 text-center">
-          <div>
-            <div className="text-3xl font-extrabold text-demargo-orange mb-2">8+</div>
-            <div className="text-gray-700">Years of Excellence</div>
-          </div>
-          <div>
-            <div className="text-3xl font-extrabold text-black mb-2">4000+</div>
-            <div className="text-gray-700">Projects Completed</div>
-          </div>
-          <div>
-            <div className="text-3xl font-extrabold text-demargo-orange mb-2">100%</div>
-            <div className="text-gray-700">Client Satisfaction</div>
-          </div>
-        </div>
-      </div>
-
       {lightbox.open && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeLightbox}>
           <div className="max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
