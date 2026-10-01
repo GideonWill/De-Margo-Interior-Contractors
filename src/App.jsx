@@ -381,25 +381,6 @@ function Home() {
             />
           </picture>
         </div>
-
-        {/* Action CTAs */}
-        <div className="max-w-6xl mx-auto px-4 py-8 md:py-10">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/contact" className="btn-primary text-base font-semibold px-6 py-3 flex items-center gap-2 shadow-md hover:opacity-95">
-              <span>Start Your Award-Winning Project</span>
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-            </Link>
-            <Link to="/news" className="inline-flex items-center justify-center px-6 py-3 border-2 border-demargo-orange text-white bg-black hover:bg-demargo-orange hover:text-black transition font-semibold text-base shadow-sm">
-              <span>Demargo News & Press</span>
-            </Link>
-            <Link to="/awards" className="inline-flex items-center justify-center px-6 py-3 border-2 border-black text-black bg-white hover:bg-black hover:text-white transition font-semibold text-base shadow-sm">
-              <span>View All Citations & Awards</span>
-            </Link>
-            <Link to="/portfolio" className="inline-flex items-center justify-center px-6 py-3 border border-slate-300 bg-slate-50 text-slate-800 hover:bg-slate-100 transition font-semibold text-base shadow-sm">
-              <span>Explore Portfolio</span>
-            </Link>
-          </div>
-        </div>
       </motion.section>
 
       {/* ABOUT SNAPSHOT SECTION (second screenshot) */}
