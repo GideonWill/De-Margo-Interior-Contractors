@@ -477,34 +477,6 @@ export default function NewsFeed() {
           )}
         </section>
 
-        {/* Newsletter & Consultation Callout */}
-        <section className="bg-black text-white p-8 sm:p-12 border-2 border-demargo-orange/40 text-center space-y-6 relative overflow-hidden shadow-xl">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-demargo-orange/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="max-w-2xl mx-auto space-y-3">
-            <span className="text-xs uppercase font-extrabold tracking-widest text-demargo-orange">Direct Consultation</span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold uppercase">Have a Space That Needs an Award-Winning Touch?</h2>
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Book a free onsite consultation in Accra or schedule our mobile fabric catalog showcase directly at your home or corporate office.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-2">
-            <Link
-              to="/contact"
-              className="w-full sm:w-auto px-6 py-3.5 bg-demargo-orange text-black font-extrabold text-xs uppercase tracking-wider hover:opacity-90 transition shadow-md"
-            >
-              Request Free Consultation
-            </Link>
-            <a
-              href="https://wa.me/233546738914?text=Hello%20Demargo,%20I%20am%20interested%20in%20consulting%20with%20your%20design%20team%20for%20my%20space."
-              target="_blank"
-              rel="noreferrer"
-              className="w-full sm:w-auto px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider border border-white/20 transition flex items-center justify-center gap-2"
-            >
-              <span>💬 Instant WhatsApp Chat</span>
-            </a>
-          </div>
-        </section>
       </div>
 
       {/* Full Article Reader Modal */}
