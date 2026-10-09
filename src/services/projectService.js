@@ -64,6 +64,19 @@ const defaultProjects = [
         measurementNotes: 'Living room: 3 windows of 2.5m drop. Study: 2 windows of 1.8m drop.',
         estimateDetails: 'Living Room: GHS 5,500 (3 sets of heavy drapery + 3 sheers + tracks).\nStudy Room: GHS 3,000 (2 wooden zebra blinds + installation fee).',
         estimateApproved: false,
+        estimateStatus: 'in_followup',
+        estimateSentDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        estimateFollowUps: [
+            {
+                id: 'fu-mock-1',
+                attempt: 1,
+                channel: 'call',
+                date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                outcome: 'promised_review',
+                notes: 'Called client to confirm receipt of estimate. Client stated they are reviewing the drapery quote with their partner and will get back by Friday.',
+                loggedBy: 'Admin'
+            }
+        ],
         createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
         updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
         satisfaction: '',
@@ -140,6 +153,58 @@ const defaultProjects = [
         messages: [],
         createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
         updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+        id: 'mock-proj-6',
+        clientName: 'Daniel Mensah',
+        clientEmail: 'daniel.mensah@example.com',
+        clientPhone: '0244112233',
+        projectTitle: 'Penthouse Motorized Blinds',
+        projectDescription: 'Motorized roller blinds for floor-to-ceiling windows in living room and master bedroom.',
+        serviceAddress: 'Airport Residential, Accra',
+        totalAmount: 18500,
+        amountPaid: 0,
+        balance: 18500,
+        status: 'estimate',
+        measurementDate: '2026-06-05T10:00',
+        measurementNotes: '5 double-height floor-to-ceiling windows. Power outlets confirmed near ceiling.',
+        estimateDetails: '5 Somfy Motorized Roller Blinds: GHS 18,500',
+        estimateApproved: false,
+        estimateStatus: 'max_reached_stopped',
+        estimateSentDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+        estimateFollowUps: [
+            {
+                id: 'fu-mock-6-1',
+                attempt: 1,
+                channel: 'call',
+                date: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString(),
+                outcome: 'promised_review',
+                notes: 'Called client to check if estimate was received. Said they will review over the weekend.',
+                loggedBy: 'Admin'
+            },
+            {
+                id: 'fu-mock-6-2',
+                attempt: 2,
+                channel: 'whatsapp',
+                date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                outcome: 'no_answer',
+                notes: 'Sent WhatsApp follow-up message with estimate summary. Delivered with two ticks, no response.',
+                loggedBy: 'Admin'
+            },
+            {
+                id: 'fu-mock-6-3',
+                attempt: 3,
+                channel: 'call',
+                date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                outcome: 'no_answer',
+                notes: 'Final 3rd follow-up call. Phone rang with no answer. 3 attempts reached; outreach halted as per policy.',
+                loggedBy: 'Admin'
+            }
+        ],
+        createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        satisfaction: '',
+        messages: []
     }
 ]
 

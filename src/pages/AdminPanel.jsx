@@ -56,6 +56,11 @@ const viewDocument = (url) => {
     }
 };
 
+const getLocalDateTimeString = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+};
 
 function AdminPanel() {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -69,14 +74,15 @@ function AdminPanel() {
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
+    const [estimateFilter, setEstimateFilter] = useState('all') // 'all' | 'pending_0' | 'active_1_2' | 'stopped_3' | 'approved'
     const [currentPage, setCurrentPage] = useState(1)
     const [mobileView, setMobileView] = useState('list')
     const [hasBeeped, setHasBeeped] = useState(false)
 
-    // Reset to page 1 when search query or status filter changes
+    // Reset to page 1 when search query, status filter, or estimate filter changes
     useEffect(() => {
         setCurrentPage(1)
-    }, [searchQuery, statusFilter])
+    }, [searchQuery, statusFilter, estimateFilter])
 
     // Modals & Selection
     const [showCreateModal, setShowCreateModal] = useState(false)
@@ -124,10 +130,34 @@ function AdminPanel() {
         measurementNotes: '',
         estimatePdfUrls: [],
         estimateApproved: false,
+        estimateFollowUps: [],
+        estimateStatus: 'pending_review',
+        estimateSentDate: '',
         selectedFabrics: '',
         installationDate: '',
         measurementPdfUrls: []
     })
+
+    // Follow-Up Logger Form States
+    const [showFollowUpForm, setShowFollowUpForm] = useState(false)
+    const [newFollowUp, setNewFollowUp] = useState({
+        channel: 'call',
+        outcome: 'promised_review',
+        date: getLocalDateTimeString(),
+        notes: ''
+    })
+    const [savingFollowUp, setSavingFollowUp] = useState(false)
+    const [updatingProject, setUpdatingProject] = useState(false)
+
+    // Follow-up edit state
+    const [editingFollowUpId, setEditingFollowUpId] = useState(null)
+    const [editFollowUpData, setEditFollowUpData] = useState({
+        channel: 'call',
+        outcome: 'promised_review',
+        date: '',
+        notes: ''
+    })
+    const [savingEditFollowUp, setSavingEditFollowUp] = useState(false)
 
     const [uploadingPdf, setUploadingPdf] = useState(false)
     const [uploadingEstimatePdf, setUploadingEstimatePdf] = useState(false)
@@ -306,11 +336,24 @@ function AdminPanel() {
             measurementNotes: updatedProj.measurementNotes || '',
             estimatePdfUrls: eUrls,
             estimateApproved: updatedProj.estimateApproved || false,
+            estimateFollowUps: updatedProj.estimateFollowUps || [],
+            estimateStatus: updatedProj.estimateStatus || (updatedProj.estimateApproved ? 'approved' : 'pending_review'),
+            estimateSentDate: updatedProj.estimateSentDate || '',
             selectedFabrics: updatedProj.selectedFabrics || '',
             installationDate: updatedProj.installationDate || '',
             measurementPdfUrls: mUrls
         })
         
+        // Reset follow-up logger form
+        setShowFollowUpForm(false)
+        setEditingFollowUpId(null)
+        setNewFollowUp({
+            channel: 'call',
+            outcome: 'promised_review',
+            date: getLocalDateTimeString(),
+            notes: ''
+        })
+
         // Reset manual payment logger
         setManualPayment({ amount: '', method: 'cash', reference: '' })
 
@@ -381,8 +424,9 @@ function AdminPanel() {
 
     // Update generic project properties
     const handleUpdateProject = async (e) => {
-        e.preventDefault()
-        if (!selectedProject) return
+        if (e && e.preventDefault) e.preventDefault()
+        if (!selectedProject || updatingProject) return
+        setUpdatingProject(true)
         try {
             const total = Number(editProjData.totalAmount) || 0
             const updatePayload = {
@@ -399,6 +443,9 @@ function AdminPanel() {
                 estimatePdfUrls: editProjData.estimatePdfUrls,
                 estimatePdfUrl: editProjData.estimatePdfUrls.length > 0 ? editProjData.estimatePdfUrls[0].url : '',
                 estimateApproved: editProjData.estimateApproved,
+                estimateFollowUps: editProjData.estimateFollowUps || [],
+                estimateStatus: editProjData.estimateStatus || (editProjData.estimateApproved ? 'approved' : 'pending_review'),
+                estimateSentDate: editProjData.estimateSentDate || '',
                 selectedFabrics: editProjData.selectedFabrics,
                 installationDate: editProjData.installationDate,
                 measurementPdfUrls: editProjData.measurementPdfUrls,
@@ -406,7 +453,7 @@ function AdminPanel() {
             }
             
             await updateProject(selectedProject.id, updatePayload)
-            showToast('Project details updated successfully.', 'success')
+            showToast('Saved successfully! Project details updated.', 'success')
             
             // Reload all data & select refreshed project
             const freshList = await getAllProjects()
@@ -418,6 +465,287 @@ function AdminPanel() {
         } catch (err) {
             console.error('Update error:', err)
             showToast('Failed to save project updates.', 'error')
+        } finally {
+            setUpdatingProject(false)
+        }
+    }
+
+    // Follow-up outreach handlers (3-touch limit)
+    const handleLogFollowUp = async (e) => {
+        if (e && e.preventDefault) e.preventDefault()
+        if (!selectedProject || savingFollowUp) return
+        const currentFollowUps = editProjData.estimateFollowUps || []
+        if (currentFollowUps.length >= 3) {
+            showToast('Outreach halted: maximum of 3 follow-ups already reached for this client.', 'error')
+            return
+        }
+
+        setSavingFollowUp(true)
+        const nextAttempt = currentFollowUps.length + 1
+        const newEntry = {
+            id: `fu-${Date.now()}`,
+            attempt: nextAttempt,
+            channel: newFollowUp.channel || 'call',
+            outcome: newFollowUp.outcome || 'promised_review',
+            date: newFollowUp.date ? new Date(newFollowUp.date).toISOString() : new Date().toISOString(),
+            notes: (newFollowUp.notes || '').trim(),
+            loggedBy: 'Admin'
+        }
+
+        const updatedFollowUps = [...currentFollowUps, newEntry]
+        let newStatus = editProjData.estimateStatus || 'in_followup'
+        if (nextAttempt >= 3) {
+            newStatus = 'max_reached_stopped'
+        } else if (newStatus === 'pending_review' || !newStatus) {
+            newStatus = 'in_followup'
+        }
+
+        const sentDate = editProjData.estimateSentDate || new Date().toISOString()
+
+        try {
+            await updateProject(selectedProject.id, {
+                estimateFollowUps: updatedFollowUps,
+                estimateStatus: newStatus,
+                estimateSentDate: sentDate
+            })
+
+            // Update state locally immediately so changes are visible instantly
+            setEditProjData(prev => ({
+                ...prev,
+                estimateFollowUps: updatedFollowUps,
+                estimateStatus: newStatus,
+                estimateSentDate: sentDate
+            }))
+
+            setSelectedProject(prev => prev ? {
+                ...prev,
+                estimateFollowUps: updatedFollowUps,
+                estimateStatus: newStatus,
+                estimateSentDate: sentDate
+            } : prev)
+
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? {
+                ...p,
+                estimateFollowUps: updatedFollowUps,
+                estimateStatus: newStatus,
+                estimateSentDate: sentDate
+            } : p))
+
+            setShowFollowUpForm(false)
+            setNewFollowUp({
+                channel: 'call',
+                outcome: 'promised_review',
+                date: getLocalDateTimeString(),
+                notes: ''
+            })
+
+            // Background refresh to keep in sync
+            getAllProjects().then(freshList => {
+                setProjects(freshList)
+                const freshProj = freshList.find(p => p.id === selectedProject.id)
+                if (freshProj) {
+                    setSelectedProject(freshProj)
+                }
+            }).catch(console.error)
+
+            showToast(nextAttempt >= 3 ? 'Saved! Final (3rd) follow-up logged. Outreach marked as stopped.' : `Saved! Follow-up touch #${nextAttempt} recorded successfully.`, 'success')
+        } catch (err) {
+            console.error('Failed to log follow-up:', err)
+            showToast('Failed to save follow-up.', 'error')
+        } finally {
+            setSavingFollowUp(false)
+        }
+    }
+
+    const handleDeleteFollowUp = async (fuId) => {
+        if (!selectedProject) return
+        const currentFollowUps = editProjData.estimateFollowUps || []
+        const updated = currentFollowUps
+            .filter(f => f.id !== fuId)
+            .map((f, idx) => ({ ...f, attempt: idx + 1 }))
+
+        let newStatus = editProjData.estimateStatus
+        if (updated.length === 0) {
+            newStatus = editProjData.estimateApproved ? 'approved' : 'pending_review'
+        } else if (updated.length < 3 && newStatus === 'max_reached_stopped') {
+            newStatus = 'in_followup'
+        }
+
+        try {
+            await updateProject(selectedProject.id, {
+                estimateFollowUps: updated,
+                estimateStatus: newStatus
+            })
+            setEditProjData(prev => ({
+                ...prev,
+                estimateFollowUps: updated,
+                estimateStatus: newStatus
+            }))
+            const freshList = await getAllProjects()
+            setProjects(freshList)
+            const freshProj = freshList.find(p => p.id === selectedProject.id)
+            if (freshProj) setSelectedProject(freshProj)
+            if (editingFollowUpId === fuId) {
+                setEditingFollowUpId(null)
+            }
+            showToast('Follow-up record removed.', 'success')
+        } catch (err) {
+            console.error('Delete follow-up error:', err)
+            showToast('Failed to remove follow-up.', 'error')
+        }
+    }
+
+    const startEditFollowUp = (fu) => {
+        let formattedDate = ''
+        if (fu.date) {
+            try {
+                const d = new Date(fu.date)
+                d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
+                formattedDate = d.toISOString().slice(0, 16)
+            } catch {
+                formattedDate = getLocalDateTimeString()
+            }
+        } else {
+            formattedDate = getLocalDateTimeString()
+        }
+
+        setEditingFollowUpId(fu.id)
+        setEditFollowUpData({
+            channel: fu.channel || 'call',
+            outcome: fu.outcome || 'promised_review',
+            date: formattedDate,
+            notes: fu.notes || ''
+        })
+    }
+
+    const cancelEditFollowUp = () => {
+        setEditingFollowUpId(null)
+        setEditFollowUpData({ channel: 'call', outcome: 'promised_review', date: '', notes: '' })
+    }
+
+    const handleSaveEditFollowUp = async (fuId) => {
+        if (!selectedProject || savingEditFollowUp) return
+        setSavingEditFollowUp(true)
+
+        const currentFollowUps = editProjData.estimateFollowUps || []
+        const updatedFollowUps = currentFollowUps.map(fu => {
+            if (fu.id === fuId) {
+                return {
+                    ...fu,
+                    channel: editFollowUpData.channel || 'call',
+                    outcome: editFollowUpData.outcome || 'promised_review',
+                    date: editFollowUpData.date ? new Date(editFollowUpData.date).toISOString() : fu.date,
+                    notes: (editFollowUpData.notes || '').trim()
+                }
+            }
+            return fu
+        })
+
+        try {
+            await updateProject(selectedProject.id, {
+                estimateFollowUps: updatedFollowUps
+            })
+
+            setEditProjData(prev => ({
+                ...prev,
+                estimateFollowUps: updatedFollowUps
+            }))
+
+            setSelectedProject(prev => prev ? {
+                ...prev,
+                estimateFollowUps: updatedFollowUps
+            } : prev)
+
+            setProjects(prev => prev.map(p => p.id === selectedProject.id ? {
+                ...p,
+                estimateFollowUps: updatedFollowUps
+            } : p))
+
+            setEditingFollowUpId(null)
+            showToast('Saved! Follow-up outreach record updated successfully.', 'success')
+
+            getAllProjects().then(freshList => {
+                setProjects(freshList)
+                const freshProj = freshList.find(p => p.id === selectedProject.id)
+                if (freshProj) {
+                    setSelectedProject(freshProj)
+                }
+            }).catch(console.error)
+        } catch (err) {
+            console.error('Failed to update follow-up record:', err)
+            showToast('Failed to save follow-up changes.', 'error')
+        } finally {
+            setSavingEditFollowUp(false)
+        }
+    }
+
+    const handleQuickApproveEstimate = async () => {
+        if (!selectedProject) return
+        const nextStage = editProjData.status === 'estimate' ? 'fabric' : editProjData.status
+        try {
+            await updateProject(selectedProject.id, {
+                estimateApproved: true,
+                estimateStatus: 'approved',
+                status: nextStage
+            })
+            setEditProjData(prev => ({
+                ...prev,
+                estimateApproved: true,
+                estimateStatus: 'approved',
+                status: nextStage
+            }))
+            const freshList = await getAllProjects()
+            setProjects(freshList)
+            const freshProj = freshList.find(p => p.id === selectedProject.id)
+            if (freshProj) setSelectedProject(freshProj)
+            showToast('Estimate marked as Approved by client! Project advanced.', 'success')
+        } catch (err) {
+            console.error('Approve estimate error:', err)
+            showToast('Failed to approve estimate.', 'error')
+        }
+    }
+
+    const handleMarkEstimateDeclined = async () => {
+        if (!selectedProject) return
+        try {
+            await updateProject(selectedProject.id, {
+                estimateApproved: false,
+                estimateStatus: 'declined'
+            })
+            setEditProjData(prev => ({
+                ...prev,
+                estimateApproved: false,
+                estimateStatus: 'declined'
+            }))
+            const freshList = await getAllProjects()
+            setProjects(freshList)
+            const freshProj = freshList.find(p => p.id === selectedProject.id)
+            if (freshProj) setSelectedProject(freshProj)
+            showToast('Estimate marked as declined / closed.', 'success')
+        } catch (err) {
+            console.error('Decline estimate error:', err)
+            showToast('Failed to update status.', 'error')
+        }
+    }
+
+    const handleReopenFollowUp = async () => {
+        if (!selectedProject) return
+        try {
+            await updateProject(selectedProject.id, {
+                estimateStatus: 'in_followup'
+            })
+            setEditProjData(prev => ({
+                ...prev,
+                estimateStatus: 'in_followup'
+            }))
+            const freshList = await getAllProjects()
+            setProjects(freshList)
+            const freshProj = freshList.find(p => p.id === selectedProject.id)
+            if (freshProj) setSelectedProject(freshProj)
+            showToast('Follow-up outreach reopened.', 'success')
+        } catch (err) {
+            console.error('Reopen error:', err)
+            showToast('Failed to reopen follow-up.', 'error')
         }
     }
 
@@ -775,6 +1103,30 @@ function AdminPanel() {
     const totalCollected = projects.reduce((acc, p) => acc + (p.amountPaid || 0), 0)
     const inSewingCount = projects.filter(p => p.status === 'production').length
     const awaitingEstimate = projects.filter(p => p.status === 'estimate').length
+
+    // Estimate follow-up tracking statistics
+    const estimateFollowUpStats = useMemo(() => {
+        let pendingZero = 0
+        let inFollowUp = 0
+        let maxReachedStopped = 0
+        let approved = 0
+
+        projects.forEach(p => {
+            const count = (p.estimateFollowUps || []).length
+            const isApproved = p.estimateApproved || p.estimateStatus === 'approved'
+            if (isApproved) {
+                approved++
+            } else if (p.estimateStatus === 'max_reached_stopped' || count >= 3) {
+                maxReachedStopped++
+            } else if (count > 0 || p.estimateStatus === 'in_followup') {
+                inFollowUp++
+            } else if (p.status === 'estimate' || p.estimateStatus === 'pending_review' || (p.estimatePdfUrls && p.estimatePdfUrls.length > 0)) {
+                pendingZero++
+            }
+        })
+
+        return { pendingZero, inFollowUp, maxReachedStopped, approved }
+    }, [projects])
     
     // Projects with pending client payment submissions (from global payments array)
     const pendingClientPaymentProjectIds = new Set(
@@ -845,11 +1197,25 @@ function AdminPanel() {
     // Filter and sort projects (upcoming installations pinned to the top)
     const sortedProjects = useMemo(() => {
         const filtered = projectsWithCorrectBalance.filter(p => {
-            const matchesQuery = p.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                 p.clientPhone.includes(searchQuery) ||
-                                 p.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())
+            const matchesQuery = (p.clientName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                 (p.clientPhone || '').includes(searchQuery) ||
+                                 (p.projectTitle || '').toLowerCase().includes(searchQuery.toLowerCase())
             const matchesStatus = statusFilter === 'all' ? true : p.status === statusFilter
-            return matchesQuery && matchesStatus
+
+            let matchesEstimate = true
+            const fuCount = (p.estimateFollowUps || []).length
+            const isApproved = p.estimateApproved || p.estimateStatus === 'approved'
+            if (estimateFilter === 'pending_0') {
+                matchesEstimate = !isApproved && fuCount === 0 && (p.status === 'estimate' || p.estimateStatus === 'pending_review' || (p.estimatePdfUrls && p.estimatePdfUrls.length > 0))
+            } else if (estimateFilter === 'active_1_2') {
+                matchesEstimate = !isApproved && fuCount >= 1 && fuCount < 3 && p.estimateStatus !== 'max_reached_stopped'
+            } else if (estimateFilter === 'stopped_3') {
+                matchesEstimate = !isApproved && (fuCount >= 3 || p.estimateStatus === 'max_reached_stopped')
+            } else if (estimateFilter === 'approved') {
+                matchesEstimate = isApproved
+            }
+
+            return matchesQuery && matchesStatus && matchesEstimate
         })
 
         return [...filtered].sort((a, b) => {
@@ -892,7 +1258,7 @@ function AdminPanel() {
             const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0
             return bCreated - aCreated
         })
-    }, [projectsWithCorrectBalance, searchQuery, statusFilter])
+    }, [projectsWithCorrectBalance, searchQuery, statusFilter, estimateFilter])
 
     const itemsPerPage = 10
     const totalItems = sortedProjects.length
@@ -1176,7 +1542,7 @@ function AdminPanel() {
                         </div>
 
                         {/* Search and Filters */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                             <input
                                 type="text"
                                 placeholder="Search by name, phone, title..."
@@ -1194,6 +1560,77 @@ function AdminPanel() {
                                     <option key={s.key} value={s.key}>{s.label}</option>
                                 ))}
                             </select>
+                            <select
+                                value={estimateFilter}
+                                onChange={(e) => setEstimateFilter(e.target.value)}
+                                className="bg-slate-950 border border-amber-500/40 text-amber-300 font-semibold px-3 py-2 text-xs focus:outline-none focus:border-demargo-orange"
+                            >
+                                <option value="all">All Estimate Outreach</option>
+                                <option value="pending_0">⏳ Pending 0 Follow-ups ({estimateFollowUpStats.pendingZero})</option>
+                                <option value="active_1_2">📞 In Outreach 1-2 Touches ({estimateFollowUpStats.inFollowUp})</option>
+                                <option value="stopped_3">⛔ 3/3 Limit Reached / Halted ({estimateFollowUpStats.maxReachedStopped})</option>
+                                <option value="approved">✓ Estimate Approved ({estimateFollowUpStats.approved})</option>
+                            </select>
+                        </div>
+
+                        {/* Quick Filter Status Pills */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1 pb-1 border-b border-slate-850/60 text-[11px] allow-custom-colors">
+                            <span className="text-slate-600 font-bold uppercase text-[10px] tracking-wide">Filter Outreach:</span>
+                            <button
+                                type="button"
+                                onClick={() => setEstimateFilter('all')}
+                                className={`allow-custom-colors px-3 py-1 rounded-md text-[11px] font-black uppercase transition cursor-pointer ${
+                                    estimateFilter === 'all'
+                                        ? 'pill-all-active'
+                                        : 'pill-all-inactive'
+                                }`}
+                            >
+                                All ({projects.length})
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setEstimateFilter('pending_0')}
+                                className={`allow-custom-colors px-3 py-1 rounded-md text-[11px] font-black uppercase transition cursor-pointer ${
+                                    estimateFilter === 'pending_0'
+                                        ? 'pill-pending-active'
+                                        : 'pill-pending-inactive'
+                                }`}
+                            >
+                                ⏳ Pending (0) [{estimateFollowUpStats.pendingZero}]
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setEstimateFilter('active_1_2')}
+                                className={`allow-custom-colors px-3 py-1 rounded-md text-[11px] font-black uppercase transition cursor-pointer ${
+                                    estimateFilter === 'active_1_2'
+                                        ? 'pill-active-active'
+                                        : 'pill-active-inactive'
+                                }`}
+                            >
+                                📞 In Progress (1-2) [{estimateFollowUpStats.inFollowUp}]
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setEstimateFilter('stopped_3')}
+                                className={`allow-custom-colors px-3 py-1 rounded-md text-[11px] font-black uppercase transition cursor-pointer ${
+                                    estimateFilter === 'stopped_3'
+                                        ? 'pill-stopped-active'
+                                        : 'pill-stopped-inactive'
+                                }`}
+                            >
+                                ⛔ 3/3 Halted [{estimateFollowUpStats.maxReachedStopped}]
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setEstimateFilter('approved')}
+                                className={`allow-custom-colors px-3 py-1 rounded-md text-[11px] font-black uppercase transition cursor-pointer ${
+                                    estimateFilter === 'approved'
+                                        ? 'pill-approved-active'
+                                        : 'pill-approved-inactive'
+                                }`}
+                            >
+                                ✓ Approved [{estimateFollowUpStats.approved}]
+                            </button>
                         </div>
 
                         {/* Projects Table */}
@@ -1249,15 +1686,58 @@ function AdminPanel() {
                                                         <div className="text-[10px] text-slate-500 mt-0.5 break-words">{p.serviceAddress}</div>
                                                     </td>
                                                     <td className="py-3 px-2">
-                                                        <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${
-                                                            p.status === 'completed' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
-                                                            p.status === 'production' ? 'bg-orange-500/10 border-orange-500/20 text-demargo-orange' :
-                                                            p.status === 'estimate' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
-                                                            p.status === 'correction' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
-                                                            'bg-slate-800 border-slate-700 text-slate-400'
-                                                        }`}>
-                                                            {STAGES.find(s => s.key === p.status)?.label || p.status}
-                                                        </span>
+                                                        <div>
+                                                            <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${
+                                                                p.status === 'completed' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
+                                                                p.status === 'production' ? 'bg-orange-500/10 border-orange-500/20 text-demargo-orange' :
+                                                                p.status === 'estimate' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
+                                                                p.status === 'correction' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                                                'bg-slate-800 border-slate-700 text-slate-400'
+                                                            }`}>
+                                                                {STAGES.find(s => s.key === p.status)?.label || p.status}
+                                                            </span>
+                                                        </div>
+                                                        {(() => {
+                                                            const fuList = p.estimateFollowUps || []
+                                                            const isApproved = p.estimateApproved || p.estimateStatus === 'approved'
+                                                            if (isApproved) {
+                                                                return (
+                                                                    <div className="mt-1">
+                                                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[8px] font-bold rounded">
+                                                                            ✓ Approved
+                                                                        </span>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            if (p.estimateStatus === 'max_reached_stopped' || fuList.length >= 3) {
+                                                                return (
+                                                                    <div className="mt-1">
+                                                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[8px] font-extrabold rounded" title="Policy: Max 3 follow-ups reached. Outreach halted.">
+                                                                            ⛔ 3/3 Halted
+                                                                        </span>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            if (fuList.length > 0 || p.estimateStatus === 'in_followup') {
+                                                                return (
+                                                                    <div className="mt-1">
+                                                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[8px] font-bold rounded">
+                                                                            📞 {fuList.length}/3 Touches
+                                                                        </span>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            if (p.status === 'estimate' || p.estimateStatus === 'pending_review' || (p.estimatePdfUrls && p.estimatePdfUrls.length > 0)) {
+                                                                return (
+                                                                    <div className="mt-1">
+                                                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-400 text-[8px] font-medium rounded">
+                                                                            ⏳ 0/3 Touches
+                                                                        </span>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            return null
+                                                        })()}
                                                     </td>
                                                     <td className="py-3 px-2">
                                                         {p.measurementDate ? (
@@ -1430,8 +1910,8 @@ function AdminPanel() {
                                 </div>
 
 
-                                {/* Form for Updates */}
-                                <form onSubmit={handleUpdateProject} className="space-y-4 text-xs">
+                                {/* Panel for Updates */}
+                                <div className="space-y-4 text-xs">
                                 {/* Status Selector */}
                                 <div>
                                     <label className="block text-slate-400 font-bold mb-1 uppercase tracking-wider">Current Lifecycle Stage</label>
@@ -1565,9 +2045,9 @@ function AdminPanel() {
                                                     <button 
                                                         type="button"
                                                         onClick={() => handleDeleteMeasurementPdf(idx)}
-                                                        className="text-[10px] font-black text-red-500 hover:text-red-400 bg-slate-950 px-2 py-1 rounded transition uppercase"
+                                                        className="btn-delete-red allow-custom-colors text-[10px] font-bold px-2 py-1 rounded transition uppercase flex items-center gap-1 cursor-pointer"
                                                     >
-                                                        Remove
+                                                        <span style={{ color: '#ffffff' }}>✕ Remove</span>
                                                     </button>
                                                 </div>
                                             ))}
@@ -1588,25 +2068,509 @@ function AdminPanel() {
                                     </div>
                                 </div>
 
-                                {/* 2. Estimate Information */}
-                                <div className="border-t border-slate-850 pt-4 space-y-3">
-                                    <span className="font-extrabold text-white uppercase text-[10px] tracking-wider block">2. Estimate Approval Settings</span>
+                                {/* 2. Estimate & Follow-up Outreach Tracker (3-Touch Max Rule) */}
+                                <div className="border-t border-slate-850 pt-5 space-y-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-850/70 pb-3">
+                                        <div>
+                                            <span className="font-extrabold text-white uppercase text-[11px] tracking-wider block">
+                                                2. Estimate & Client Follow-up Tracking
+                                            </span>
+                                            <p className="text-[10px] text-slate-400 mt-0.5">
+                                                Outreach policy: Up to 3 follow-ups (calls/messages) on estimate approval. Outreach halts after 3 attempts.
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {!editProjData.estimateApproved && editProjData.estimateStatus !== 'approved' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleQuickApproveEstimate}
+                                                    className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] uppercase tracking-wider rounded transition flex items-center gap-1 shadow-sm"
+                                                >
+                                                    <span>✓</span> Mark Estimate Approved
+                                                </button>
+                                            )}
+                                            {editProjData.estimateStatus !== 'declined' && !editProjData.estimateApproved && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleMarkEstimateDeclined}
+                                                    className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[10px] uppercase tracking-wider rounded border border-slate-700 transition"
+                                                >
+                                                    Mark Declined
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Outreach Status Policy Banner */}
+                                    {(() => {
+                                        const fuList = editProjData.estimateFollowUps || []
+                                        const count = fuList.length
+                                        const isApproved = editProjData.estimateApproved || editProjData.estimateStatus === 'approved'
+
+                                        if (isApproved) {
+                                            return (
+                                                <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 flex items-start gap-3">
+                                                    <span className="text-emerald-400 text-lg">✅</span>
+                                                    <div className="flex-1">
+                                                        <div className="text-xs font-bold text-emerald-300 uppercase tracking-wide">Estimate Approved by Client</div>
+                                                        <p className="text-[11px] text-emerald-200/80 mt-0.5">Client has confirmed and approved this quote. Project can advance to fabric selection and sewing.</p>
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
+
+                                        if (count >= 3 || editProjData.estimateStatus === 'max_reached_stopped') {
+                                            return (
+                                                <div className="p-3.5 rounded-xl bg-rose-950/35 border border-rose-500/40 space-y-2">
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        <div className="flex items-start gap-2.5">
+                                                            <span className="text-rose-400 text-lg">⛔</span>
+                                                            <div>
+                                                                <div className="text-xs font-black text-rose-300 uppercase tracking-wide">
+                                                                    Outreach Halted (3 of 3 Attempts Reached)
+                                                                </div>
+                                                                <p className="text-[11px] text-rose-200/80 mt-0.5">
+                                                                    Standard company policy reached: Client was contacted 3 times without confirmation. Outreach is stopped to avoid inconvenience. Do not call or message again unless client initiates.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleReopenFollowUp}
+                                                            className="shrink-0 px-2 py-1 bg-rose-900/60 hover:bg-rose-800 text-rose-200 text-[10px] font-bold uppercase rounded border border-rose-700/50 transition"
+                                                        >
+                                                            Reopen Outreach
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
+
+                                        if (count > 0) {
+                                            return (
+                                                <div className="p-3.5 rounded-xl bg-amber-950/25 border border-amber-500/40 flex items-start justify-between gap-3">
+                                                    <div className="flex items-start gap-2.5">
+                                                        <span className="text-amber-400 text-lg">📞</span>
+                                                        <div>
+                                                            <div className="text-xs font-bold text-amber-300 uppercase tracking-wide">
+                                                                Estimate Follow-up Active ({count} of 3 Touches)
+                                                            </div>
+                                                            <p className="text-[11px] text-amber-200/80 mt-0.5">
+                                                                {3 - count === 1 ? '1 attempt remaining before outreach policy stops.' : `${3 - count} attempts remaining before outreach policy stops.`}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    {!showFollowUpForm && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setNewFollowUp(prev => ({ ...prev, date: prev.date || getLocalDateTimeString() }))
+                                                                setShowFollowUpForm(true)
+                                                            }}
+                                                            className="shrink-0 px-2.5 py-1 bg-demargo-orange hover:opacity-90 text-white text-[10px] font-bold uppercase rounded transition cursor-pointer"
+                                                        >
+                                                            + Log Touch #{count + 1}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )
+                                        }
+
+                                        return (
+                                            <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-start justify-between gap-3">
+                                                <div className="flex items-start gap-2.5">
+                                                    <span className="text-slate-400 text-lg">⏳</span>
+                                                    <div>
+                                                        <div className="text-xs font-bold text-slate-300 uppercase tracking-wide">
+                                                            Pending Initial Follow-up (0 of 3 Touches)
+                                                        </div>
+                                                        <p className="text-[11px] text-slate-400 mt-0.5">
+                                                            Estimate has been sent. When you make a follow-up call or send a WhatsApp/SMS message, log it below.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                {!showFollowUpForm && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setNewFollowUp(prev => ({ ...prev, date: prev.date || getLocalDateTimeString() }))
+                                                            setShowFollowUpForm(true)
+                                                        }}
+                                                        className="shrink-0 px-2.5 py-1 bg-demargo-orange hover:opacity-90 text-white text-[10px] font-bold uppercase rounded transition cursor-pointer"
+                                                    >
+                                                        + Log 1st Follow-up
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )
+                                    })()}
+
+                                    {/* 3-Touch Visual Stepper */}
+                                    <div className="grid grid-cols-3 gap-2 pt-1 pb-1">
+                                        {[1, 2, 3].map((touchNum) => {
+                                            const fuList = editProjData.estimateFollowUps || []
+                                            const entry = fuList.find(f => f.attempt === touchNum) || fuList[touchNum - 1]
+                                            const isDone = !!entry
+                                            const isCurrent = !isDone && fuList.length === touchNum - 1 && !editProjData.estimateApproved && editProjData.estimateStatus !== 'approved'
+
+                                            // Styling rules:
+                                            // - Final Touch #3 turns RED when active or completed
+                                            // - Touches #1 & #2 turn YELLOW when active (highlighter indicator)
+                                            // - All non-highlighted boxes are clean WHITE
+                                            let boxClass = 'stepper-box-white'
+                                            let isRed = false
+                                            let isYellow = false
+
+                                            if (touchNum === 3 && (isCurrent || isDone)) {
+                                                boxClass = 'stepper-box-red'
+                                                isRed = true
+                                            } else if (isCurrent) {
+                                                boxClass = 'stepper-box-yellow'
+                                                isYellow = true
+                                            } else {
+                                                boxClass = 'stepper-box-white'
+                                            }
+
+                                            return (
+                                                <div
+                                                    key={touchNum}
+                                                    className={`allow-custom-colors p-2.5 rounded-xl text-center transition ${boxClass}`}
+                                                >
+                                                    <div className="flex items-center justify-center gap-1.5 mb-1">
+                                                        <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-extrabold ${
+                                                            isRed
+                                                                ? 'bg-red-600 text-white'
+                                                                : isYellow
+                                                                    ? 'bg-amber-500 text-slate-950'
+                                                                    : isDone
+                                                                        ? 'bg-emerald-600 text-white'
+                                                                        : 'bg-slate-200 text-slate-600'
+                                                        }`}>
+                                                            {isDone ? '✓' : touchNum}
+                                                        </span>
+                                                        <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
+                                                            isRed
+                                                                ? 'text-red-800'
+                                                                : isYellow
+                                                                    ? 'text-amber-950'
+                                                                    : 'text-slate-800'
+                                                        }`}>
+                                                            {touchNum === 3 ? 'Final Touch #3' : `Touch #${touchNum}`}
+                                                        </span>
+                                                    </div>
+                                                    {isDone ? (
+                                                        <div className="text-[9px] space-y-0.5">
+                                                            <div className={`font-semibold capitalize ${isRed ? 'text-red-900' : 'text-slate-700'}`}>
+                                                                {entry.channel} • {formatDateOnly(entry.date)}
+                                                            </div>
+                                                            <div className={`truncate font-medium ${isRed ? 'text-red-700' : 'text-slate-600'}`}>
+                                                                {entry.outcome ? entry.outcome.replace(/_/g, ' ') : 'Contacted'}
+                                                            </div>
+                                                        </div>
+                                                    ) : isCurrent ? (
+                                                        <div className={`text-[9px] font-bold ${isRed ? 'text-red-700' : 'text-amber-800'}`}>
+                                                            {touchNum === 3 ? 'Final Touch: Ready to Log' : 'Ready to Log'}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-[9px] text-slate-400 font-medium">
+                                                            {touchNum === 3 ? 'Outreach Stops Here' : 'Upcoming'}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+
+                                    {/* Inline Follow-up Logger Form */}
+                                    {showFollowUpForm && (
+                                        <div className="bg-slate-950 border border-demargo-orange/50 p-4 rounded-2xl space-y-3">
+                                            <div className="flex items-center justify-between border-b border-slate-850 pb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-demargo-orange font-bold text-xs uppercase tracking-wider">
+                                                        Log Outreach Touch #{(editProjData.estimateFollowUps || []).length + 1} of 3
+                                                    </span>
+                                                    {(editProjData.estimateFollowUps || []).length + 1 === 3 && (
+                                                        <span className="px-1.5 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[9px] font-extrabold uppercase rounded">
+                                                            Policy: Final 3rd Touch
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowFollowUpForm(false)}
+                                                    className="text-slate-500 hover:text-white text-xs px-2 py-0.5 cursor-pointer"
+                                                >
+                                                    ✕ Close
+                                                </button>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div>
+                                                    <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Outreach Channel *</label>
+                                                    <select
+                                                        value={newFollowUp.channel}
+                                                        onChange={(e) => setNewFollowUp(p => ({ ...p, channel: e.target.value }))}
+                                                        className="w-full bg-slate-900 border border-slate-800 text-white text-xs px-2.5 py-2 focus:outline-none focus:border-demargo-orange rounded"
+                                                    >
+                                                        <option value="call">📞 Phone Call</option>
+                                                        <option value="whatsapp">💬 WhatsApp Message</option>
+                                                        <option value="sms">📱 SMS Text</option>
+                                                        <option value="email">✉️ Email</option>
+                                                        <option value="in_person">🤝 In-Person / Meeting</option>
+                                                    </select>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Date & Time *</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        value={newFollowUp.date || ''}
+                                                        onChange={(e) => setNewFollowUp(p => ({ ...p, date: e.target.value }))}
+                                                        className="w-full bg-slate-900 border border-slate-800 text-white text-xs px-2.5 py-2 focus:outline-none focus:border-demargo-orange rounded"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Client Response / Outcome *</label>
+                                                    <select
+                                                        value={newFollowUp.outcome}
+                                                        onChange={(e) => setNewFollowUp(p => ({ ...p, outcome: e.target.value }))}
+                                                        className="w-full bg-slate-900 border border-slate-800 text-white text-xs px-2.5 py-2 focus:outline-none focus:border-demargo-orange rounded"
+                                                    >
+                                                        <option value="promised_review">Reviewing with partner/family</option>
+                                                        <option value="promised_approval">Promised approval / payment soon</option>
+                                                        <option value="requested_changes">Requested adjustments to estimate</option>
+                                                        <option value="call_back_later">Busy, requested call back later</option>
+                                                        <option value="no_answer">No answer / Phone rang out</option>
+                                                        <option value="left_message">Left voicemail / WhatsApp sent</option>
+                                                        <option value="undecided">Undecided / Delaying project</option>
+                                                        <option value="not_interested">Not proceeding / Budget constraints</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Outreach Notes / Client Discussion</label>
+                                                <textarea
+                                                    rows={2}
+                                                    value={newFollowUp.notes}
+                                                    onChange={(e) => setNewFollowUp(p => ({ ...p, notes: e.target.value }))}
+                                                    placeholder="Enter details of conversation, feedback on quote, or agreed next steps..."
+                                                    className="w-full bg-slate-900 border border-slate-800 text-white text-xs p-2.5 focus:outline-none focus:border-demargo-orange rounded placeholder-slate-600"
+                                                />
+                                            </div>
+
+                                            <div className="flex items-center justify-end gap-2 pt-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowFollowUpForm(false)}
+                                                    className="px-3 py-1.5 bg-slate-800 text-slate-300 text-xs font-semibold rounded hover:bg-slate-700 transition cursor-pointer"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleLogFollowUp}
+                                                    disabled={savingFollowUp}
+                                                    className="px-4 py-1.5 bg-demargo-orange text-white text-xs font-bold uppercase tracking-wider rounded hover:opacity-90 transition disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                                                >
+                                                    {savingFollowUp ? 'Saving Entry...' : `Save Touch #${(editProjData.estimateFollowUps || []).length + 1}`}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Follow-up Outreach History Log */}
                                     <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
+                                                Logged Outreach Records ({(editProjData.estimateFollowUps || []).length} / 3)
+                                            </span>
+                                            {!(editProjData.estimateFollowUps || []).length && (
+                                                <span className="text-[10px] text-slate-600 italic">No follow-ups recorded yet</span>
+                                            )}
+                                        </div>
+
+                                        {(editProjData.estimateFollowUps || []).length > 0 && (
+                                            <div className="space-y-2">
+                                                {(editProjData.estimateFollowUps || []).map((fu, idx) => {
+                                                    const isEditing = editingFollowUpId === fu.id
+
+                                                    if (isEditing) {
+                                                        return (
+                                                            <div key={fu.id || idx} className="bg-slate-950 border border-blue-500/60 p-3.5 rounded-xl space-y-3 shadow-md">
+                                                                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-blue-400 font-bold text-xs uppercase tracking-wide">
+                                                                            ✏️ Edit Outreach Touch #{fu.attempt || idx + 1}
+                                                                        </span>
+                                                                    </div>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={cancelEditFollowUp}
+                                                                        className="text-slate-500 hover:text-white text-xs px-2 py-0.5 cursor-pointer"
+                                                                    >
+                                                                        ✕ Cancel
+                                                                    </button>
+                                                                </div>
+
+                                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                                                    <div>
+                                                                        <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Outreach Channel *</label>
+                                                                        <select
+                                                                            value={editFollowUpData.channel}
+                                                                            onChange={(e) => setEditFollowUpData(p => ({ ...p, channel: e.target.value }))}
+                                                                            className="w-full bg-slate-900 border border-slate-800 text-white text-xs px-2 py-1.5 focus:outline-none focus:border-blue-400 rounded"
+                                                                        >
+                                                                            <option value="call">📞 Phone Call</option>
+                                                                            <option value="whatsapp">💬 WhatsApp Message</option>
+                                                                            <option value="sms">📱 SMS Text</option>
+                                                                            <option value="email">✉️ Email</option>
+                                                                            <option value="in_person">🤝 In-Person / Meeting</option>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div>
+                                                                        <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Date & Time *</label>
+                                                                        <input
+                                                                            type="datetime-local"
+                                                                            value={editFollowUpData.date}
+                                                                            onChange={(e) => setEditFollowUpData(p => ({ ...p, date: e.target.value }))}
+                                                                            className="w-full bg-slate-900 border border-slate-800 text-white text-xs px-2 py-1.5 focus:outline-none focus:border-blue-400 rounded"
+                                                                        />
+                                                                    </div>
+
+                                                                    <div>
+                                                                        <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Response / Outcome *</label>
+                                                                        <select
+                                                                            value={editFollowUpData.outcome}
+                                                                            onChange={(e) => setEditFollowUpData(p => ({ ...p, outcome: e.target.value }))}
+                                                                            className="w-full bg-slate-900 border border-slate-800 text-white text-xs px-2 py-1.5 focus:outline-none focus:border-blue-400 rounded"
+                                                                        >
+                                                                            <option value="promised_review">Reviewing with partner/family</option>
+                                                                            <option value="promised_approval">Promised approval / payment soon</option>
+                                                                            <option value="requested_changes">Requested adjustments to estimate</option>
+                                                                            <option value="call_back_later">Busy, requested call back later</option>
+                                                                            <option value="no_answer">No answer / Phone rang out</option>
+                                                                            <option value="left_message">Left voicemail / WhatsApp sent</option>
+                                                                            <option value="undecided">Undecided / Delaying project</option>
+                                                                            <option value="not_interested">Not proceeding / Budget constraints</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div>
+                                                                    <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Outreach Notes / Discussion</label>
+                                                                    <textarea
+                                                                        rows={2}
+                                                                        value={editFollowUpData.notes}
+                                                                        onChange={(e) => setEditFollowUpData(p => ({ ...p, notes: e.target.value }))}
+                                                                        className="w-full bg-slate-900 border border-slate-800 text-white text-xs p-2 focus:outline-none focus:border-blue-400 rounded placeholder-slate-600"
+                                                                    />
+                                                                </div>
+
+                                                                <div className="flex items-center justify-end gap-2 pt-1">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={cancelEditFollowUp}
+                                                                        className="px-3 py-1 bg-slate-800 text-slate-300 text-xs font-semibold rounded hover:bg-slate-700 transition cursor-pointer"
+                                                                    >
+                                                                        Cancel
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleSaveEditFollowUp(fu.id)}
+                                                                        disabled={savingEditFollowUp}
+                                                                        className="px-3.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider rounded transition cursor-pointer disabled:opacity-50"
+                                                                    >
+                                                                        {savingEditFollowUp ? 'Saving...' : 'Save Changes'}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    }
+
+                                                    return (
+                                                        <div key={fu.id || idx} className="bg-slate-950 border border-slate-850 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                                                            <div className="space-y-1 flex-1">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] font-black uppercase rounded">
+                                                                        Touch #{fu.attempt || idx + 1}
+                                                                    </span>
+                                                                    <span className="text-xs font-bold text-white capitalize">
+                                                                        {fu.channel === 'call' ? '📞 Phone Call' :
+                                                                         fu.channel === 'whatsapp' ? '💬 WhatsApp' :
+                                                                         fu.channel === 'sms' ? '📱 SMS' :
+                                                                         fu.channel === 'email' ? '✉️ Email' : '🤝 In-Person'}
+                                                                    </span>
+                                                                    <span className="text-[10px] text-slate-400">
+                                                                        • {fu.date ? new Date(fu.date).toLocaleString('en-GH', { dateStyle: 'medium', timeStyle: 'short' }) : 'Logged'}
+                                                                    </span>
+                                                                    <span className="px-1.5 py-0.2 bg-slate-800 text-slate-300 text-[9px] font-semibold rounded">
+                                                                        Outcome: {(fu.outcome || '').replace(/_/g, ' ')}
+                                                                    </span>
+                                                                </div>
+                                                                {fu.notes && (
+                                                                    <p className="text-xs text-slate-300 bg-slate-900/60 p-2 rounded border border-slate-850 mt-1">
+                                                                        "{fu.notes}"
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => startEditFollowUp(fu)}
+                                                                    className="allow-custom-colors px-2.5 py-1 text-[10px] font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition uppercase shadow-xs flex items-center gap-1 cursor-pointer"
+                                                                    title="Edit this outreach record"
+                                                                >
+                                                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                    </svg>
+                                                                    <span style={{ color: '#ffffff' }}>Edit</span>
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleDeleteFollowUp(fu.id)}
+                                                                    className="btn-delete-red allow-custom-colors px-2.5 py-1 text-[10px] font-bold text-white bg-red-600 hover:bg-red-700 rounded-md transition uppercase shadow-xs flex items-center gap-1 cursor-pointer"
+                                                                    title="Delete this outreach record"
+                                                                >
+                                                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                    </svg>
+                                                                    <span style={{ color: '#ffffff' }}>Delete</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Estimate Documents Upload & Approval Checkbox */}
+                                    <div className="pt-3 border-t border-slate-850/60 space-y-3">
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="checkbox"
                                                 id="estApprovedCheck"
                                                 checked={editProjData.estimateApproved}
-                                                onChange={(e) => setEditProjData(p => ({ ...p, estimateApproved: e.target.checked }))}
+                                                onChange={(e) => setEditProjData(p => ({
+                                                    ...p,
+                                                    estimateApproved: e.target.checked,
+                                                    estimateStatus: e.target.checked ? 'approved' : p.estimateStatus
+                                                }))}
                                                 className="w-4 h-4 bg-slate-950 border border-slate-850 accent-demargo-orange focus:outline-none"
                                             />
-                                            <label htmlFor="estApprovedCheck" className="text-slate-300 font-bold uppercase text-[10px]">Estimate Approved by Client</label>
+                                            <label htmlFor="estApprovedCheck" className="text-slate-300 font-bold uppercase text-[10px]">
+                                                Estimate Approved by Client (Manual Confirmation)
+                                            </label>
                                         </div>
+
                                         <div className="space-y-2">
-                                            <label className="block text-slate-500 font-semibold">Client Estimate Documents (Max 5)</label>
+                                            <label className="block text-slate-400 font-semibold text-xs">Client Estimate Documents (Max 5)</label>
                                             <div className="space-y-1.5 max-w-md">
                                                 {(editProjData.estimatePdfUrls || []).map((fileItem, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between bg-slate-900 border border-slate-850 p-2 text-xs text-slate-300 min-w-0 w-full">
+                                                    <div key={idx} className="flex items-center justify-between bg-slate-900 border border-slate-850 p-2 text-xs text-slate-300 min-w-0 w-full rounded">
                                                         <button 
                                                             type="button"
                                                             onClick={() => viewDocument(fileItem.url)}
@@ -1618,15 +2582,15 @@ function AdminPanel() {
                                                         <button 
                                                             type="button"
                                                             onClick={() => handleDeleteEstimatePdf(idx)}
-                                                            className="text-[10px] font-black text-red-500 hover:text-red-400 bg-slate-950 px-2 py-1 rounded transition uppercase"
+                                                            className="btn-delete-red allow-custom-colors text-[10px] font-bold px-2 py-1 rounded transition uppercase flex items-center gap-1 cursor-pointer"
                                                         >
-                                                            Remove
+                                                            <span style={{ color: '#ffffff' }}>✕ Remove</span>
                                                         </button>
                                                     </div>
                                                 ))}
                                             </div>
                                             {(editProjData.estimatePdfUrls || []).length < 5 && (
-                                                <label className={`inline-block cursor-pointer px-3 py-2 text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition ${uploadingEstimatePdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                <label className={`inline-block cursor-pointer px-3 py-2 text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition rounded ${uploadingEstimatePdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                                     {uploadingEstimatePdf ? 'Uploading...' : '📎 Upload Estimate PDF'}
                                                     <input 
                                                         type="file" 
@@ -1639,7 +2603,7 @@ function AdminPanel() {
                                                 </label>
                                             )}
                                         </div>
-                                     </div>
+                                    </div>
                                 </div>
 
                                 {/* 3. Fabric selection */}
@@ -1688,12 +2652,14 @@ function AdminPanel() {
 
                                 {/* Save Button */}
                                 <button
-                                    type="submit"
-                                    className="w-full py-3 bg-demargo-orange hover:bg-orange-600 text-black font-extrabold transition uppercase tracking-wider text-xs"
+                                    type="button"
+                                    onClick={handleUpdateProject}
+                                    disabled={updatingProject}
+                                    className="w-full py-3 bg-demargo-orange hover:bg-orange-600 text-black font-extrabold transition uppercase tracking-wider text-xs cursor-pointer disabled:opacity-50"
                                 >
-                                    Save All Changes
+                                    {updatingProject ? 'Saving Changes...' : 'Save All Changes'}
                                 </button>
-                            </form>
+                            </div>
 
                             {/* Ledger / Logging offline manual payments */}
                             <div className="border-t border-slate-850 pt-6 space-y-4">
@@ -1791,9 +2757,9 @@ function AdminPanel() {
                                                         <button
                                                             type="button"
                                                             onClick={() => handleDeletePayment(p.id, p.amount, p.status !== 'pending')}
-                                                            className="text-red-500 hover:text-red-400 hover:underline text-[9px] font-bold uppercase"
+                                                            className="btn-delete-red allow-custom-colors px-2 py-0.5 text-[9px] font-bold uppercase rounded transition flex items-center gap-1 cursor-pointer"
                                                         >
-                                                            Delete
+                                                            <span style={{ color: '#ffffff' }}>✕ Delete</span>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1817,13 +2783,13 @@ function AdminPanel() {
                                                 type="button"
                                                 onClick={handleClearChat}
                                                 disabled={clearingChat}
-                                                className="text-[9px] text-red-400 hover:text-red-300 hover:bg-red-950/60 border border-red-900/60 rounded-full px-2 py-0.5 font-semibold transition-all flex items-center gap-1 shrink-0 disabled:opacity-50 cursor-pointer"
+                                                className="btn-delete-red allow-custom-colors text-[9px] rounded-full px-2.5 py-1 font-semibold transition-all flex items-center gap-1 shrink-0 disabled:opacity-50 cursor-pointer"
                                                 title="Clear conversation history"
                                             >
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
-                                                <span>Clear Chat</span>
+                                                <span style={{ color: '#ffffff' }}>Clear Chat</span>
                                             </button>
                                         )}
                                     </div>
@@ -1912,9 +2878,12 @@ function AdminPanel() {
                                 <button
                                     type="button"
                                     onClick={() => requestDeleteProject(selectedProject.id, selectedProject.clientName)}
-                                    className="px-4 py-2 bg-red-950/40 text-red-500 border border-red-900/50 hover:bg-red-900/40 hover:text-white transition text-[10px] font-bold uppercase tracking-wider rounded-xl"
+                                    className="btn-delete-red allow-custom-colors px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
                                 >
-                                    Delete Record
+                                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span style={{ color: '#ffffff' }}>Delete Project Record</span>
                                 </button>
                             </div>
                         </div>
@@ -2318,9 +3287,9 @@ function AdminPanel() {
                             <button
                                 onClick={confirmDeleteProject}
                                 disabled={deleting}
-                                className="flex-1 py-2.5 bg-red-600 text-white hover:bg-red-700 transition text-xs font-bold uppercase rounded disabled:opacity-50"
+                                className="btn-delete-red allow-custom-colors flex-1 py-2.5 bg-red-600 text-white hover:bg-red-700 transition text-xs font-bold uppercase rounded-lg shadow-md disabled:opacity-50 cursor-pointer"
                             >
-                                {deleting ? 'Deleting...' : 'Yes, Delete'}
+                                <span style={{ color: '#ffffff' }}>{deleting ? 'Deleting...' : 'Yes, Delete Project'}</span>
                             </button>
                         </div>
                     </div>

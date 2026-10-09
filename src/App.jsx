@@ -2021,6 +2021,45 @@ export default function App() {
   )
 }
 
+// React Error Boundary to catch render errors and prevent blank screens
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('App ErrorBoundary caught an error:', error, errorInfo)
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
+          <div className="max-w-md bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl space-y-4">
+            <div className="text-3xl">⚠️</div>
+            <h2 className="text-lg font-bold text-white uppercase tracking-wider">A Display Error Occurred</h2>
+            <p className="text-xs text-slate-400">
+              {this.state.error?.message || 'An unexpected rendering error occurred.'}
+            </p>
+            <button
+              onClick={() => {
+                this.setState({ hasError: false, error: null })
+                window.location.reload()
+              }}
+              className="px-4 py-2 bg-demargo-orange text-white text-xs font-bold uppercase rounded hover:opacity-90 transition"
+            >
+              ↻ Reload Application
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 function AnimatedRoutes() {
   const location = useLocation()
   const page = {
@@ -2029,7 +2068,8 @@ function AnimatedRoutes() {
     exit: { opacity: 0, y: -8 }
   }
   return (
-    <AnimatePresence mode="wait">
+    <ErrorBoundary>
+      <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Home /></motion.div>} />
         <Route path="/portfolio" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Portfolio /></motion.div>} />
@@ -2048,6 +2088,7 @@ function AnimatedRoutes() {
         <Route path="/contact" element={<motion.div {...page} transition={{ duration: .35, ease: 'easeOut' }}><Contact /></motion.div>} />
       </Routes>
     </AnimatePresence>
+    </ErrorBoundary>
   )
 }
 

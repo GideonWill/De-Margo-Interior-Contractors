@@ -159,6 +159,11 @@ export const downloadCustomerDemographicsExcel = (projects, options = {}) => {
             'Payment Status': paymentStatus,
             'Economic Tier': spendingTier,
             'Selected Fabrics / Materials': p.selectedFabrics || 'N/A',
+            'Estimate Status': p.estimateApproved ? 'Approved' : (p.estimateStatus === 'max_reached_stopped' || (p.estimateFollowUps && p.estimateFollowUps.length >= 3) ? 'Max Follow-ups (3/3 Stopped)' : (p.estimateStatus === 'declined' ? 'Declined / Cold' : (p.estimateFollowUps && p.estimateFollowUps.length > 0 ? `In Follow-up (${p.estimateFollowUps.length}/3)` : (p.status === 'estimate' ? 'Awaiting 1st Follow-up (0/3)' : 'N/A')))),
+            'Estimate Follow-ups Count': p.estimateFollowUps ? p.estimateFollowUps.length : 0,
+            'Last Follow-up Date': p.estimateFollowUps && p.estimateFollowUps.length > 0 ? formatDate(p.estimateFollowUps[p.estimateFollowUps.length - 1].date) : 'N/A',
+            'Last Follow-up Channel': p.estimateFollowUps && p.estimateFollowUps.length > 0 ? (p.estimateFollowUps[p.estimateFollowUps.length - 1].channel || 'N/A').toUpperCase() : 'N/A',
+            'Last Follow-up Notes': p.estimateFollowUps && p.estimateFollowUps.length > 0 ? (p.estimateFollowUps[p.estimateFollowUps.length - 1].notes || '') : '',
             'Customer Satisfaction': p.satisfaction || 'Pending Feedback',
             'Feedback Remarks': p.feedbackRemarks || 'N/A'
         };
