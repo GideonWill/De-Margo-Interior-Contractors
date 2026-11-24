@@ -38,6 +38,34 @@ const viewDocument = (url) => {
     }
 };
 
+const formatProjectDate = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleString('en-GH', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+const formatProjectDateLong = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleString('en-GH', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
 function ProjectTracker() {
     const [phone, setPhone] = useState('')
     const [searching, setSearching] = useState(false)
@@ -373,7 +401,19 @@ function ProjectTracker() {
                                 >
                                     <div>
                                         <div className="font-bold text-black">{p.projectTitle}</div>
-                                        <div className="text-xs text-slate-600 mt-1">Status: {STAGES.find(s => s.key === p.status)?.label || p.status}</div>
+                                        <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-slate-600">
+                                            <span>Status: {STAGES.find(s => s.key === p.status)?.label || p.status}</span>
+                                            {p.measurementDate && (
+                                                <span className="text-[10px] text-slate-700 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded">
+                                                    📐 Measured: {new Date(p.measurementDate).toLocaleDateString('en-GH', { month: 'short', day: 'numeric' })}
+                                                </span>
+                                            )}
+                                            {p.installationDate && (
+                                                <span className="text-[10px] text-orange-900 bg-orange-100 border border-orange-200 px-1.5 py-0.5 rounded font-bold">
+                                                    🔨 Install: {new Date(p.installationDate).toLocaleDateString('en-GH', { month: 'short', day: 'numeric' })}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                     <span className="text-demargo-orange text-lg">›</span>
                                 </button>
@@ -505,6 +545,85 @@ function ProjectTracker() {
                             </div>
                         )}
 
+                        {/* Project Schedule Highlights (Measurement & Installation Dates) */}
+                        <div className="bg-slate-50 border border-gray-200 p-6 md:p-8">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-200 gap-2 mb-6">
+                                <div>
+                                    <span className="text-xs text-demargo-orange uppercase font-bold tracking-wider block">Timeline & Key Dates</span>
+                                    <h3 className="text-xl font-extrabold text-black tracking-tight uppercase">Project Schedule</h3>
+                                </div>
+                                <p className="text-xs text-slate-500 max-w-sm">
+                                    Measurement and installation dates reflect here immediately once saved by the Demargo team.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Site Measurement Card */}
+                                <div className="bg-white border border-gray-200 p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                                    <div className="absolute top-0 left-0 w-1.5 h-full bg-slate-800" />
+                                    <div>
+                                        <div className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-lg">📐</span>
+                                                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Site Measurement</span>
+                                            </div>
+                                            {selectedProject.measurementDate ? (
+                                                <span className="text-[10px] font-bold px-2.5 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider rounded-full">
+                                                    Scheduled
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] font-semibold px-2.5 py-0.5 bg-slate-100 text-slate-500 uppercase tracking-wider rounded-full">
+                                                    To be scheduled
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="mt-3">
+                                            <div className="text-base sm:text-lg font-black text-black">
+                                                {formatProjectDateLong(selectedProject.measurementDate) || 'Awaiting Schedule'}
+                                            </div>
+                                            <p className="text-xs text-slate-600 mt-1">
+                                                {selectedProject.measurementDate 
+                                                    ? 'Our technician will arrive at the site to take accurate window dimensions and inspect track fittings.'
+                                                    : 'Site measurement date has not been assigned yet. Our team will contact you once scheduled.'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Target Installation Card */}
+                                <div className="bg-white border border-gray-200 p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                                    <div className="absolute top-0 left-0 w-1.5 h-full bg-demargo-orange" />
+                                    <div>
+                                        <div className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-lg">🔨</span>
+                                                <span className="text-xs font-bold uppercase tracking-wider text-demargo-orange">Installation Date</span>
+                                            </div>
+                                            {selectedProject.installationDate ? (
+                                                <span className="text-[10px] font-bold px-2.5 py-0.5 bg-demargo-orange/20 text-orange-900 border border-demargo-orange/30 uppercase tracking-wider rounded-full">
+                                                    Confirmed Date
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] font-semibold px-2.5 py-0.5 bg-slate-100 text-slate-500 uppercase tracking-wider rounded-full">
+                                                    To be scheduled
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="mt-3">
+                                            <div className="text-base sm:text-lg font-black text-black">
+                                                {formatProjectDateLong(selectedProject.installationDate) || 'Awaiting Schedule'}
+                                            </div>
+                                            <p className="text-xs text-slate-600 mt-1">
+                                                {selectedProject.installationDate 
+                                                    ? 'Installation crew will mount and neatly dress your finished curtains/blinds on this date.'
+                                                    : 'Target installation date will reflect here immediately once assigned by the team.'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* STEPPER PROGRESS */}
                         <div className="bg-white border border-gray-200 p-6 md:p-8">
                             <h3 className="font-bold text-black text-lg mb-8 uppercase tracking-wider">Project Lifecycle Progress</h3>
@@ -549,6 +668,16 @@ function ProjectTracker() {
                                                 <span className="text-[10px] text-slate-500 mt-1 max-w-[140px] leading-relaxed">
                                                     {s.title}
                                                 </span>
+                                                {s.key === 'measurement' && selectedProject.measurementDate && (
+                                                    <span className="inline-block mt-2 px-1.5 py-0.5 bg-slate-100 border border-slate-300 text-[10px] font-bold text-slate-800 rounded">
+                                                        📅 {new Date(selectedProject.measurementDate).toLocaleDateString('en-GH', { month: 'short', day: 'numeric' })}
+                                                    </span>
+                                                )}
+                                                {s.key === 'installation' && selectedProject.installationDate && (
+                                                    <span className="inline-block mt-2 px-1.5 py-0.5 bg-orange-100 border border-orange-300 text-[10px] font-bold text-orange-950 rounded">
+                                                        📅 {new Date(selectedProject.installationDate).toLocaleDateString('en-GH', { month: 'short', day: 'numeric' })}
+                                                    </span>
+                                                )}
                                             </div>
                                         )
                                     })}
@@ -589,6 +718,16 @@ function ProjectTracker() {
                                                         {s.label} ({s.title})
                                                     </div>
                                                     <p className="text-xs text-slate-500 mt-0.5">{s.desc}</p>
+                                                    {s.key === 'measurement' && selectedProject.measurementDate && (
+                                                        <div className="mt-1 text-[11px] font-bold text-slate-800 flex items-center gap-1">
+                                                            <span>📅 Scheduled: {formatProjectDate(selectedProject.measurementDate)}</span>
+                                                        </div>
+                                                    )}
+                                                    {s.key === 'installation' && selectedProject.installationDate && (
+                                                        <div className="mt-1 text-[11px] font-bold text-demargo-orange flex items-center gap-1">
+                                                            <span>📅 Scheduled: {formatProjectDate(selectedProject.installationDate)}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         )
@@ -744,6 +883,22 @@ function ProjectTracker() {
                                              </div>
                                          </div>
                                      )}
+
+                                     {/* Upcoming installation date banner for any active stage prior to installation */}
+                                     {selectedProject.installationDate && selectedProject.status !== 'installation' && selectedProject.status !== 'completed' && (
+                                         <div className="mt-4 p-4 bg-orange-50 border border-orange-200 flex items-center justify-between text-xs">
+                                             <div className="flex items-center gap-2.5">
+                                                 <span className="text-base">🔨</span>
+                                                 <div>
+                                                     <strong className="text-black block font-bold">Planned Installation Date:</strong>
+                                                     <span className="text-slate-700">{formatProjectDateLong(selectedProject.installationDate)}</span>
+                                                 </div>
+                                             </div>
+                                             <span className="px-2 py-0.5 bg-demargo-orange/20 text-orange-950 font-bold text-[10px] uppercase tracking-wider rounded">
+                                                 Confirmed
+                                             </span>
+                                         </div>
+                                     )}
                                 </div>
 
                                 {/* Project Records & Logs Card */}
@@ -753,7 +908,19 @@ function ProjectTracker() {
                                         <div className="bg-white p-4 border border-gray-200 space-y-3">
                                             <div>
                                                 <span className="text-slate-500 uppercase block mb-1">Client Address / Site Location</span>
-                                                <span className="text-black">{selectedProject.serviceAddress || 'No site location registered.'}</span>
+                                                <span className="text-black font-medium">{selectedProject.serviceAddress || 'No site location registered.'}</span>
+                                            </div>
+                                            <div className="pt-2 border-t border-gray-100">
+                                                <span className="text-slate-500 uppercase block mb-1">Scheduled Measurement Date</span>
+                                                <span className="text-black font-semibold">
+                                                    {formatProjectDateLong(selectedProject.measurementDate) || 'Pending schedule by team'}
+                                                </span>
+                                            </div>
+                                            <div className="pt-2 border-t border-gray-100">
+                                                <span className="text-slate-500 uppercase block mb-1">Scheduled Installation Date</span>
+                                                <span className="text-black font-semibold text-demargo-orange">
+                                                    {formatProjectDateLong(selectedProject.installationDate) || 'Pending schedule by team'}
+                                                </span>
                                             </div>
                                         </div>
 

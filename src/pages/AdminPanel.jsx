@@ -113,7 +113,8 @@ function AdminPanel() {
         projectDescription: '',
         serviceAddress: '',
         totalAmount: '0',
-        measurementDate: ''
+        measurementDate: '',
+        installationDate: ''
     })
 
     // Edit Project Details Form
@@ -398,7 +399,8 @@ function AdminPanel() {
                 totalAmount: amount,
                 messages: [],
                 status: 'measurement',
-                measurementDate: newProjData.measurementDate || ''
+                measurementDate: newProjData.measurementDate || '',
+                installationDate: newProjData.installationDate || ''
             })
             await fetchData()
             setNewProjData({
@@ -409,7 +411,8 @@ function AdminPanel() {
                 projectDescription: '',
                 serviceAddress: '',
                 totalAmount: '0',
-                measurementDate: ''
+                measurementDate: '',
+                installationDate: ''
             })
             setShowCreateModal(false)
             showToast('Project created successfully.', 'success')
@@ -2991,14 +2994,25 @@ function AdminPanel() {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-slate-500 font-bold mb-1 uppercase">Measurement Date & Time (Optional)</label>
-                                <input
-                                    type="datetime-local"
-                                    value={newProjData.measurementDate}
-                                    onChange={(e) => setNewProjData(p => ({ ...p, measurementDate: e.target.value }))}
-                                    className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2 focus:outline-none"
-                                />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-slate-500 font-bold mb-1 uppercase">Measurement Date & Time (Optional)</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={newProjData.measurementDate}
+                                        onChange={(e) => setNewProjData(p => ({ ...p, measurementDate: e.target.value }))}
+                                        className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2 focus:outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-slate-500 font-bold mb-1 uppercase">Installation Date & Time (Optional)</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={newProjData.installationDate}
+                                        onChange={(e) => setNewProjData(p => ({ ...p, installationDate: e.target.value }))}
+                                        className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2 focus:outline-none"
+                                    />
+                                </div>
                             </div>
 
                             <button
