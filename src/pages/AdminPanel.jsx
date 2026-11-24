@@ -2996,7 +2996,7 @@ function AdminPanel() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-slate-500 font-bold mb-1 uppercase">Measurement Date & Time (Optional)</label>
+                                    <label className="block text-slate-500 font-bold mb-1 uppercase">Measurement Date & Time</label>
                                     <input
                                         type="datetime-local"
                                         value={newProjData.measurementDate}
@@ -3005,7 +3005,7 @@ function AdminPanel() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-slate-500 font-bold mb-1 uppercase">Installation Date & Time (Optional)</label>
+                                    <label className="block text-slate-500 font-bold mb-1 uppercase">Installation Date & Time</label>
                                     <input
                                         type="datetime-local"
                                         value={newProjData.installationDate}
