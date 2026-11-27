@@ -198,6 +198,151 @@ function Navbar() {
   )
 }
 
+const AWARD_HERO_SLIDES = [
+  {
+    id: 1,
+    src: '/assets/award-hero-company-of-the-year-2026.jpg',
+    alt: 'Award Winning Company - Outstanding Interior Company of the Year 2026 - Ghana Business Standard Awards',
+    caption: 'Outstanding Interior Company of the Year 2026 • Ghana Business Standard Awards',
+    tag: 'National Award Winner'
+  },
+  {
+    id: 2,
+    src: '/assets/award-hero-ceo-interior-designer-of-the-year.jpg',
+    alt: "Ghana's Most Respected CEO - Interior Designer of the Year 2026 - Mr. Jeffery Ofosuhene Apenteng",
+    caption: "Ghana's Most Respected CEO - Interior Designer of the Year • 9th Ghana Industry CEO Awards",
+    tag: 'CEO Award 2026'
+  },
+  {
+    id: 3,
+    src: '/assets/award-hero-ceo-citation-plaque.jpg',
+    alt: 'Citation of Excellence - Mr. Jeffery Ofosuhene Apenteng - Ghana Industry 9th CEO Awards',
+    caption: 'Official Citation of Excellence • 9th Edition Ghana Industry CEO Awards 2026',
+    tag: 'Citation of Honour'
+  },
+  {
+    id: 4,
+    src: '/assets/award-hero-ceo-team-celebration.jpg',
+    alt: 'De Margo Interior Contractors Executive Leadership & Team at the Ghana Industry CEO Awards',
+    caption: 'De Margo Team Celebrating National Recognition at the CEO Awards Gala 2026',
+    tag: 'Celebration of Excellence'
+  }
+]
+
+function AwardHeroCarousel() {
+  const [current, setCurrent] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+
+  const nextSlide = () => {
+    setCurrent(prev => (prev + 1) % AWARD_HERO_SLIDES.length)
+  }
+
+  const prevSlide = () => {
+    setCurrent(prev => (prev - 1 + AWARD_HERO_SLIDES.length) % AWARD_HERO_SLIDES.length)
+  }
+
+  useEffect(() => {
+    if (isPaused) return
+    const interval = setInterval(() => {
+      setCurrent(prev => (prev + 1) % AWARD_HERO_SLIDES.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [isPaused, current])
+
+  const slide = AWARD_HERO_SLIDES[current]
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="relative w-full overflow-hidden bg-black border-y border-slate-900"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
+    >
+      {/* Edge-to-edge container: full height responsive view without cropping */}
+      <div className="relative w-full h-[360px] sm:h-[480px] md:h-[620px] lg:h-[720px] xl:h-[800px] flex items-center justify-center overflow-hidden bg-black select-none">
+        
+        {/* Animated Slide Transition */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={slide.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="absolute inset-0 w-full h-full flex items-center justify-center"
+          >
+            {/* Ambient luxury backdrop glow from the actual slide image */}
+            <img
+              src={slide.src}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-25 scale-105 pointer-events-none"
+            />
+
+            {/* Main Foreground Image (Fully uncropped, 100% visible, sharp) */}
+            <img
+              src={slide.src}
+              alt={slide.alt}
+              className="relative z-10 w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)]"
+              loading="eager"
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Slide Counter Indicator */}
+        <div className="absolute top-4 sm:top-6 right-4 sm:right-6 z-20 px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 text-[11px] sm:text-xs font-bold text-white/90 rounded-full shadow-lg">
+          <span className="text-demargo-orange">{current + 1}</span> / {AWARD_HERO_SLIDES.length}
+        </div>
+
+        {/* Prev & Next Navigation Buttons */}
+        <button
+          type="button"
+          onClick={prevSlide}
+          aria-label="Previous Award Slide"
+          className="absolute left-2 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-demargo-orange text-white hover:text-black border border-white/20 hover:border-demargo-orange flex items-center justify-center transition-all duration-300 backdrop-blur-md cursor-pointer group shadow-xl"
+        >
+          <svg className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          onClick={nextSlide}
+          aria-label="Next Award Slide"
+          className="absolute right-2 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-demargo-orange text-white hover:text-black border border-white/20 hover:border-demargo-orange flex items-center justify-center transition-all duration-300 backdrop-blur-md cursor-pointer group shadow-xl"
+        >
+          <svg className="w-5 h-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Pagination Dots in a clean floating pill */}
+        <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/10 shadow-lg">
+          {AWARD_HERO_SLIDES.map((s, idx) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setCurrent(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+              className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                idx === current
+                  ? 'w-6 sm:w-7 bg-demargo-orange shadow-[0_0_8px_rgba(255,102,0,0.6)]'
+                  : 'w-2 bg-white/40 hover:bg-white/80'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </motion.section>
+  )
+}
+
 function Home() {
   const videoRef = useRef(null)
   const revealRefs = useRef([])
@@ -356,32 +501,8 @@ function Home() {
         </div>
       </section>
 
-      {/* AWARD HERO 2026 - Edge-to-edge hero image touching left and right walls of the page */}
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative w-full overflow-hidden bg-white border-b border-slate-200"
-      >
-        {/* Full-bleed edge-to-edge award hero image touching both walls */}
-        <div className="w-full relative overflow-hidden bg-black">
-          <picture className="w-full block">
-            {/* Mobile portrait view (< 768px): Trophy Award visual */}
-            <source
-              media="(max-width: 767px)"
-              srcSet="/assets/AwardWinning%20Interior%20Design%20Trophy.png"
-            />
-            {/* Desktop landscape view (>= 768px): Full wide edge-to-edge banner */}
-            <img
-              src="/assets/Award%20Winning%20Interior%20Design%202026.png"
-              alt="Award Winning Interior Design Company of the Year 2026 - Ghana Business Standard Awards"
-              className="w-full h-auto block"
-              loading="eager"
-            />
-          </picture>
-        </div>
-      </motion.section>
+      {/* AWARD HERO 2026 - Edge-to-edge Carousel format changing every 5s */}
+      <AwardHeroCarousel />
 
       {/* ABOUT SNAPSHOT SECTION (second screenshot) */}
       <motion.section
